@@ -8,10 +8,10 @@
 
 	 You do need to install some of them separately: 
 
-	 - Emacs, for compiling this file into a static website.
-	 - Mono (if compiling on a non-windows platform), for running inklecate.exe
+	 - Emacs (with the s string package installed), for compiling this file into a static website.
+	 - Mono for running inklecate.exe
 
-	 Parts of the build process are scripted in Bash, so building on Windows is not recommended.
+	 Parts of the build process are scripted in Bash, so building on Windows is not supported.
 
 *** Inkjs
 
@@ -23,7 +23,59 @@
 
 		TEMmy is built using Inklecate, the official Ink compiler. Ink is governed by the MIT License, and its license file is included in the inklecate directory.
 
+** HTML
+
+	 Inkjs can run on a static HTML website. The HTML for TEMmy lives in [[file:index.html][index.html]] (which is a modified version of an Inkjs template file).
+
+** Ink
+
+	 The following code block contains *all* of TEMmy's internal logic for guiding a new electron microscope user. You should almost never have to edit anything outside this block.
+
+	 #+begin_src ink :tangle temmy.ink
+	 
+	 VAR current_density = 0
+
+	 Welcome to TEMmy! First of all, which electron microscope are you using?
+	 * TEM1
+	   // Set TEM1-specific variables
+		 ~ current_density = 250
+	 * TEM2
+	   // Set TEM2-specific variables
+		 ~ current_density = 65
+	 - Great. Eventually you will want a current density of {current_density}
+	 
+	 
+	 #+end_src
+
 ** Build
+
+	 To build TEMmy, simply execute the following block. It will create a directory called temmy which you can upload wherever you want to host TEMmy.
+
+	 #+begin_src emacs-lisp
+		 ;; Make sure there is no existing TEMmy build
+		 (shell-command "if [ -d temmy ]; then rm -rf temmy; fi")
+		 ;; Generate the Ink file
+		 (org-babel-tangle)
+		 ;; Compile the ink file
+		 (shell-command "mono inklecate/inklecate.exe temmy.ink")
+
+		 ;; Make the static site
+		 (shell-command "cp -r boilerplate temmy")
+		 (let ((storyjs
+						(concat "var storyContent = "
+										(with-temp-buffer (insert-file-contents "temmy.ink.json") (buffer-string))
+										";")))
+			 (save-excursion (find-file "temmy/story.js")
+											 (insert storyjs)
+											 (save-buffer)))
+		 (copy-file "index.html" "temmy/")
+		 ;; Clean up
+		 (shell-command "rm temmy.ink")
+		 (shell-command "rm temmy.ink.json")
+	 #+end_src
+
+	 #+RESULTS:
+
 
 	 
 	 

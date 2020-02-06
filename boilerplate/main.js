@@ -2,6 +2,8 @@
 
     var story = new inkjs.Story(storyContent);
 
+		setupStory(story);
+		
     var storyContainer = document.querySelectorAll('#story')[0];
 
     function showAfter(delay, el) {

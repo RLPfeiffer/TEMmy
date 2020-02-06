@@ -23,29 +23,70 @@
 
 		TEMmy is built using Inklecate, the official Ink compiler. Ink is governed by the MIT License, and its license file is included in the inklecate directory.
 
-** HTML
 
-	 Inkjs can run on a static HTML website. The HTML for TEMmy lives in [[file:index.html][index.html]] (which is a modified version of an Inkjs template file).
+** Source code
+*** HTML
 
-** Ink
+		Inkjs can run on a static HTML website. The HTML for TEMmy lives in [[file+emacs:index.html][index.html]] (which is a modified version of an Inkjs template file).
 
-	 The following code block contains *all* of TEMmy's internal logic for guiding a new electron microscope user. You should almost never have to edit anything outside this block.
+*** JavaScript
 
-	 #+begin_src ink :tangle temmy.ink
+		TEMmy uses some JavaScript functions to manipulate the DOM (for instance, to display images for the tutorial. These functions are defined in the following source block:
+
+		#+begin_src js :tangle temmy.js
+			function showImage(file) {
+					var elem = document.createElement("img");
+					elem.setAttribute("src", "images/" + file);
+					document.getElementById("story").appendChild(elem);
+			}
+
+			// This function will be called by main.js
+			function setupStory(story) {
+				story.BindExternalFunction("showImage", showImage);
+			}
+		#+end_src
+		
+*** Ink
+
+		The code blocks in this subtree contain *all* of TEMmy's internal logic for guiding a new electron microscope user. You should almost never have to edit anything outside this block.
+
+**** Functions
+
+		 #+begin_src ink :tangle temmy.ink
+		 EXTERNAL showImage(file)
+		 #+end_src
+
+**** Variables
+
+		 #+begin_src ink :tangle temmy.ink
 	 
-	 VAR current_density = 0
+		 VAR current_density = 0
+		
+		 #+end_src
 
-	 Welcome to TEMmy! First of all, which electron microscope are you using?
-	 * TEM1
-	   // Set TEM1-specific variables
-		 ~ current_density = 250
-	 * TEM2
-	   // Set TEM2-specific variables
-		 ~ current_density = 65
-	 - Great. Eventually you will want a current density of {current_density}
+**** Protocol
+
+		 #+begin_src ink :tangle temmy.ink
+		 ~ showImage("temmy.png")
+		 Welcome to TEMmy, the Electron Microscope tutor named after Toby Fox's adorable character from Undertale.
+		 
+		 -> first_time_ever
+
+		 // This choice should only need to be made once, when TEMmy is opened on the computer corresponding to one of our two TEMs.
+		 == first_time_ever
+		 
+		 First of all, which electron microscope are you using?
+
+		 * TEM1
+		 	// Set TEM1-specific variables
+		 	~ current_density = 250
+		 * TEM2
+		  // Set TEM2-specific variables
+		 	~ current_density = 65
+		 - Great. Eventually you will want a current density of {current_density}
+
 	 
-	 
-	 #+end_src
+		#+end_src
 
 ** Build
 
@@ -69,12 +110,18 @@
 											 (insert storyjs)
 											 (save-buffer)))
 		 (copy-file "index.html" "temmy/")
+		 (copy-directory "images" "temmy/")
+		 (rename-file "temmy.js" "temmy/")
+		 
 		 ;; Clean up
 		 (shell-command "rm temmy.ink")
 		 (shell-command "rm temmy.ink.json")
+		 ;; Share with Windows partition
+		 (shell-command "sudo cp -r temmy /mnt/arch-share/")
 	 #+end_src
 
 	 #+RESULTS:
+	 : 0
 
 
 	 

@@ -2,12 +2,13 @@
 
     var story = new inkjs.Story(storyContent);
 
+		story.delayingContinue = false;
 		setupStory(story);
 		
     var storyContainer = document.querySelectorAll('#story')[0];
 
     function showAfter(delay, el) {
-        setTimeout(function() { el.classList.add("show") }, delay);
+        setTimeout(function() { el.classList.add("show"); scrollToBottom(); }, delay);
     }
 
     function scrollToBottom() {
@@ -32,62 +33,66 @@
 
         var paragraphIndex = 0;
         var delay = 0.0;
+				if (!story.delayingContinue && story.canContinue) {
+						// Generate next paragraph of story text
+						// Get ink to generate the next paragraph
+						var paragraphText = story.Continue();
+				
+						// Create paragraph element
+						var paragraphElement = document.createElement('p');
+						paragraphElement.innerHTML = paragraphText;
+						storyContainer.appendChild(paragraphElement);
 
-        // Generate story text - loop through available content
-        while(story.canContinue) {
+						// Fade in paragraph after a short delay
+						showAfter(delay, paragraphElement);
 
-            // Get ink to generate the next paragraph
-            var paragraphText = story.Continue();
+						delay += 200.0;
+				}
+				if (!story.delayingContinue && !story.canContinue) {
+						// Create HTML choices from ink choices
+						story.currentChoices.forEach(function(choice) {
 
-            // Create paragraph element
-            var paragraphElement = document.createElement('p');
-            paragraphElement.innerHTML = paragraphText;
-            storyContainer.appendChild(paragraphElement);
+								// Create paragraph with anchor element
+								var choiceParagraphElement = document.createElement('p');
+								choiceParagraphElement.classList.add("choice");
+								choiceParagraphElement.innerHTML = `<a href='#'>${choice.text}</a>`
+								storyContainer.appendChild(choiceParagraphElement);
 
-            // Fade in paragraph after a short delay
-            showAfter(delay, paragraphElement);
+								// Fade choice in after a short delay
+								showAfter(delay, choiceParagraphElement);
+								delay += 200.0;
 
-            delay += 200.0;
-        }
+								// Click on choice
+								var choiceAnchorEl = choiceParagraphElement.querySelectorAll("a")[0];
+								choiceAnchorEl.addEventListener("click", function(event) {
 
-        // Create HTML choices from ink choices
-        story.currentChoices.forEach(function(choice) {
+										// Don't follow <a> link
+										event.preventDefault();
 
-            // Create paragraph with anchor element
-            var choiceParagraphElement = document.createElement('p');
-            choiceParagraphElement.classList.add("choice");
-            choiceParagraphElement.innerHTML = `<a href='#'>${choice.text}</a>`
-            storyContainer.appendChild(choiceParagraphElement);
+										// Remove all existing choices
+										var existingChoices = storyContainer.querySelectorAll('p.choice');
+										for(var i=0; i<existingChoices.length; i++) {
+												var c = existingChoices[i];
+												c.parentNode.removeChild(c);
+										}
 
-            // Fade choice in after a short delay
-            showAfter(delay, choiceParagraphElement);
-            delay += 200.0;
+										// Tell the story where to go next
+										story.ChooseChoiceIndex(choice.index);
 
-            // Click on choice
-            var choiceAnchorEl = choiceParagraphElement.querySelectorAll("a")[0];
-            choiceAnchorEl.addEventListener("click", function(event) {
+										continueStory();
+								// Aaand loop
+								});
 
-                // Don't follow <a> link
-                event.preventDefault();
-
-                // Remove all existing choices
-                var existingChoices = storyContainer.querySelectorAll('p.choice');
-                for(var i=0; i<existingChoices.length; i++) {
-                    var c = existingChoices[i];
-                    c.parentNode.removeChild(c);
-                }
-
-                // Tell the story where to go next
-                story.ChooseChoiceIndex(choice.index);
-
-                // Aaand loop
-                continueStory();
-            });
-        });
-
+								
         scrollToBottom();
+            });
+				}
+				else if (!story.delayingContinue) {
+						story.noTimers = false;
+						continueStory();
+				}
     }
-
+		story.gContinueStory = continueStory;
     continueStory();
 
 })(storyContent);

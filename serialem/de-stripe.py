@@ -79,6 +79,12 @@ def minMaxMeanData(section_idoc, section_log):
         ]
     ]
 
+def whichTEM(idoc):
+    if "OneView" in idoc.Note:
+        return "TEM2"
+    else:
+        return "TEM1"
+
 def plotIntensity(volume_dir, section):
     # output_file = join(volume_dir, section.rjust(4, "0"), "Intensity.png")
     output_file = "Intensity{}.png".format(section)
@@ -89,7 +95,7 @@ def plotIntensity(volume_dir, section):
 
     assert idoc.NumTiles == log.NumTiles, "For section {}, the log and IDoc file have a different number of tiles!".format(section)
 
-    plot.PolyLine(minMaxMeanData(idoc, log), "Section {}".format(section), "Time", "Intensity", output_file)
+    plot.PolyLine(minMaxMeanData(idoc, log), "Section {} - {}".format(section, whichTem(idoc)), "Time", "Intensity", output_file)
 
 if __name__ == "__main__":
     volume_dir = ""

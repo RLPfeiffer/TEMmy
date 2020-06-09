@@ -59,7 +59,7 @@ def tilesData(volume_dir, section):
     ''' Return the log and IDoc data for every tile in the given section
     '''
     section_dir = join(volume_dir, section.rjust(4, "0"))
-    idoc = IDoc.Load(print(join(section_dir, "{}.idoc".format(section))))
+    idoc = IDoc.Load(join(section_dir, "{}.idoc".format(section)))
     log = SerialEMLog.Load(join(section_dir, "{}.log".format(section)))
     
     assert idoc.NumTiles == log.NumTiles, "For section {}, the log and IDoc file have a different number of tiles!".format(section)
@@ -69,10 +69,34 @@ def tilesData(volume_dir, section):
         "logData": log.tileData[tile_num]
     } for tile_num in range(log.NumTiles)]
 
-def minMaxMeanData(volume_dir, section, tile_num):
+def minMaxMeanData(tiles_data):
     '''Parse a nested list of min, max, and mean intensity data over time for the given section.
     Return value in the form required by nornir_shared.plot.PolyLine()
     '''
+    # The x-axis will be the same for each line
+    x_axis = [tile["logData"].startTime for tile in tiles_data]
+    return [
+        # Min line
+        [
+            x_axis,
+            [tile["idocData"].Min for tile in tiles_data]
+        ],
+        # Max line
+        [
+            x_axis,
+            [tile["idocData"].Max for tile in tiles_data]
+        ],
+        # Mean line
+        [
+            x_axis,
+            [tile["idocData"].Mean for tile in tiles_data]
+        ]
+    ]
+
+def plotIntensity(volume_dir, section):
+    # output_file = join(volume_dir, section.rjust(4, "0"), "Intensity.png")
+    output_file = "Intensity{}.png".format(section)
+    plot.PolyLine(minMaxMeanData(tilesData(volume_dir, section)), "Intensity over time", "Time", "Intensity", output_file)
 
 if __name__ == "__main__":
     volume_dir = ""
@@ -89,6 +113,5 @@ if __name__ == "__main__":
         print("Second arg must specify one or more sections to correct.")
         exit()
 
-    tiles = tilesData(volume_dir, sections[0])
-    interact(local=locals())
-
+    for section in sections:
+        plotIntensity(volume_dir, section)

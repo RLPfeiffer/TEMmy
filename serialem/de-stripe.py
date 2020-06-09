@@ -18,6 +18,13 @@ Run examples:
 '''
 
 import sys
+from os.path import join
+from code import interact
+
+import nornir_shared.plot as plot
+from nornir_buildmanager.importers.idoc import IDoc, IDocTileData
+from nornir_buildmanager.importers.serialemlog import SerialEMLog
+
 # To be more Lisp-like, make print() return its argument.
 def print_decorator(p):
     def wrapped_print(*args,**kwargs):
@@ -26,11 +33,12 @@ def print_decorator(p):
             return args[0]
     return wrapped_print
 
-print = print_decorator(print) 
+print = print_decorator(print)
+
 
 def parseSections(arg):
     '''
-    Parse a list of section numbers from the given arg which may have comma-separated ranges and individual values
+    Parse a list of section numbers (as strings) from the given arg which may have comma-separated ranges and individual values
     '''
     sections = []
 
@@ -42,12 +50,19 @@ def parseSections(arg):
             lower, upper = [int(num) for num in arg.split('-')]
             return range(lower, upper+1)
         else:
-            return [int(arg)]
+            return [arg]
 
     # Eliminate duplicates
     return list(set(sections))
 
-
+def minMaxMeanData(volume_dir, section):
+    '''Parse a nested list of min, max, and mean intensity data over time for the given section.
+    Return value in the form required by nornir_shared.plot.PolyLine()
+    '''
+    section_dir = join(volume_dir, section.rjust(4, "0"))
+    idoc = IDoc.Load(print(join(section_dir, "{}.idoc".format(section))))
+    log = SerialEMLog.Load(join(section_dir, "{}.txt".format(section)))
+    interact(local=locals())
 
 if __name__ == "__main__":
     volume_dir = ""
@@ -63,4 +78,4 @@ if __name__ == "__main__":
         print("Second arg must specify one or more sections to correct.")
         exit()
 
-    print(sections)
+    minMaxMeanData(volume_dir, sections[0])

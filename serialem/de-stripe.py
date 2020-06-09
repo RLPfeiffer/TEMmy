@@ -2,9 +2,12 @@
 Adjust brightness of mosaic tiles so they appear seamlessly connected.
 
 Setup:
-~ git clone https://github.com/jamesra/nornir-buildmanager
-~ cd nornir-buildmanager
-~ python setup.py install
+```
+git clone https://github.com/jamesra/nornir-buildmanager
+(cd nornir-buildmanager && python setup.py install)
+git clone https://github.com/jamesra/nornir-shared
+(cd nornir-shared && python setup.py install)
+```
 
 Run examples:
 ~ python de-stripe.py V:\RawData\RC3 1              # de-stripe section 0001

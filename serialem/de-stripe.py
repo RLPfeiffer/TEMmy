@@ -18,7 +18,7 @@ Run examples:
 '''
 
 import sys
-from os.path import join
+from os.path import join, exists
 from code import interact
 
 import nornir_shared.plot as plot
@@ -68,6 +68,7 @@ if __name__ == "__main__":
     volume_dir = ""
     sections = []
     if len(sys.argv) > 1:
+        assert exists(sys.argv[1]), "First arg must specify the directory of a volume's raw data."
         volume_dir = sys.argv[1]
     else:
         print("First arg must specify the directory of a volume's raw data.")

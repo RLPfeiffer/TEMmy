@@ -18,6 +18,15 @@ Run examples:
 '''
 
 import sys
+# To be more Lisp-like, make print() return its argument.
+def print_decorator(p):
+    def wrapped_print(*args,**kwargs):
+        p(*args,**kwargs)
+        if len(args) == 1:
+            return args[0]
+    return wrapped_print
+
+print = print_decorator(print) 
 
 def parseSections(arg):
     '''

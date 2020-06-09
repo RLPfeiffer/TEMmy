@@ -47,8 +47,8 @@ def parseSections(arg):
             sections += parseSections(list_arg)
     else:
         if '-' in arg:
-            lower, upper = [int(num) for num in arg.split('-')]
-            return range(lower, upper+1)
+            lower, upper = [num for num in arg.split('-')]
+            return [str(i) for i in range(int(lower), int(upper)+1)]
         else:
             return [arg]
 

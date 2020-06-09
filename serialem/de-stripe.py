@@ -55,14 +55,24 @@ def parseSections(arg):
     # Eliminate duplicates
     return list(set(sections))
 
-def minMaxMeanData(volume_dir, section):
-    '''Parse a nested list of min, max, and mean intensity data over time for the given section.
-    Return value in the form required by nornir_shared.plot.PolyLine()
+def tilesData(volume_dir, section):
+    ''' Return the log and IDoc data for every tile in the given section
     '''
     section_dir = join(volume_dir, section.rjust(4, "0"))
     idoc = IDoc.Load(print(join(section_dir, "{}.idoc".format(section))))
-    log = SerialEMLog.Load(join(section_dir, "{}.txt".format(section)))
-    interact(local=locals())
+    log = SerialEMLog.Load(join(section_dir, "{}.log".format(section)))
+    
+    assert idoc.NumTiles == log.NumTiles, "For section {}, the log and IDoc file have a different number of tiles!".format(section)
+
+    return [{
+        "idocData": idoc.tiles[tile_num],
+        "logData": log.tileData[tile_num]
+    } for tile_num in range(log.NumTiles)]
+
+def minMaxMeanData(volume_dir, section, tile_num):
+    '''Parse a nested list of min, max, and mean intensity data over time for the given section.
+    Return value in the form required by nornir_shared.plot.PolyLine()
+    '''
 
 if __name__ == "__main__":
     volume_dir = ""
@@ -79,4 +89,6 @@ if __name__ == "__main__":
         print("Second arg must specify one or more sections to correct.")
         exit()
 
-    minMaxMeanData(volume_dir, sections[0])
+    tiles = tilesData(volume_dir, sections[0])
+    interact(local=locals())
+

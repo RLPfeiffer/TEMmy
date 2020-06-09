@@ -55,48 +55,41 @@ def parseSections(arg):
     # Eliminate duplicates
     return list(set(sections))
 
-def tilesData(volume_dir, section):
-    ''' Return the log and IDoc data for every tile in the given section
-    '''
-    section_dir = join(volume_dir, section.rjust(4, "0"))
-    idoc = IDoc.Load(join(section_dir, "{}.idoc".format(section)))
-    log = SerialEMLog.Load(join(section_dir, "{}.log".format(section)))
-    
-    assert idoc.NumTiles == log.NumTiles, "For section {}, the log and IDoc file have a different number of tiles!".format(section)
-
-    return [{
-        "idocData": idoc.tiles[tile_num],
-        "logData": log.tileData[tile_num]
-    } for tile_num in range(log.NumTiles)]
-
-def minMaxMeanData(tiles_data):
+def minMaxMeanData(section_idoc, section_log):
     '''Parse a nested list of min, max, and mean intensity data over time for the given section.
     Return value in the form required by nornir_shared.plot.PolyLine()
     '''
     # The x-axis will be the same for each line
-    x_axis = [tile["logData"].startTime for tile in tiles_data]
+    x_axis = [tile.startTime for tile in section_log.tileData.values()]
     return [
         # Min line
         [
             x_axis,
-            [tile["idocData"].Min for tile in tiles_data]
+            [tile.Min for tile in section_idoc.tiles]
         ],
         # Max line
         [
             x_axis,
-            [tile["idocData"].Max for tile in tiles_data]
+            [tile.Max for tile in section_idoc.tiles]
         ],
         # Mean line
         [
             x_axis,
-            [tile["idocData"].Mean for tile in tiles_data]
+            [tile.Mean for tile in section_idoc.tiles]
         ]
     ]
 
 def plotIntensity(volume_dir, section):
     # output_file = join(volume_dir, section.rjust(4, "0"), "Intensity.png")
     output_file = "Intensity{}.png".format(section)
-    plot.PolyLine(minMaxMeanData(tilesData(volume_dir, section)), "Intensity over time", "Time", "Intensity", output_file)
+
+    section_dir = join(volume_dir, section.rjust(4, "0"))
+    idoc = IDoc.Load(join(section_dir, "{}.idoc".format(section)), None, False)
+    log = SerialEMLog.Load(join(section_dir, "{}.log".format(section)))
+
+    assert idoc.NumTiles == log.NumTiles, "For section {}, the log and IDoc file have a different number of tiles!".format(section)
+
+    plot.PolyLine(minMaxMeanData(idoc, log), "Section {}".format(section), "Time", "Intensity", output_file)
 
 if __name__ == "__main__":
     volume_dir = ""

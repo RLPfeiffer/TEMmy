@@ -95,7 +95,7 @@ def plotIntensity(volume_dir, section):
 
     assert idoc.NumTiles == log.NumTiles, "For section {}, the log and IDoc file have a different number of tiles!".format(section)
 
-    plot.PolyLine(minMaxMeanData(idoc, log), "Section {} - {}".format(section, whichTem(idoc)), "Time", "Intensity", output_file)
+    plot.PolyLine(minMaxMeanData(idoc, log), "Section {} - {}".format(section, whichTEM(idoc)), "Time", "Intensity", output_file)
 
 if __name__ == "__main__":
     volume_dir = ""

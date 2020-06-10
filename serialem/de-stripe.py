@@ -19,6 +19,7 @@ Run examples:
 
 import sys
 from os.path import join, exists
+from os import mkdir
 from code import interact
 from glob import glob
 
@@ -87,9 +88,6 @@ def whichTEM(idoc):
         return "TEM1"
 
 def plotIntensity(volume_dir, section):
-    # output_file = join(volume_dir, section.rjust(4, "0"), "Intensity.png")
-    output_file = "Intensity{}.png".format(section)
-
     section_dir = join(volume_dir, section.rjust(4, "0"))
 
     # Some sections will be missing. Just skip them
@@ -99,16 +97,21 @@ def plotIntensity(volume_dir, section):
     try:
         idoc = IDoc.Load(join(section_dir, "{}.idoc".format(section)), None, False)
         log = SerialEMLog.Load(join(section_dir, "{}.log".format(section)))
-
     # Because some idoc files might be mis-named, do a glob if loading fails
     except:
         print("section {} has mis-named idoc/log file".format(section))
         idoc = IDoc.Load(glob(join(section_dir, '*.idoc'))[0], None, False)
         log = SerialEMLog.Load(glob(join(section_dir, "*.log.pickle"))[0].replace(".pickle", ""))
 
-
-
     assert idoc.NumTiles == log.NumTiles, "For section {}, the log and IDoc file have a different number of tiles!".format(section)
+
+    scope_name = whichTEM(idoc)
+
+    if not exists(scope_name):
+        mkdir(scope_name)
+        
+    output_file = join(scope_name, "Intensity{}.svg".format(section))
+    # output_file = join(volume_dir, section.rjust(4, "0"), "Intensity.png")
 
     plot.PolyLine(minMaxMeanData(idoc, log), "Section {} - {}".format(section, whichTEM(idoc)), "Time", "Intensity", output_file)
 

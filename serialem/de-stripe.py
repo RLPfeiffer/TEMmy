@@ -20,6 +20,7 @@ Run examples:
 import sys
 from os.path import join, exists
 from code import interact
+from glob import glob
 
 import nornir_shared.plot as plot
 from nornir_buildmanager.importers.idoc import IDoc, IDocTileData
@@ -90,8 +91,22 @@ def plotIntensity(volume_dir, section):
     output_file = "Intensity{}.png".format(section)
 
     section_dir = join(volume_dir, section.rjust(4, "0"))
-    idoc = IDoc.Load(join(section_dir, "{}.idoc".format(section)), None, False)
-    log = SerialEMLog.Load(join(section_dir, "{}.log".format(section)))
+
+    # Some sections will be missing. Just skip them
+    if not exists(section_dir):
+        return
+
+    try:
+        idoc = IDoc.Load(join(section_dir, "{}.idoc".format(section)), None, False)
+        log = SerialEMLog.Load(join(section_dir, "{}.log".format(section)))
+
+    # Because some idoc files might be mis-named, do a glob if loading fails
+    except:
+        print("section {} has mis-named idoc/log file".format(section))
+        idoc = IDoc.Load(glob(join(section_dir, '*.idoc'))[0], None, False)
+        log = SerialEMLog.Load(glob(join(section_dir, "*.log.pickle"))[0].replace(".pickle", ""))
+
+
 
     assert idoc.NumTiles == log.NumTiles, "For section {}, the log and IDoc file have a different number of tiles!".format(section)
 

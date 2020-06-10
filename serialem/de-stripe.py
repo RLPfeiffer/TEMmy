@@ -109,11 +109,11 @@ def plotIntensity(volume_dir, section):
 
     if not exists(scope_name):
         mkdir(scope_name)
-        
+
     output_file = join(scope_name, "Intensity{}.svg".format(section))
     # output_file = join(volume_dir, section.rjust(4, "0"), "Intensity.png")
 
-    plot.PolyLine(minMaxMeanData(idoc, log), "Section {} - {}".format(section, whichTEM(idoc)), "Time", "Intensity", output_file)
+    plot.PolyLine(minMaxMeanData(idoc, log), "Section {} - {}".format(section, whichTEM(idoc)), "Time", "Intensity", output_file, LineWidth=0)
 
 if __name__ == "__main__":
     volume_dir = ""

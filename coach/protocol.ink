@@ -93,7 +93,7 @@ Flip the pump switch to PUMP. The yellow light should be on!
 - Turn on the filament.
 Open SerialEM.
 Make sure the screen is raised.
-Hit the low mag button. SerialEM should go to 150X.
+Hit the low mag button. The mag in TEM Center should go to 150X.
 Turn the aperture dial to the red dot.
 * These are all done
 - Wait until the filament is fully on (the button should be bright green and stop blinking).
@@ -128,7 +128,7 @@ Make sure the Navigator is open.
 
 Navigator (in the menu bar) > Montage and Grids > Add Circle polygon > Enter desired radius (125 for RC3; TODO add a choice to manage this with other samples/core scans).
 
-Create a new left-zero-padded 4-digit folder for the section number (off the sticky note), open that folder and save sec#.idoc (no zero-padding).
+In the navigator window, check the boxes for Acquire, New File at item. Create a new left-zero-padded 4-digit folder for the section number (off the sticky note), open that folder and save sec#.idoc (no zero-padding).
 
 Go to 5000X with spot size 2.
 

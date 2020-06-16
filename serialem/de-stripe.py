@@ -276,7 +276,9 @@ def PlotSpatialIntensity(IDocSource, LogSource, OutputImageFile=None, title=None
     fig.subplotpars.bottom = 0
     fig.subplotpars.top = 1
     
-    if OutputImageFile is None: 
+    ax.view_init(90, -90)
+
+    if OutputImageFile is None:
         plt.show()
     else: 
         plt.ioff()
@@ -285,15 +287,16 @@ def PlotSpatialIntensity(IDocSource, LogSource, OutputImageFile=None, title=None
     plt.close(fig) 
 
     print("min z: {0}".format(np.min(adjusted_points[:,2])))
-    plot.Scatter(timeStamps, adjusted_points[:,2], Title=title, XAxisLabel="Time", YAxisLabel="Intensity", OutputFilename=None)
+    #plot.Scatter(timeStamps, adjusted_points[:,2], Title=title, XAxisLabel="Tile X", YAxisLabel="Tile Y", ZAxisLabel="Mean Intensity", OutputFilename=None)
     #plot.PolyLine([[timeStamps, points[0:2,:]]], title , "Time", "Intensity", None, LineWidth = 0) #"scatter_" + output_file, LineWidth=0)
 
         
     return
 
-img = nornir_imageregistration.Load(".png")
-img = img + intensity_adjustment # adjustment = planar adjustment(x,y) + curve fit(time)
-nornir_imageregistration.Save(img)
+# Notes for making actual value correction:
+#img = nornir_imageregistration.Load(".png")
+#img = img + intensity_adjustment # adjustment = planar adjustment(x,y) + curve fit(time)
+#nornir_imageregistration.Save(img)
 
 if __name__ == "__main__":
     volume_dir = ""

@@ -121,8 +121,8 @@ def plotIntensity(volume_dir, section):
     # output_file = join(volume_dir, section.rjust(4, "0"), "Intensity.png")
     title = "Section {} - {}".format(section, whichTEM(idoc))
 
-    #PlotSpatialIntensity(idoc, spatial_output_file, title)
-    PlotSpatialIntensity(idoc, log, None, title)
+    PlotSpatialIntensity(idoc, log, spatial_output_file, title)
+    #PlotSpatialIntensity(idoc, log, None, title) # uncomment this to view the 3D plot interactively
     plot.PolyLine(minMaxMeanData(idoc, log), title , "Time", "Intensity", output_file, LineWidth=0)
 
 def FitPlane(points):

@@ -121,8 +121,8 @@ def plotIntensity(volume_dir, section):
     # output_file = join(volume_dir, section.rjust(4, "0"), "Intensity.png")
     title = "Section {} - {}".format(section, whichTEM(idoc))
 
-    PlotSpatialIntensity(idoc, log, spatial_output_file, title)
-    #PlotSpatialIntensity(idoc, log, None, title) # uncomment this to view the 3D plot interactively
+    PlotSpatialIntensity(True, idoc, log, spatial_output_file, title) # pass true for flat plot
+    #PlotSpatialIntensity(False, idoc, log, None, title) # uncomment this to view the 3D plot interactively
     plot.PolyLine(minMaxMeanData(idoc, log), title , "Time", "Intensity", output_file, LineWidth=0)
 
 def FitPlane(points):
@@ -166,7 +166,7 @@ def SubtractPlanarFitFromPoints(points):
     return point_copy
 
 
-def PlotSpatialIntensity(IDocSource, LogSource, OutputImageFile=None, title=None):
+def PlotSpatialIntensity(Flat, IDocSource, LogSource, OutputImageFile=None, title=None):
 
     Data = ArgToIdoc(IDocSource)
     section_log = ArgToSerialEMLog(LogSource)
@@ -261,13 +261,18 @@ def PlotSpatialIntensity(IDocSource, LogSource, OutputImageFile=None, title=None
     #    zrange = 1.0
     
     offset = SymmetricNormalize(vabsmax=zrange, vcenter=0.)
-     
+    
     ax.plot_trisurf(triang, z, cmap=plt.get_cmap('plasma'), shade=True, alpha=1, norm=offset) #, c=c, Title=title, XAxisLabel='X', YAxisLabel='Y', OutputFilename=OutputImageFile)
     ax.set_title(title)
-    ax.set_zlabel('Z (intensity)')
+    if Flat:
+        ax.set_zticks([0])
+    else:
+        ax.set_zlabel('Z (intensity)')
+    
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
-    ax.set_zlim(-zrange, zrange) 
+    ax.set_zlim(-zrange, zrange)
+    #interact(local = locals())
     ax.set_xlim(np.min(adjusted_points[:,0]), np.max(adjusted_points[:,0]) )
     ax.set_ylim(np.min(adjusted_points[:,1]), np.max(adjusted_points[:,1]) )
     
@@ -276,7 +281,10 @@ def PlotSpatialIntensity(IDocSource, LogSource, OutputImageFile=None, title=None
     fig.subplotpars.bottom = 0
     fig.subplotpars.top = 1
     
-    ax.view_init(90, -90)
+    if Flat:
+        ax.view_init(90, -90)
+    else:
+        ax.view_init(30, -90)
 
     if OutputImageFile is None:
         plt.show()
@@ -292,11 +300,6 @@ def PlotSpatialIntensity(IDocSource, LogSource, OutputImageFile=None, title=None
 
         
     return
-
-# Notes for making actual value correction:
-#img = nornir_imageregistration.Load(".png")
-#img = img + intensity_adjustment # adjustment = planar adjustment(x,y) + curve fit(time)
-#nornir_imageregistration.Save(img)
 
 if __name__ == "__main__":
     volume_dir = ""
@@ -315,3 +318,9 @@ if __name__ == "__main__":
 
     for section in sections:
         plotIntensity(volume_dir, section)
+
+    
+# Notes for making actual value correction:
+#img = nornir_imageregistration.Load(".png")
+#img = img + intensity_adjustment # adjustment = planar adjustment(x,y) + curve fit(time)
+#nornir_imageregistration.Save(img)

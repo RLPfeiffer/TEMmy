@@ -104,8 +104,14 @@ Examine the section for damage or large dirt.
 * It looks good
 - Locate the center of the tissue (move using the scroll ball on the left-hand control panel if necessary).
 
--> low_mag_cook ->
--> find_center_150x ->
+Do you need to run low mag cook?
+
+* No
+    Skipping, then.
+* Yes
+    -> low_mag_cook ->
+
+- -> find_center_150x ->
 
 Open Navigator. Hit add points, and place a point at the center point.
 Stop adding points. Go to XY (or manually move the sample until the center point is centered on the SerialEM capture.

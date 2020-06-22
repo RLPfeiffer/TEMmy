@@ -17,7 +17,7 @@ Most of the dependencies are included in this repository to keep their versions 
 
 ### Inkjs
 
-Inkjs is a re-implementation of [Ink](http:www.inklestudios.com/ink/), a scripting language for making choice-based games. The important parts of TEMmy are written in Ink because it is a simple language, and anyone should be able to update TEMmy's Ink logic by following this guide: [[Writing With Ink](http:github.com/inkle/ink/blob/master/Documentation/WritingWithInk.md).
+Inkjs is a re-implementation of [Ink](http:www.inklestudios.com/ink/), a scripting language for making choice-based games. The important parts of TEMmy are written in Ink because it is a simple language, and anyone should be able to update TEMmy's Ink logic by following this guide: [Writing With Ink](http:github.com/inkle/ink/blob/master/Documentation/WritingWithInk.md).
 
 The Inkjs source code is governed by the MIT License, and its license file is included in the boilerplate directory.
 

@@ -56,8 +56,6 @@ First of all, which electron microscope are you using?
 
 == first_time_today
 
-You need to warm up the filament in your scope. Make sure TEM Core is open.
-
 Check HT Voltage.
 
 * HT Voltage is off (red) or less than 80.
@@ -65,12 +63,7 @@ Someone is in the middle of increasing the HT Voltage, probably because they ins
 -> increase_ht_voltage ->
 * HT Voltage is on (green) and at 80.
 
-- -> turn_on_filament ->
-
-
 - (new_capture) If Serial EM is open from a previous capture, close it. Do not save anything.
-Turn off the filament {tem2_setup: and BEAM BLANK}.
-
 * Ok.
 - -> rod_out ->
 Flip the Pump switch to AIR.
@@ -254,21 +247,6 @@ THIS PART IS VERY DELICATE AND CONFUSING. TODO: more specific instructions/pictu
 // TODO notes for this are handwritten
 // ->->
 -> kevin
-
-== turn_on_filament
-{tem2_setup: Use the physical control panel on the left to turn on BEAM BLANK. The button should light up.} 
-
-Turn the filament on in TEM Core. The button should blink green for a while before becoming solid.
-
-Then it could take around 30 minutes to be warmed up.
-
-* Time it for me
-~ timer("30 m")
-* Skip that
-
-- Ok, should be good to go!
-
-->->
 
 == kevin
 Talk to Kevin.

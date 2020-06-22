@@ -37,7 +37,7 @@ Inkjs can run on a static HTML website. The HTML for TEMmy lives in [index.html]
 
 ## JavaScript
 
-TEMmy uses some JavaScript functions to manipulate the DOM (for instance, to display images for the tutorial. These functions are defined in <temmy.js>
+TEMmy uses some JavaScript functions to manipulate the DOM (for instance, to display images for the tutorial. These functions are defined in [temmy.js](temmy.js)
 
 ## Ink
 

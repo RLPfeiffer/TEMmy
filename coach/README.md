@@ -33,7 +33,7 @@ On non-windows platforms, you need to install Mono for running inklecate.exe.
 
 ## HTML
 
-Inkjs can run on a static HTML website. The HTML for TEMmy lives in <index.html> (which is a modified version of an Inkjs template file).
+Inkjs can run on a static HTML website. The HTML for TEMmy lives in [index.html](index.html) (which is a modified version of an Inkjs template file).
 
 ## JavaScript
 
@@ -41,4 +41,4 @@ TEMmy uses some JavaScript functions to manipulate the DOM (for instance, to dis
 
 ## Ink
 
-The code in <protocol.ink> contains *all* of TEMmy's internal logic for guiding a new electron microscope user. You should almost never have to edit anything outside of that file.
+The code in [protocol.ink](protocol.ink) contains *all* of TEMmy's internal logic for guiding a new electron microscope user. You should almost never have to edit anything outside of that file.

@@ -1,3 +1,3 @@
 # TEMmy
 
-Human-accessible electron microscope coach!
+MarcLab tools for consistent, reliable electron microscope use.

@@ -118,10 +118,14 @@ def plotIntensity(volume_dir, section):
 
     output_file = join(scope_name, "Intensity{}.svg".format(section))
     spatial_output_file = join(scope_name, "SpatialIntensity{}.svg".format(section))
+    spatial_output_file_no_fit = join(scope_name, "NoFitSpatialIntensity{}.svg".format(section))
     # output_file = join(volume_dir, section.rjust(4, "0"), "Intensity.png")
     title = "Section {} - {}".format(section, whichTEM(idoc))
 
-    PlotSpatialIntensity(True, idoc, log, spatial_output_file, title) # pass true for flat plot
+    # Plot spatial intensity with and without Jamie's plane fit
+    PlotSpatialIntensity(True, True, idoc, log, spatial_output_file, title)
+    PlotSpatialIntensity(True, False, idoc, log, spatial_output_file_no_fit, title)
+
     #PlotSpatialIntensity(False, idoc, log, None, title) # uncomment this to view the 3D plot interactively
     plot.PolyLine(minMaxMeanData(idoc, log), title , "Time", "Intensity", output_file, LineWidth=0)
 
@@ -166,7 +170,7 @@ def SubtractPlanarFitFromPoints(points):
     return point_copy
 
 
-def PlotSpatialIntensity(Flat, IDocSource, LogSource, OutputImageFile=None, title=None):
+def PlotSpatialIntensity(Flat, DoFitPlane, IDocSource, LogSource, OutputImageFile=None, title=None):
 
     Data = ArgToIdoc(IDocSource)
     section_log = ArgToSerialEMLog(LogSource)
@@ -177,6 +181,12 @@ def PlotSpatialIntensity(Flat, IDocSource, LogSource, OutputImageFile=None, titl
     
     if title is None:
         title = 'Spatial position vs Intensity'
+
+    title += " "
+    if DoFitPlane:
+        title += "with planar fit"
+    else:
+        title += "without planar fit"
     
     x = []
     y = []
@@ -239,8 +249,11 @@ def PlotSpatialIntensity(Flat, IDocSource, LogSource, OutputImageFile=None, titl
     #print( "solution:")
 
     
-    left_points = SubtractPlanarFitFromPoints(points[0:left_end,:])
-    right_points = SubtractPlanarFitFromPoints(points[left_end:,:])
+    left_points = points[0:left_end,:]
+    right_points = points[left_end:,:]
+    if DoFitPlane:
+        left_points = SubtractPlanarFitFromPoints(left_points)
+        right_points = SubtractPlanarFitFromPoints(right_points)
 
     adjusted_points = np.vstack((left_points, right_points))
 

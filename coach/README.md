@@ -3,11 +3,15 @@ TEMmy Coach
 
 An interactive guide to running TEM captures for the MarcLab.
 
+The latest version is live at http://internal.connectomes.utah.edu/temmy/
+
 This file aims to explain all there is to know for modifying the Coach.
 
 # Build
 
 Run build.sh. It will generate a static site in a folder called `temmy`, which you can upload to any hosting service.
+
+To make sure it gets pushed live, have VPN active and make sure Y: is mapped to `\\OpR-Marc-RC2\Data`
 
 Building on Windows is supported only with a Bash emulator like msys2.
 

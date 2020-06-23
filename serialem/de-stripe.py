@@ -28,7 +28,7 @@ import matplotlib.pyplot as plt
 import matplotlib.tri as mtri
 
 import nornir_shared.plot as plot
-from nornir_buildmanager.importers.idoc import IDoc, IDocTileData, ArgToIdoc, NearestLimit, SymmetricNormalize
+from nornir_buildmanager.importers.idoc import IDoc, IDocTileData, ArgToIDoc, NearestLimit, SymmetricNormalize
 from nornir_buildmanager.importers.serialemlog import SerialEMLog, ArgToSerialEMLog
 
 
@@ -67,7 +67,7 @@ def minMaxMeanData(section_idoc, section_log):
     Return value in the form required by nornir_shared.plot.PolyLine()
     '''
     # The x-axis will be the same for each line
-    x_axis = [tile.startTime for tile in section_log.tileData.values()]
+    x_axis = [tile.startAcquisitionTime for tile in section_log.tileData.values()]
     return [
         # Min line
         [
@@ -172,10 +172,10 @@ def SubtractPlanarFitFromPoints(points):
 
 def PlotSpatialIntensity(Flat, DoFitPlane, IDocSource, LogSource, OutputImageFile=None, title=None):
 
-    Data = ArgToIdoc(IDocSource)
+    Data = ArgToIDoc(IDocSource)
     section_log = ArgToSerialEMLog(LogSource)
 
-    timeStamps = [tile.startTime for tile in section_log.tileData.values()]
+    timeStamps = [tile.startAcquisitionTime for tile in section_log.tileData.values()]
 
     assert Data is not None
     
@@ -201,7 +201,7 @@ def PlotSpatialIntensity(Flat, DoFitPlane, IDocSource, LogSource, OutputImageFil
 
     left_end = None
 
-    timeStamps = [] #[tile.startTime for tile in section_log.tileData.values()]
+    timeStamps = [tile.startAcquisitionTime for tile in section_log.tileData.values()]
 
     (f_root, f_ext) = splitext(basename(Data.Tiles[0].Image))
     first_image_number = int(f_root)
@@ -218,7 +218,6 @@ def PlotSpatialIntensity(Flat, DoFitPlane, IDocSource, LogSource, OutputImageFil
             
             (root, ext) = splitext(basename(t.Image)) 
             tile_number = int(root) - first_image_number
-            timeStamps.append(section_log.tileData[tile_number].startTime)
             #x.append(t.StagePosition[0])
             #y.append(t.MeanStagePosition[1])
             #z.append(t.Mean)

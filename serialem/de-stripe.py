@@ -125,9 +125,10 @@ def plotIntensity(volume_dir, section):
     # Plot spatial intensity with and without Jamie's plane fit
     PlotSpatialIntensity(True, True, idoc, log, spatial_output_file, title)
     PlotSpatialIntensity(True, False, idoc, log, spatial_output_file_no_fit, title)
+    #PlotSpatialIntensity(True, True, idoc, log, None, title) # uncomment this to view the 3D plot interactively (with fit)
+    #PlotSpatialIntensity(True, False, idoc, log, None, title) # uncomment this to view the 3D plot interactively (without fit)
 
-    #PlotSpatialIntensity(False, idoc, log, None, title) # uncomment this to view the 3D plot interactively
-    plot.PolyLine(minMaxMeanData(idoc, log), title , "Time", "Intensity", output_file, LineWidth=0)
+    plot.PolyLine(minMaxMeanData(idoc, log), title, "Time", "Intensity", output_file, marker='.', markersize=1, alpha=0.5, LineWidth=0, Colors=["red", "green", "blue"], ColorStyle=plot.ColorSelectionStyle.PER_LINE)
 
 def FitPlane(points):
     '''Fit a plane to a 3D set of points in a numpy array

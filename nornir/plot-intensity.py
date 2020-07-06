@@ -22,6 +22,7 @@ from os import mkdir
 from code import interact
 from glob import glob
 
+from math import log
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.tri as mtri
@@ -34,26 +35,37 @@ from util import *
 from process_sections import *
 
 def minMaxMeanData(section_idoc, section_log):
-    '''Parse a nested list of min, max, and mean intensity data over time for the given section.
+    '''Parse a nested list of min, max, and mean intensity (including a fitted log curve of mean intensity) data over time for the given section.
     Return value in the form required by nornir_shared.plot.PolyLine()
     '''
     # The x-axis will be the same for each line
     x_axis = [tile.startAcquisitionTime for tile in section_log.tileData.values()]
+    min_values = [tile.Min for tile in section_idoc.tiles]
+    max_values = [tile.Max for tile in section_idoc.tiles]
+    mean_values = [tile.Mean for tile in section_idoc.tiles]
+    B,A = np.polyfit(np.log(x_axis), [tile.Mean for tile in section_idoc.tiles], 1)
+    log_values = [A + B * log(x) for x in x_axis]
+
     return [
         # Min line
         [
             x_axis,
-            [tile.Min for tile in section_idoc.tiles]
+            min_values
         ],
         # Max line
         [
             x_axis,
-            [tile.Max for tile in section_idoc.tiles]
+            max_values
         ],
         # Mean line
         [
             x_axis,
-            [tile.Mean for tile in section_idoc.tiles]
+            mean_values
+        ],
+        # Log line
+        [
+            x_axis,
+            log_values
         ]
     ]
 
@@ -84,7 +96,8 @@ def plotIntensity(section, idoc, log):
     #PlotSpatialIntensity(True, True, idoc, log, None, title) # uncomment this to view the 3D plot interactively (with fit)
     #PlotSpatialIntensity(True, False, idoc, log, None, title) # uncomment this to view the 3D plot interactively (without fit)
 
-    plot.PolyLine(minMaxMeanData(idoc, log), title, "Time", "Intensity", output_file, marker='.', markersize=1, alpha=0.5, LineWidth=0, Colors=["red", "green", "blue"], ColorStyle=plot.ColorSelectionStyle.PER_LINE)
+
+    plot.PolyLine(minMaxMeanData(idoc, log), title, "Time", "Intensity", output_file, marker='.', markersize=1, alpha=0.5, LineWidth=0, Colors=["red", "green", "blue", "orange"], ColorStyle=plot.ColorSelectionStyle.PER_LINE)
 
 def FitPlane(points):
     '''Fit a plane to a 3D set of points in a numpy array

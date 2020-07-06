@@ -113,12 +113,21 @@ def plotIntensity(volume_dir, section):
 
     scope_name = whichTEM(idoc)
 
-    if not exists(scope_name):
-        mkdir(scope_name)
+    # Create the directories required for sorting the graph files:
+    dirs = [
+        scope_name,
+        join(scope_name, "IntensityOverTime"),
+        join(scope_name, "SpatialWithFit"),
+        join(scope_name, "SpatialNoFit")
+    ]
 
-    output_file = join(scope_name, "Intensity{}.svg".format(section))
-    spatial_output_file = join(scope_name, "SpatialIntensity{}.svg".format(section))
-    spatial_output_file_no_fit = join(scope_name, "NoFitSpatialIntensity{}.svg".format(section))
+    for output_dir in dirs:
+        if not exists(output_dir):
+            mkdir(output_dir)
+
+    output_file = join(scope_name, "IntensityOverTime", "Intensity{}.svg".format(section))
+    spatial_output_file = join(scope_name, "SpatialWithFit", "SpatialIntensity{}.svg".format(section))
+    spatial_output_file_no_fit = join(scope_name, "SpatialNoFit", "NoFitSpatialIntensity{}.svg".format(section))
     # output_file = join(volume_dir, section.rjust(4, "0"), "Intensity.png")
     title = "Section {} - {}".format(section, whichTEM(idoc))
 

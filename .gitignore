@@ -1,1 +1,6 @@
+# Temmy coach generated website:
 coach/temmy/
+# Python stuff
+*.pyc
+# SVGs from plot scripts:
+*.svg

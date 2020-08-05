@@ -61,7 +61,7 @@ def processSections(volumeDir, sectionsRange, process):
     # Make a Processing pool that will utilize up to all available cpu cores.
     pool = Pool(cpu_count())
 
-    return pool.map(partial(processSection, process), sectionDirs)
+    return list(filter(lambda result: result != None, pool.map(partial(processSection, process), sectionDirs)))
 
 def processSection(process, sectionDir):
     section = str(int(basename(sectionDir)[0:4])) # Remove 0's from in front of the section number
@@ -71,13 +71,21 @@ def processSection(process, sectionDir):
     # Because some idoc files might be mis-named, do a glob if loading fails
     except:
         print("section {} has mis-named idoc file".format(section))
-        idoc = IDoc.Load(glob(join(sectionDir, '*.idoc'))[0], None, False)
+        idocMatches = glob(join(sectionDir, '*.idoc'))
+        if len(idocMatches) == 0:
+            print("section {} has no idoc file".format(section))
+            return
+        idoc = IDoc.Load(idocMatches[0], None, False)
 
     try:
         log = SerialEMLog.Load(join(sectionDir, "{}.log".format(section)))
     except:
         print("section {} has mis-named log file".format(section))
-        log = SerialEMLog.Load(glob(join(sectionDir, "*.log*"))[0].replace(".pickle", ""))
+        logMatches = glob(join(sectionDir, "*.log*"))
+        if len(logMatches) == 0:
+            print("section {} has no log file".format(section))
+            return
+        log = SerialEMLog.Load(logMatches[0].replace(".pickle", ""))
 
     assert idoc.NumTiles == log.NumTiles, "For section {}, the log and IDoc file have a different number of tiles!".format(section)
 

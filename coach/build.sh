@@ -22,4 +22,4 @@ rm protocol.ink.json
 # Try to copy to internal.connectomes.utah.edu/temmy
 out_path=/y/Volumes/temmy
 if [ -d $out_path ]; then rm -rf $out_path; fi
-cp -r temmy $out_path
+if [ -d /y/Volumes ]; then cp -r temmy $out_path; fi

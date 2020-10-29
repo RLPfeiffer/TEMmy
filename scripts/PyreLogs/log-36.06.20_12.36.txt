@@ -1,0 +1,7 @@
+WARNING - root - Creating Global multithreading pool pool of type <class 'nornir_pools.multiprocessthreadpool.MultiprocessThread_Pool'>
+WARNING - root - Creating Global local thread pool pool of type <class 'nornir_pools.threadpool.Thread_Pool'>
+WARNING - OpenGL.arrays.numpymodule - Unable to load numpy_formathandler accelerator from OpenGL_accelerate
+ERROR - ImageGridTransformView - Cached Point sprite error, resetting cache
+ERROR - ImageGridTransformView - Cached Point sprite error, resetting cache
+ERROR - ImageGridTransformView - Cached Point sprite error, resetting cache
+ERROR - ImageGridTransformView - Cached Point sprite error, resetting cache

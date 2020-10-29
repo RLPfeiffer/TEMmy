@@ -1,8 +1,8 @@
 ''' Parse a range of sections and run a function on all of their idocs/logs with multiprocessing
 '''
 
-from os import walk
-from os.path import join, exists, dirname, basename, splitext
+from os import listdir
+from os.path import join, exists, dirname, basename, splitext, isdir
 from multiprocessing import Pool, cpu_count
 from functools import partial
 from glob import glob
@@ -32,8 +32,8 @@ def completeSectionDirList(volumeDir, sections):
     # All section directories will be at least four chars long
     sections = [section.rjust(4, "0") for section in sections]
     
-    directories = [dir[0] for dir in walk(volumeDir)]
-    
+    directories = [dir for dir in listdir(volumeDir) if isdir(dir)]
+
     # Some sections will be recaptures. Include them
     for dir in directories:
         if len(dir) > 4 and dir[0:4] in sections:
@@ -64,6 +64,7 @@ def processSections(volumeDir, sectionsRange, process):
     return list(filter(lambda result: result != None, pool.map(partial(processSection, process), sectionDirs)))
 
 def processSection(process, sectionDir):
+    ''' Run the given function 'process', passing it the section directory, idoc, and log object '''
     section = str(int(basename(sectionDir)[0:4])) # Remove 0's from in front of the section number
 
     try:

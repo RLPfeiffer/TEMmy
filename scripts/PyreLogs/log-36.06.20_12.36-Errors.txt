@@ -1,0 +1,4 @@
+ERROR - ImageGridTransformView - Cached Point sprite error, resetting cache
+ERROR - ImageGridTransformView - Cached Point sprite error, resetting cache
+ERROR - ImageGridTransformView - Cached Point sprite error, resetting cache
+ERROR - ImageGridTransformView - Cached Point sprite error, resetting cache

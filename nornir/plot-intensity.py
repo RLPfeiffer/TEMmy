@@ -1,5 +1,5 @@
 '''
-Adjust brightness of mosaic tiles so they appear seamlessly connected.
+Make plots to try to diagnose the "white stripe" problem
 
 Setup:
 ```
@@ -10,10 +10,10 @@ git clone https://github.com/jamesra/nornir-shared
 ```
 
 Run examples:
-~ python de-stripe.py V:\RawData\RC3 1              # de-stripe section 0001
-~ python de-stripe.py V:\RawData\RC3 1,2,3          # de-stripe sections 0001, 0002, 0003
-~ python de-stripe.py V:\RawData\RC3 1-21           # de-stripe all sections that exist between 0001 and 0022 (skips 0021 which is missing)
-~ python de-stripe.py V:\RawData\RC3 1-21,26-30     # de-stripe multiple ranges of sections
+~ python plot-intensity.py V:\RawData\RC3 1         # plot intensity of section 0001
+~ python plot-intensity.py V:\RawData\RC3 1,2,3          # plot intensity of sections 0001, 0002, 0003
+~ python plot-intensity.py V:\RawData\RC3 1-21           # plot intensity of all sections that exist between 0001 and 0022 (skips 0021 which is missing)
+~ python plot-intensity.py V:\RawData\RC3 1-21,26-30     # plot intensity of multiple ranges of sections
 
 '''
 

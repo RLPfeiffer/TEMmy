@@ -1,0 +1,84 @@
+    If Serial EM is already running from a previous capture:
+        Check to see if prior capture went to completion. If it didn't, or the overview looks bad enough to recapture, see the protocol on recapturing using the same navigator items.
+        Hit OK.
+        Close Serial EM.
+        Close navigator. Do not save.
+    If the filament is on, turn it off.
+    Pull out specimen rod to safety position. Flip pump switch to AIR.
+    Remove rod, place in holder and place on bench.
+    Insert new rod and flip pump switch to PUMP. Do NOT turn yet. Let pump down to green values. Then, twist rod and fully insert, gently.
+    Check HT (should be at 80). Turn ON if necessary. Check filament beam current (should be @ 40 – 55).
+    Open Serial EM.
+    Raise screen (to protect sample in next steps).
+    Hit low mag button and go to 150X.
+    Turn aperture dial to red dot.
+    Lower screen and turn on filament. Wait until fully on (bright green).
+    Examine section for damage or large dirt.
+        If there is dirt, you (or someone else in the lab) may be able to clean it, restain it and try again.
+        If there are large holes, do not run LowMagCook
+        If there are small holes, sit and watch carefully during the LowMagCook, and stop it if any holes get bigger.
+    Locate center of tissue (move if necessary).
+    Cook tissue:
+        Center the beam and condense beam to inner brackets. Make sure you are at 150X!
+        Change spot size to 1. Cook for 7 minutes using Burn Wobble (see below).
+        Run > Macro 1: Burn wobble.
+
+Bonus: this will start a timer – expand the Log dialogue box to watch the time.
+
+    To stop cooking after the 7 minutes, change spot size to 3.
+
+    Find the center point of the capture region using the screenshots in DROPBOX from the previous section.
+    Find center spot – Image – Screen Capture – Paste in Paint – Save to DROPBOX in file: "RC3 [Sec#] 150X"
+    Raise screen (to prevent damage to section in next step).
+    If using TEM1,
+        Return aperture to first white dot (aperture 1; largest white dot on dial).
+    If using TEM2,
+        Return aperture to second white dot (aperture 2; second-largest white dot on dial).
+    Hit mag 1 button (or just Mag on TEM2).
+    Lower screen and lower mag to 600X while spreading beam.
+    Center the aperture if you are using TEM1.
+    Find center spot – Image – Screen Capture – Paste in Paint – Save to DROPBOX in file: "RC3 [Sec#] 600X"
+    Go to 2000X.
+    Recenter BOTH aperture and beam.
+    Put the mirror down and make sure the Current Density is near 250 for TEM1 or 65 for TEM2.
+    Find center spot. Place SerialEM marker at the center point.
+    Image – Screen Capture – Paste in Paint – Save to desktop: Volume_Sec#_2000X.bmp
+    Open Navigator.
+    Navigator (in toolbar) > open
+    Navigator (in toolbar) > Montage and grids > Add circular polygon (or draw polygon for non-connectome volumes) > Enter desired radius (125 for RC2, 45 RPC2).
+    Use the scrollbar to find an empty part of the formvar. Press RECORD to make sure it is normal at the center.
+        If you see a circular artifact over the formvar, move to a different part of formvar and RECORD again. If the same circular artifact is there, you need to run gain reference before starting the capture.
+    Navigator window > add stage pos (to add the point on the formvar as a reference point)
+    You should have two navigator items, a polygon and a point on the formvar.
+
+    Go to 5000X.
+    Recenter beam.
+    In Acquire dialogue box:
+        New file item > Montage > Fit to polygon > OK > OK.
+        Create new folder for section number (if this is a recapture, followed by "B", "C", "D", etc.) > open folder and save: Sec#.idoc for connectome volumes Bloc#_Grid#.idoc
+    Lower screen and narrow the beam to 2 clicks inside the inner brackets.
+    Calibration > Image shift (make sure you are at5000X and spot size 2!!).
+        See if calibration says: “THIS IS GOOD”. If not, redo calibration until it does.
+        If message pops up: “Do you want to modify all other old measured…” > select NO.
+    Navigator > Acquire at points > HighMagCook for a new capture, CalibrateAndRecapture for any section that seems fragile, or has already been cooked and/or captured before.
+    If this is the last capture of the day, make sure "Turn filament off when done" is checked.
+    Watch for a moment to ensure the pre-capture process is proceeding normally.
+        That includes: Another ImageShift, HighMagCook, WaitForStableFilament, and the sending of the start notification.
+    A notes window will pop open. Enter: 
+        TEM#
+        Section# or Bloc#
+        Grid#
+        Rod#
+        Investigator
+        Operator
+        Whether this is the first capture with a new filament
+        Any new changes made in settings
+        Any relevant observations regarding the capture process or data quality, Examples: “Building demolition next door” or “First capture after transition to copper grids”
+        Any other notes
+        Save as Sec#.txt for connectome volumes or Bloc#_Grid#notes.txt for other captures (Be aware the notes.txt remains with the data and can be seen online with the published data.) In the same folder as the capture
+    
+    SerialEM will automatically capture the montage. Indicated by status bar stating “capturing X of total # of tiles”.
+        
+    Once capture is complete,
+        For Connectome captures: copy the capture folder to the volume folder on Dropbox (e.g RC2, RC3, RPC2, etc).
+        For Non connectome projects: label capture folder Bloc#_Grid# and put it inside a folder named Investigator_ExperimentalSeriesName on DROPBOX.

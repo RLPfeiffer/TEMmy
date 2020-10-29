@@ -1,0 +1,76 @@
+Remote Desktop to OpR-Marc-Build1
+Open cmd window
+cd \Python37\scripts
+
+#### Import most recent captures ####
+
+Make sure Dropbox doesn't contain sections that are already imported.
+
+Clear stuff out of the D:\ drive temp volume.
+
+             dest            src
+RC3Import D:\Volumes\RC3 Y:\Dropbox\RC3 && RC3Build D:\Volumes\RC3 && rito --slack tem-bot "D drive Build is finished. Check it and merge it"
+
+Wait for build to finish
+Open D:\Volumes\RC3\MosaicReport.html, Scan for issues
+
+If it looks good continue
+
+##### Merge new sections into the full RC3 volume ####
+
+Run Robocopy script I copied into Slack 
+
+/*
+Then go here:
+W:\Volumes\RC3\TEM
+
+Open: 
+W:\Volumes\RC3\TEM\VolumeData.xml
+Ctrl+Shift+Alt+B formats the document nicely
+
+Open: 
+W:\Volumes\RC3\TEM\VolumeData.temp
+
+Append VolumeData.temp's <Section_Link> elements to the VolumeData.xml file
+
+##### Align new sections with the full RC3 volume ####
+cd \Python37\scripts
+RC3Align W:\Volumes\RC3
+*/
+
+cd \Python37\Scripts && copy-section-links W:\Volumes\RC3\TEM\VolumeData.xml W:\Volumes\RC3\TEM\VolumeData.temp C:\Users\u0920639\Desktop && RC3Align W:\Volumes\RC3 && textme nat align
+
+##### Check quality of alignment ######
+
+Using http://storage2.connectomes.utah.edu/RC3/VolumeReport and/or Viking check the alignment.
+
+Make manual fixes using Pyre.
+	Input is the stos file in the W:\Volumes\RC3\TEM\Grid32 directory
+	Output is the exact same filename saved in W:\Volumes\RC3\TEM\Grid32\Manual directory
+
+Rerun RC3Align W:\Volumes\RC3 to pull in fixes.
+
+#### Future work ####
+
+##### TO get help ####
+nornir-build W:\Volumes\RC3 -h
+
+##### To Set Prune Cutoff ####
+nornir-build W:\Volumes\RC3 SetPruneCutoff -Sections 360 -Channels TEM -Filters Raw8
+
+
+##### If a section won't rebuild the mosaic ####
+Delete the Translated*.mosaic and Grid*.mosaic files from the section directory:
+i.e. W:\Volumes\RC3\TEM\0360\TEM
+
+And run RC3Build again
+
+
+#### Set Contrast ####
+Update the ContrastOverrides.txt 
+
+
+
+# Other notes
+
+For anything that isn't an established volume, use TEMCoreBuildFast [destination] [source]

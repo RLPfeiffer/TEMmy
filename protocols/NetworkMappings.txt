@@ -1,0 +1,19 @@
+Ok, rough mapping is (OpR-Marc-____):
+X:\ Syn1    155.100.104.158
+W:\Syn2     155.100.107.198
+V:\Syn3     155.100.106.5
+Y:\RC2  155.100.104.153
+
+Then I have SynBkp on Z:
+
+Most annotator machines however have Z: as MarcLabHD (not OpR-Marc, just 155.100.105.73\MarcLab)
+
+And D:\ is referring to the D drive on Build1
+
+I don't tend to map Build1 because I only use it remoting in.
+
+none of them can be accessed without the vpn on
+
+Its just if you are using a vpn and connecting to the Syn machines for some reason windows wants the ip to map them right.  When the machine is physically located in the moran I don't have that issue and the names work fine
+
+use \Data

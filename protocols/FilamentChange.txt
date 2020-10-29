@@ -1,0 +1,118 @@
+Filament Change TEM1
+====
+
+- Turn off HT voltage & Filament 
+	- wait ~60min
+	
+Under cabinet
+----
+
+- Move gun switch to 'air' 
+	- wait 5mins
+
+-Lift to 'up'
+
+TEM Upper assembly
+----
+
+- Move arm out of way.  
+- Unscrew ring.  
+- Pull down on filament (Wehnelt) cap.  
+- Take new wehnelt cap and fit notch on edge of assembly.  
+	- Extra cap kept cleaned in a ziploc bag in one of the main EM room drawers.  
+- Replace ring (it screws).  
+- Move back to stop point.  
+	- Move switch to put gun down.  
+- If assembly not sitting flat, check the gasket that seals around the gun.  
+	- Gun air switch to pump.
+	- Push both reset buttons.  
+	
+- Leave scope overnight.  
+
+
+Wehnelt Cap Cleaning
+====
+- Needs to be cleaned before reinserting a new filament.  
+- Cleaned using an ammonia solvent in beaker in sonicator for 1 hour.   
+	- Note: This solvent is toxic, do this in the hood.  
+	
+	
+New Filament Conditioning
+====
+
+- HT Voltage to 30 increasing stepwise by 10kV.  
+	- Return step to 1.  
+	
+**Turn Filament ON**
+
+- Watch the Penning gauge (PG) valve, this should stay at ~20
+- Slowly bring up the HT Voltage to 40, ensuring PG valve does not change.
+- Leave for 1hr at 40.  
+
+- After stabilization, step HT to 60kV.
+	- Watch PG valve and give breaks to keep in 18-22 range.   
+	
+- Once 60 has been attained with stable PG, reduce step size to 0.5.  
+	- Continue to slowly increase the HT while paying close attention to PG.
+
+- At 75, reduce step size to 0.1.  
+**Important to increase very slowly at this point**	
+	- If you hear a pop behind the machine & the HT turns off, HT was increased too
+	fast and an arcing event was created.  
+		- If this happens, reduce HT & turn back on.  
+	
+	- If you hear a pop from up by the gun & HT turns off:
+		- The cap needs to be rechecked, starting the process over again. 
+		- You may have 'fried' the wehnelt cap (Major problem)
+	
+	
+Alignment of New Filament
+====
+- Ensure empty rod in scope.  
+- Bring HT down to 80kV.
+- Turn filament on.
+	- Should be at ~58 (will be ~5 over due to being cold)
+		- Can use bias to bring current down to within 5 over. 
+		- Try to keep bias between 20-80
+		
+- Turn on SerialEM
+	- Calibrate
+- Use low-mag to find the beam.
+- Switch to high-mag.  
+
+Align Gun
+----
+- At 500x find center.  
+	- Spot size 1
+	- Unsaturate filament by dropping target (??)
+	- Focus
+	- Center Image (On TEM1, the green knobs)
+	- Click Gun Align. 
+	
+- Resaturate, but keep it below 80
+	- Won't be able to see the filament anymore
+	
+- Spread beam between inner bracket
+	- Mirror in (spot size 3)
+	- Gun align
+	- Use the yellow knobs to bring the current density as high as possible. 
+	
+- Turn off gun align.  
+
+- Leave condensor lens alone
+	- This is taken care of at our 6 month service call
+	
+If spot size is not aligned
+----
+- Spot 1 
+	- Gun align 
+	- Center with green knobs. 
+	- Turn the gun align back off.  
+	
+- Spot 4
+	- Bright tilt.  
+	- Center with grenn knobs
+	- Bright tilt off
+	
+**Repeat the spot 1 and spot 4 calibrations until the beam remains centered**
+	

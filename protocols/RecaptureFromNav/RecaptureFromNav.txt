@@ -1,0 +1,9 @@
+1.      Select the nav item corresponding to each area you want to capture. It should have the "Acquire" checkbox checked. (For 99.9% of captures this is only Nav Item #1)
+a.      Reselect "New File at Item" (Screenshot #1)
+b.      A dialog pops up, select "montaged Images" & "Fit montage to polygon", hit OK (Screenshot #2)
+c.      The montage setup pops up, it should match the standard settings. Hit OK (Screenshot #3)
+d.      You'll be prompted to choose where to save the montage. Do not replace the first montage (unless no tiles were ever captured.) Instead create a new folder and add a letter after the section number. Continue moving up the alphabet if there is more than one attempt "B", "C", "D", etc… The letter convention only applies to the folder. Naming the .idoc file inside the folder with only the section number. 
+2.      Go to "Navigator->Acquire at items" menu. (Screenshot #4)
+a.      Ensure that the "CalibrateAndRecapture" macro is being used since this is a recapture.
+b.      Ensure other settings follow standard procedure (Screenshot #5)
+c.      Click Go

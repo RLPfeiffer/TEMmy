@@ -1,0 +1,16 @@
+Gain reference (done once a day):
+1.	Pull rod out to first position
+2.	Put foil thingy into the slot to keep the vacuum on.
+3.	Go to High Mag 5000X
+4.	Center the Beam
+5.	Lower mirror and turn the current density to 100
+6.	Camera>Acquire Gain reference
+7.	Make sure count target is 17500
+8.	Hit Yes
+2 replies
+
+Nat Quayle Nelson  17 days ago
+After step 5, move the screen up
+
+Becca  17 days ago
+Also, TEM2's gain reference is in Digital Micrograph. Gain reference should be run from there and follow the on screen prompts.

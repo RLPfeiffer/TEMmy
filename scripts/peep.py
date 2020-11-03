@@ -8,6 +8,7 @@ def peep(section, idoc, log):
     # TODO check the section in the section directory excel file
     # TODO check that any previous recaptures are in RawData using another processSections call
     # TODO check if there is a manual stos file
+    # TODO check where its stos files are pointing (to the right sections or not)
     # TODO check the notes file
     # TODO open the overview
     print(section)

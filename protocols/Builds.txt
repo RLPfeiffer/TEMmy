@@ -20,25 +20,8 @@ If it looks good continue
 
 Run Robocopy script I copied into Slack 
 
-/*
-Then go here:
-W:\Volumes\RC3\TEM
 
-Open: 
-W:\Volumes\RC3\TEM\VolumeData.xml
-Ctrl+Shift+Alt+B formats the document nicely
-
-Open: 
-W:\Volumes\RC3\TEM\VolumeData.temp
-
-Append VolumeData.temp's <Section_Link> elements to the VolumeData.xml file
-
-##### Align new sections with the full RC3 volume ####
-cd \Python37\scripts
-RC3Align W:\Volumes\RC3
-*/
-
-cd \Python37\Scripts && copy-section-links W:\Volumes\RC3\TEM\VolumeData.xml W:\Volumes\RC3\TEM\VolumeData.temp C:\Users\u0920639\Desktop && RC3Align W:\Volumes\RC3 && textme nat align
+cd \Python37\Scripts && copy-section-links W:\Volumes\RC3\TEM\VolumeData.xml W:\Volumes\RC3\TEM\VolumeData.temp C:\Users\u0920639\Desktop && RC3Align W:\Volumes\RC3 && rito --slack tem-bot --att 8014935262 "align is finished"
 
 ##### Check quality of alignment ######
 

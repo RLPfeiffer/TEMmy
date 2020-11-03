@@ -28,7 +28,10 @@ Bonus: this will start a timer – expand the Log dialogue box to watch the time
     To stop cooking after the 7 minutes, change spot size to 3.
 
     Find the center point of the capture region using the screenshots in DROPBOX from the previous section.
-    Find center spot – Image – Screen Capture – Paste in Paint – Save to DROPBOX in file: "RC3 [Sec#] 150X"
+    Find center spot – Image – Screen Capture – Paste in Paint – Crop - Save to DROPBOX in file: "RC3 [Sec#] 150X"
+    
+    Note: To crop in Paint on Windows XP, you have to copy the region you want to crop to, and paste it into a new file.
+    
     Raise screen (to prevent damage to section in next step).
     If using TEM1,
         Return aperture to first white dot (aperture 1; largest white dot on dial).
@@ -37,12 +40,12 @@ Bonus: this will start a timer – expand the Log dialogue box to watch the time
     Hit mag 1 button (or just Mag on TEM2).
     Lower screen and lower mag to 600X while spreading beam.
     Center the aperture if you are using TEM1.
-    Find center spot – Image – Screen Capture – Paste in Paint – Save to DROPBOX in file: "RC3 [Sec#] 600X"
+    Find center spot – Image – Screen Capture – Paste in Paint – Crop - Save to DROPBOX in file: "RC3 [Sec#] 600X"
     Go to 2000X.
     Recenter BOTH aperture and beam.
     Put the mirror down and make sure the Current Density is near 250 for TEM1 or 65 for TEM2.
     Find center spot. Place SerialEM marker at the center point.
-    Image – Screen Capture – Paste in Paint – Save to desktop: Volume_Sec#_2000X.bmp
+    Image – Screen Capture – Paste in Paint – Crop - Save to DROPBOX in file: "RC3 [Sec#] 2000X"
     Open Navigator.
     Navigator (in toolbar) > open
     Navigator (in toolbar) > Montage and grids > Add circular polygon (or draw polygon for non-connectome volumes) > Enter desired radius (125 for RC2, 45 RPC2).

@@ -19,7 +19,7 @@ The best way I have found for returning values from functions, is actually to as
 
 ## Test in a new SerialEM window
 
-Because you can only declare global variables, variable values get stuck in SerialEM's state the first time you run your test. If you later move a variable assignment somewhere else, resulting in an incorrect access to an unassigned variable, **your test will still work because the first test's state is preserved.** This can lead you to believe your script is correct when it isn't, and the next time you run your script in a fresh SerialEM window, it can halt your capture.
+Because unencapsulated use of global variables is typical in SerialEM scripting, variable values get stuck in SerialEM's state the first time you run your test. If you later move a variable assignment somewhere else, resulting in an incorrect access to an unassigned variable, **your test will still work because the first test's state is preserved.** This can lead you to believe your script is correct when it isn't, and the next time you run your script in a fresh SerialEM window, it can halt your capture.
 
 The best practice is, once your script passes its test correctly, you must Save Package, close SerialEM, open it again, and test again. You are likely to find new errors.
 

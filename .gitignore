@@ -5,3 +5,4 @@ coach/temmy/
 # SVGs from plot scripts:
 *.svg
 PyreLogs/
+*.zip

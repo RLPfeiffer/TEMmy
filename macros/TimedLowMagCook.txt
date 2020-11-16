@@ -1,0 +1,67 @@
+MacroName Timed Low Mag Cook With Wobble
+
+MinWobbleDist = 10
+MaxWobbleDist = 20
+WobbleDist = 20
+
+ReportStageXYZ
+XStart = $reportedvalue1
+YStart = $reportedvalue2
+
+EnterDefaultedNumber 7 2 Number of minutes to cook?
+SecondsToCook = $reportedvalue1 * 60
+
+echo BEGIN BURN WOBBLE
+ResetClock
+Loop 200000 iLoop
+   If $WobbleDist > $MaxWobbleDist
+      WobbleDist = $MinWobbleDist
+   EndIf
+   movestage $WobbleDist 0
+   CallFunction WaitForStageNotBusy
+   movestage -$WobbleDist 0
+   CallFunction WaitForStageNotBusy
+   reportclock
+   movestage -$WobbleDist 0
+   CallFunction WaitForStageNotBusy
+   movestage $WobbleDist 0
+   CallFunction WaitForStageNotBusy
+   reportclock
+   movestage 0 $WobbleDist
+   CallFunction WaitForStageNotBusy
+   movestage 0 -$WobbleDist
+   CallFunction WaitForStageNotBusy
+   reportclock
+ 
+   movestage 0 -$WobbleDist
+   CallFunction WaitForStageNotBusy
+   movestage 0 $WobbleDist
+   CallFunction WaitForStageNotBusy
+   reportclock
+   CallFunction WaitForStageNotBusy
+  
+   MoveStageTo $XStart $YStart
+   ReportStageXYZ
+   reportclock
+
+   IF $reportedValue1 >= $SecondsToCook
+      Break
+   ENDIF
+
+   WobbleDist = $WobbleDist  + 1
+EndLoop
+echo END BURN WOBBLE
+
+SetSpotSize 3
+Record
+
+Function WaitForStageNotBusy
+   Loop 20000 iStageWait
+      ReportStageBusy
+      StageIsBusy = $reportedvalue1
+      if $StageIsBusy == 0
+         break
+      endif
+      Delay 500 msec
+   EndLoop
+EndFunction

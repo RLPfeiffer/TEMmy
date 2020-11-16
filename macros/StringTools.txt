@@ -1,0 +1,26 @@
+MacroName StringTools
+
+# Test:
+CallFunction StringTools::Tokenize A string with multiple tokens!
+OKBox $Tokens
+String1 = Same
+String2 = Same
+CallFunction StringTools::StringEquals
+OKBox $ReportedValue1
+String2 = Different
+CallFunction StringTools::StringEquals
+OKBox $ReportedValue1
+
+# Sets variable Tokens to an array of tokens split by spaces in the given InputString
+Function Tokenize 0 1 InputString
+   OpenTextFile outputfile O 0 output.txt
+   WriteLineToFile outputfile $InputString
+   CloseTextFile outputfile
+   ReadTextFile Tokens output.txt
+EndFunction
+
+# Set String1 and String2 to the strings you want to compare before calling this function without arguments
+# Sets ReportedValue1 to 1 if the strings are the same
+Function StringEquals 0 0
+   RunInShell if "$String1" == "$String2" (exit 1) else (exit 0)
+EndFunction

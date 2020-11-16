@@ -1,0 +1,64 @@
+MacroName Notifications
+
+# Test:
+CallFunction Notifications::SendMessage Test message
+CallFunction Notifications::SendStart
+
+Function SendMessage 0 1 Text
+   CallFunction ScopeUtil::SetScopeName
+   CallFunction ScopeUtil::SetMessageDir
+   CallFunction ScopeUtil::SetMessagePath
+
+   MakeDirectory $MessageDir
+   # Make sure there is a message file to append to
+   OldMessages = { "" }
+   OpenTextFile MessageFile T 0 $MessagePath
+   IF $reportedValue1 == 1
+      CloseTextFile MessageFile      
+   ELSEIF $reportedValue1 == 0
+      OpenTextFile MessageFile W 0 $MessagePath
+      CloseTextFile MessageFile
+   ENDIF
+   # Append to the file so multiple messages aren't overwritten
+   OpenTextFile MessageFile A 0 $MessagePath
+   WriteLineToFile MessageFile $Text
+   FlushTextFile MessageFile
+   CloseTextFile MessageFile
+EndFunction
+
+Function SendStart 0 0
+   ReportNumTableItems
+   NumNavItems = $reportedvalue1
+   CallFunction ScopeUtil::SetScopeName
+   EstimatedCaptureHours = 0
+   NumTiles = 0
+   IF $NumNavItems < 1
+      echo
+      echo Nav table does not have items indicating total capture time.
+      NumTiles = 0
+   ELSE
+      ReportNumMontagePieces 1
+      NumTiles = $reportedvalue1
+      
+      IF $NumTiles == 1
+         echo "Montage claims to have only one image. Using 1 hour as timeframe"
+         EstimatedCaptureHours = 1
+      ELSE    
+         EstimatedCaptureTime = $NumTiles * $SecondsPerTile
+         EstimatedCaptureHours =  $EstimatedCaptureTime / (60 * 60)
+      ENDIF
+   ENDIF
+   echo .  Estimating $EstimatedCaptureHours hours to complete
+   CallFunction Notifications::SendMessage Capturing $NumTiles images on $ScopeName. Estimating $EstimatedCaptureHours hours to complete
+EndFunction
+
+Function SendStop 0 0
+   CallFunction ScopeUtil::SetScopeName
+   CallFunction Notifications::SendMessage Capture $CaptureDir done on $ScopeName. Overview and tiles have been copied to DROPBOX.
+EndFunction
+
+Function SendOverview 0 0
+   CallFunction ScopeUtil::SetMessageDir
+   MakeDirectory  $MessageDir
+   CallFunction Images::SaveOverviewJpg $MessageDir\overview$CaptureDir.jpg
+EndFunction

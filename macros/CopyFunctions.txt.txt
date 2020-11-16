@@ -1,0 +1,69 @@
+MacroName CopyFunctions
+
+
+# These values only work for testing as of 11/6/2020
+CopySource = G:\RC3\0516
+CopyTarget = Y:\TEMXCopy\
+TargetDirName = 0516
+# Test the functions without side effects:
+#CallFunction CopyFunctions::CheckSpaceForCopyDir
+#OKBox $CheckSpaceSucceeded
+
+# Test with major side effects:
+CallFunction CopyFunctions::CopyDir
+
+# Set TargetDirName, CopyTarget and CopySource before calling this with no arguments.
+# Checks to make sure there is enough space, then copies the contents CopySource recursively to CopyTarget.
+# To copy a directory called C:/whatever to Z:/stuff/whatever you would have to set CopyTarget to Z:/stuff/ and TargetDirName to whatever
+Function CopyDir 0 0
+   CallFunction CopyFunctions::CheckSpaceForCopyDir
+   If $CheckSpaceSucceeded == 1
+      CallFunction CopyFunctions::CopyDirWithoutCheckingSpace
+   Else
+      OKBox There is not enough space to copy the specified directory.
+   Endif
+EndFunction
+
+# INTERNAL, called by CopyDir
+# Sets CheckSpaceSucceeded to 1 if there is enough space to copy the given directory.
+Function CheckSpaceForCopyDir 0 0
+   CheckSpaceSucceeded = 0
+
+   # Check the size and units of CopySource
+   RunInShell dir /-c $CopySource > output.txt
+   ReadStringsFromFile output output.txt
+   output = $output[$#output-1]
+   CallFunction StringTools::Tokenize $output
+   SourceSize = $Tokens[3]
+   SourceUnits = $Tokens[4]
+   
+   # Check the remaining space and units of CopyTarget
+   RunInShell dir  /-c $CopyTarget > output.txt
+   ReadStringsFromFile output output.txt
+   output = $output[$#output]
+   CallFunction StringTools::Tokenize $output
+   TargetSpace = $Tokens[3]
+   TargetUnits = $Tokens[4]
+
+
+   # dir should always output both sizes in bytes, but we sanity check it just to be safe. 
+   # If they are ever not the same, conversion will have to be implemented
+   String1 = $SourceUnits
+   String2 = $TargetUnits
+   CallFunction StringTools::StringEquals
+   If $ReportedValue1 == 1
+      If $SourceSize < $TargetSpace
+         CheckSpaceSucceeded = 1
+      Endif
+   Else
+      OKBox For some reason, CheckSpace units were $SourceUnits and $TargetUnits
+   Endif
+EndFunction
+
+# INTERNAL helper function that copies a directory to CopyTarget without checking for space first.
+Function CopyDirWithoutCheckingSpace 0 0
+   RunInShell xcopy $CopySource $CopyTarget\$TargetDirName\ /S
+   If $ReportedValue1 != 0
+      OKBox Automatically copying $CopySource failed! Check the open shell
+   EndIf
+EndFunction 

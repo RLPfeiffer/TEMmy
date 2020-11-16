@@ -1,0 +1,8 @@
+MacroName Images
+
+# Test on TEM1
+CallFunction Images::SaveOverviewJpg C:\Documents and Settings\Gatanuser\Desktop\test.jpg
+
+Function SaveOverviewJpg 0 1 Filename
+   SaveToOtherFile B JPG -1 $Filename
+EndFunction

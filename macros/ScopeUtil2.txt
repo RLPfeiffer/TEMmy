@@ -1,0 +1,39 @@
+MacroName ScopeUtil
+
+# Globally set the variable $ScopeName
+Function SetScopeName
+   ScopeName = TEM2
+EndFunction
+
+# Globally set the variable $MessageDir
+Function SetMessageDir
+   CallFunction ScopeUtil::SetScopeName
+   MessageDir = \\192.168.3.10\Dropbox\Notification\$ScopeName
+EndFunction
+
+# Globally set the variable $MessagePath
+Function SetMessagePath
+   CallFunction ScopeUtil::SetMessageDir
+   MessagePath = $MessageDir\message.txt
+EndFunction
+
+# Globally set the variable $DropboxPath
+Function SetDropboxPath
+	DropboxPath = Y:
+EndFunction
+
+# Globally set the variable $CopyDir
+Function SetCopyPath
+	CallFunction ScopeUtil::SetDropboxPath
+	CopyPath = $DropboxPath\TEMXcopy
+EndFunction
+
+# Globally set the variable $DataPath
+Function SetDataPath
+	DataPath = G:
+EndFunction
+
+# Globally set the variable PrecookMontageD
+Function SetPrecookMontageD
+	PrecookMontageD = 0
+EndFunction

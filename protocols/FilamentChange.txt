@@ -1,118 +1,169 @@
 Filament Change TEM1
 ====
-
 - Turn off HT voltage & Filament 
-	- wait ~60min
-	
-Under cabinet
+    - If the filament was just on, wait ~60min for it to cool down
+- Raise screen and switch to a rod with no grid in it
+    
+Under cabinet (panel under the Gatan monitor will open if you push it)
 ----
-
-- Move gun switch to 'air' 
-	- wait 5mins
-
+- Move gun switch to 'air'
+    - Valves V18, V15, and V10 will open (turn green) in TEM Center. 
+    - wait 5mins
 -Lift to 'up'
-
 TEM Upper assembly
 ----
-
-- Move arm out of way.  
+- Move grounding arm out of way.
 - Unscrew ring.  
-- Pull down on filament (Wehnelt) cap.  
-- Take new wehnelt cap and fit notch on edge of assembly.  
-	- Extra cap kept cleaned in a ziploc bag in one of the main EM room drawers.  
-- Replace ring (it screws).  
-- Move back to stop point.  
-	- Move switch to put gun down.  
+- Pull directly down on filament (Wehnelt) cap. It does not screw or turn.
+- New wehnelt caps are stored in clear cylindrical cases in main EM room, if you have questions ask Nat. 
+    - New cap needs to be aligned prior to inserting it into the TEM.  
+    - Do this using the two part metal system that the cap fits into (see help menu in TEM Center for image)
+    - Turn the assembly under the microscope to move the filament to match its positioning seen in the filament just removed from scope.  
+        **This could use alot more specific detail**
+ 
+- Take new wehnelt cap and fit notch on edge of assembly, then push the cap up into position (do not turn the cap as you push)  
+- Screw the ring back on.  
+- Move grounding arm back to stop point (touching the new wehnelt cap).  
+    - Move switch under cabinet to put gun down.  
 - If assembly not sitting flat, check the gasket that seals around the gun.  
-	- Gun air switch to pump.
-	- Push both reset buttons.  
-	
-- Leave scope overnight.  
-
-
-Wehnelt Cap Cleaning
-====
-- Needs to be cleaned before reinserting a new filament.  
-- Cleaned using an ammonia solvent in beaker in sonicator for 1 hour.   
-	- Note: This solvent is toxic, do this in the hood.  
-	
-	
+    - Gun air switch to pump.
+    - Push both reset buttons.  
+    
+- Once the reset buttons are pushed and the gun is switched to the pump position
+    - Valves V18 and V15 will close immediately, V10 will close when the PiG2 value reaches ~160uA
+    - You should see the GunPiG2 value begin to drop in TEMCenter soon after flipping switch.  
+    - If you don't see the pressure begin to drop, restart TEM Center. 
+- After PiG2 Gun vacuum is pumped down (turns green and reads "Evac Ready") the penning guage will begin to drop.
+IMPORTANT: You must wait for the Penning Gauge to stabilize below 20, this will take 45mins to an hour.  
+    
 New Filament Conditioning
 ====
-
-- HT Voltage to 30 increasing stepwise by 10kV.  
-	- Return step to 1.  
-	
-**Turn Filament ON**
-
-- Watch the Penning gauge (PG) valve, this should stay at ~20
-- Slowly bring up the HT Voltage to 40, ensuring PG valve does not change.
+- In TEM Center, open the HT Scheduling Window from the HT and filament window. 
+    
+- HT Voltage to 30 
+    HT Scheduler settings
+    ----
+    Step volt: 1.0kV
+    Interval: 2 sec
+    Target: 30kV
+    
+**Set Filament target to 72 and Turn Filament ON**
+- Watch the Penning gauge (PG) valve, this should stay near starting value (11/4/2020 it was 10)
+IMPORTANT: If the PG rises above 20, stop the scheduler and wait for the PG to stabilize (~5mins)
+- HT Voltage to 40
+    HT Scheduler settings
+    ----
+    Step volt: 1.0kV
+    Interval: 5 sec
+    Target: 40kV
+    
 - Leave for 1hr at 40.  
+- After stabilization, step HT to 60kV. (Watch PG, if it starts to spike remember to give breaks)
+    HT Scheduler settings
+    ----
+    Step volt: 1.0kV
+    Interval: 10 sec
+    Target: 60kV
+    
+- Step HT to 75kV (It begins to get sensitive here so you need to go slow and really watch PG)
+    HT Scheduler settings (60-65)
+    ----
+    Step volt: 0.5kV
+    Interval: 10 sec
+    Target: 65kV
+    HT Scheduler settings (65-70)
+    ----
+    Step volt: 0.5kV
+    Interval: 10 sec
+    Target: 70kV
+    
+    - Hold for 10mins at 70kV
+    
+    HT Scheduler settings (70-75)
+    ----
+    Step volt: 0.5kV
+    Interval: 20 sec
+    Target: 75kV
+    
+- At 75 this process will get much slower **It becomes really sensitive from here on** (Budget ~2hrs for the last step) 
+    HT Scheduler settings (75-95)
+    ----
+    Step volt: 0.1kV
+    Interval: 30 sec
+    Target: 95kV
 
-- After stabilization, step HT to 60kV.
-	- Watch PG valve and give breaks to keep in 18-22 range.   
-	
-- Once 60 has been attained with stable PG, reduce step size to 0.5.  
-	- Continue to slowly increase the HT while paying close attention to PG.
+	If you want to be even more careful, you can choose a step volt lower than 0.1 kV in the panel with the HT on/off button, and manually trigger the steps.
 
-- At 75, reduce step size to 0.1.  
-**Important to increase very slowly at this point**	
-	- If you hear a pop behind the machine & the HT turns off, HT was increased too
-	fast and an arcing event was created.  
-		- If this happens, reduce HT & turn back on.  
-	
-	- If you hear a pop from up by the gun & HT turns off:
-		- The cap needs to be rechecked, starting the process over again. 
-		- You may have 'fried' the wehnelt cap (Major problem)
-	
-	
+Once you reach 95, leave it there for 15 minutes before lowering back to 80
+
+IMPORTANT NOTES:
+----------------
+    - This final 20kV is super sensitive. You really have to watch the PG.  If it begins to spike at all you'll need to hit "stop"
+        in the scheduler and let the PG re-stabilize at it earlier value (approx 5 mins).  These spikes happen very fast. 
+    If the PG starts to spike the following may happen:
+        - If you hear a pop behind the machine & the HT turns off, HT was increased too
+        fast and an arcing event was created.  
+        - If this happens, reduce HT & turn back on.  
+    
+        - If you hear a pop from up by the gun & HT turns off:
+            - The cap needs to be rechecked, starting the process over again. 
+            - You may have 'fried' the wehnelt cap (Major problem)
+    
+Put SerialEM calibrations into maintenance mode. 
+
+If you are changing TEM1's filament, also open TEM Con. Click JEOLS -> Alignment -> Maintenance.
+    
 Alignment of New Filament
 ====
 - Ensure empty rod in scope.  
 - Bring HT down to 80kV.
+- Note the current going through the filament when it is off (Dark current). It should be ~40
 - Turn filament on.
-	- Should be at ~58 (will be ~5 over due to being cold)
-		- Can use bias to bring current down to within 5 over. 
-		- Try to keep bias between 20-80
-		
+    - Should go to about 15 + the Dark current value
+        - Can adjust bias to get the right current value.
+        - Try to keep bias between 0-80
+        
 - Turn on SerialEM
-	- Calibrate
+    - Calibrate
 - Use low-mag to find the beam.
 - Switch to high-mag.  
-
 Align Gun
 ----
 - At 500x find center.  
-	- Spot size 1
-	- Unsaturate filament by dropping target (??)
-	- Focus
-	- Center Image (On TEM1, the green knobs)
-	- Click Gun Align. 
-	
+- Go to 10000x
+    - Spot size 1
+    - Unsaturate filament by dropping target from 72
+	- You will start to see the filament itself in the beam
+    - Focus
+    - Center Image (On TEM1, the green knobs)
+    - Click Gun Align. 
+    
 - Resaturate, but keep it below 80
-	- Won't be able to see the filament anymore
-	
+    - Won't be able to see the filament anymore
+    
 - Spread beam between inner bracket
-	- Mirror in (spot size 3)
-	- Gun align
-	- Use the yellow knobs to bring the current density as high as possible. 
-	
+    - Mirror in (spot size 3)
+    - Gun align
+    - Use the yellow knobs to bring the current density as high as possible. 
+    
 - Turn off gun align.  
-
 - Leave condensor lens alone
-	- This is taken care of at our 6 month service call
-	
+    - This is taken care of at our 6 month service call
+    
 If spot size is not aligned
 ----
 - Spot 1 
-	- Gun align 
-	- Center with green knobs. 
-	- Turn the gun align back off.  
-	
+    - Gun align 
+    - Center with green knobs. 
+    - Turn the gun align back off.  
+    
 - Spot 4
-	- Bright tilt.  
-	- Center with grenn knobs
-	- Bright tilt off
-	
+    - Bright tilt.  
+    - Center with grenn knobs
+    - Bright tilt off
+    
 **Repeat the spot 1 and spot 4 calibrations until the beam remains centered**
-	
+
+TO SAVE THESE CALIBRATIONS, click Save as Neutral on all the values in SerialEM.
+
+On TEM1, also save the configuration through TEMCon.

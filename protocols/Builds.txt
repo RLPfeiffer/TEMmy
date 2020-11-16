@@ -4,12 +4,13 @@ cd \Python37\scripts
 
 #### Import most recent captures ####
 
-Make sure Dropbox doesn't contain sections that are already imported.
-
 Clear stuff out of the D:\ drive temp volume.
 
+Rename Dropbox\TEMXCopy to RC3Batch
+Make a new TEMXcopy folder
+
              dest            src
-RC3Import D:\Volumes\RC3 Y:\Dropbox\RC3 && RC3Build D:\Volumes\RC3 && rito --slack tem-bot "D drive Build is finished. Check it and merge it"
+RC3Import D:\Volumes\RC3 Y:\Dropbox\RC3Batch && RC3Build D:\Volumes\RC3 && rito --slack tem-bot "D drive Build is finished. Check it and merge it"
 
 Wait for build to finish
 Open D:\Volumes\RC3\MosaicReport.html, Scan for issues

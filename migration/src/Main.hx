@@ -12,8 +12,9 @@ class Main {
 	static var DEFAULT_XML = "W:/Volumes/RC3/TEM/VolumeData.xml";
 
 	public static function main() {
-		// Use sqlite3 CLI to make a new database
+		// Each time the script runs, make a time-stamped db file for a clean state
 		var dbFile = Date.now().toString().replace(" ", "-").replace(":", "-") + ".db";
+		// Use sqlite3 CLI to make a new database
 		var exitCode = new Process('@echo .save $dbFile | sqlite3').exitCode();
 		if (exitCode != 0) {
 			trace('failed to create database file $dbFile');

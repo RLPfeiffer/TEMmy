@@ -101,7 +101,6 @@ MoveToNavItem 1
 
 CallFunction Notifications::SendStart
 Montage
-CallFunction Notifications::SendStop
 CallFunction Notifications::SendOverview
 
 # Copy the capture to DROPBOX
@@ -109,3 +108,4 @@ CopySource = $DataPath\$CaptureDir
 CopyTarget = $CopyPath
 TargetDirName = $CaptureDir
 CallFunction CopyFunctions::CopyDir
+CallFunction Notifications::SendStop

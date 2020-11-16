@@ -23,4 +23,5 @@ if __name__ == "__main__":
     if not exists(stos_file):
         stos_file = join(auto_stos_dir, stos_name)
     
+    print("pyre -stos " + stos_file)
     run(["pyre", "-stos", stos_file])

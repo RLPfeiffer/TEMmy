@@ -86,8 +86,7 @@ Montage
 CallFunction Notifications::SendOverview
 
 # Copy the capture to DROPBOX
-CallFunction ScopeUtil::SetDataPath
-CallFunction ScopeUtil::SetCopyPath
+Call ScopeUtil
 CopySource = $DataPath\$CaptureDir
 CopyTarget = $CopyPath
 TargetDirName = $CaptureDir

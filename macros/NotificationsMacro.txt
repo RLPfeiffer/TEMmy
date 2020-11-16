@@ -5,9 +5,7 @@ CallFunction Notifications::SendMessage Test message
 CallFunction Notifications::SendStart
 
 Function SendMessage 0 1 Text
-   CallFunction ScopeUtil::SetScopeName
-   CallFunction ScopeUtil::SetMessageDir
-   CallFunction ScopeUtil::SetMessagePath
+   Call ScopeUtil
 
    MakeDirectory $MessageDir
    # Make sure there is a message file to append to
@@ -29,7 +27,7 @@ EndFunction
 Function SendStart 0 0
    ReportNumTableItems
    NumNavItems = $reportedvalue1
-   CallFunction ScopeUtil::SetScopeName
+   Call ScopeUtil
    EstimatedCaptureHours = 0
    NumTiles = 0
    IF $NumNavItems < 1
@@ -53,12 +51,12 @@ Function SendStart 0 0
 EndFunction
 
 Function SendStop 0 0
-   CallFunction ScopeUtil::SetScopeName
+   Call ScopeUtil
    CallFunction Notifications::SendMessage Capture $CaptureDir done on $ScopeName. Overview and tiles have been copied to DROPBOX.
 EndFunction
 
 Function SendOverview 0 0
-   CallFunction ScopeUtil::SetMessageDir
-   MakeDirectory  $MessageDir
+   Call ScopeUtil
+   MakeDirectory $MessageDir
    CallFunction Images::SaveOverviewJpg $MessageDir\overview$CaptureDir.jpg
 EndFunction

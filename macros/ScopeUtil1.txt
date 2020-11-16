@@ -1,39 +1,22 @@
 MacroName ScopeUtil
 
 # Globally set the variable $ScopeName
-Function SetScopeName
-   ScopeName = TEM1
-EndFunction
+ScopeName = TEM1
 
 # Globally set the variable $MessageDir
-Function SetMessageDir
-   CallFunction ScopeUtil::SetScopeName
-   MessageDir = N:\$ScopeName
-EndFunction
+MessageDir = N:\$ScopeName
 
 # Globally set the variable $MessagePath
-Function SetMessagePath
-   CallFunction ScopeUtil::SetMessageDir
-   MessagePath = $MessageDir\message.txt
-EndFunction
+MessagePath = $MessageDir\message.txt
 
 # Globally set the variable $DropboxPath
-Function SetDropboxPath
-	DropboxPath = Z:
-EndFunction
+DropboxPath = Z:
 
 # Globally set the variable $CopyDir
-Function SetCopyPath
-	CallFunction ScopeUtil::SetDropboxPath
-	CopyPath = $DropboxPath\TEMXcopy
-EndFunction
+CopyPath = $DropboxPath\TEMXcopy
 
 # Globally set the variable $DataPath
-Function SetDataPath
-	DataPath = D:
-EndFunction
+DataPath = D:
 
 # Globally set the variable PrecookMontageD
-Function SetPrecookMontageD
-	PrecookMontageD = 1
-EndFunction
+PrecookMontageD = 1

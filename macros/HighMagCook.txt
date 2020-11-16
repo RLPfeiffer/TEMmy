@@ -82,7 +82,7 @@ SetSpotSize 2 #Commented for test of a lower power cook
 
 ReportSpotSize
 
-CallFunction ScopeUtil::SetPrecookMontageD
+Call ScopeUtil
 PreCookMontage $PrecookMontageD 2 0 0
 
 echo Restoring spot size after cook
@@ -105,8 +105,6 @@ CallFunction Notifications::SendStop
 CallFunction Notifications::SendOverview
 
 # Copy the capture to DROPBOX
-CallFunction ScopeUtil::SetDataPath
-CallFunction ScopeUtil::SetCopyPath
 CopySource = $DataPath\$CaptureDir
 CopyTarget = $CopyPath
 TargetDirName = $CaptureDir

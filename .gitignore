@@ -4,3 +4,4 @@ coach/temmy/
 *.pyc
 # SVGs from plot scripts:
 *.svg
+PyreLogs/

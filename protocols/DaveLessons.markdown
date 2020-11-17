@@ -27,7 +27,7 @@ The best practice is, once your script passes its test correctly, you must Save 
 
 If you run SerialEM on more than one microscope, you may find that your scripts need to use different argument values depending on which scope is running it.
 
-**Do not maintain two versions of the same script.** Instead, extract all the values that are different between your microscopes into a separate script which returns those values through functions.
+**Do not maintain two versions of the same script.** Instead, extract all the values that are different between your microscopes into a separate script which sets those values.
 
 For example, on one microscope:
 
@@ -35,9 +35,7 @@ For example, on one microscope:
 MacroName ScopeUtil
 
 # Globally set the variable $ScopeName
-Function SetScopeName
-   ScopeName = TEM1
-EndFunction
+ScopeName = TEM1
 ```
 
 On another microscope:
@@ -46,9 +44,7 @@ On another microscope:
 MacroName ScopeUtil
 
 # Globally set the variable $ScopeName
-Function SetScopeName
-   ScopeName = TEM2
-EndFunction
+ScopeName = TEM2
 ```
 
 On both microscopes:
@@ -57,12 +53,12 @@ On both microscopes:
 MacroName Messages
 
 ## Incorrect:
-# CallFunction ScopeUtil::SetScopeName
+# Call ScopeUtil
 ## Won't work because other macros calling Messages::SendMessage will not run code outside of the SendMessage function
 
 Function SendMessage 0 1 Text
    # Correct:
-   CallFunction ScopeUtil::SetScopeName
+   Call ScopeUtil
    OkBox Message from $ScopeName: $Text
 EndFunction
 ```

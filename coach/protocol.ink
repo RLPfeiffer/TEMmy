@@ -1,48 +1,39 @@
 // JavaScript functions
 EXTERNAL showImage(file)
-EXTERNAL timer(time)
-EXTERNAL beep(times)
 
 // TEM1/TEM2 variables
 VAR current_density = 0
 VAR capture_estimate = 0
 
--> first_time_ever
+// Capture/state variables
+VAR recapture = false
+VAR next_section = true
+
+-> start
+
+// Dummy functions needed to make Inky play nice:
+== function showImage(file)
+~ return 0
 
 == tem1_setup
 // Set TEM1-specific variables
 ~ current_density = 250
-~ capture_estimate = 7
+~ capture_estimate = 4.5
 
 ->->
 
 == tem2_setup
 // Set TEM2-specific variables
 ~ current_density = 65
-~ capture_estimate = 3.5
+~ capture_estimate = 4.5
 
 ->->
 
 // Protocol
-== first_time_ever
+== start
 
 ~ showImage("temmy.png")
 Welcome to TEMmy, the Electron Microscope tutor named after Toby Fox's adorable character from Undertale.
-
-/* // Uncomment this block to test the timer() function:
-* Start
--
-
-
-Waiting 5 seconds
-~ timer("5 s")
-Waited, now
-* click here
-- waiting again (1 minute)
-~ timer("1 m")
-Waited!
-*/
-// This choice should only need to be made once, when TEMmy is opened on the computer corresponding to one of our two TEMs.
 
 First of all, which electron microscope are you using?
 
@@ -52,37 +43,46 @@ First of all, which electron microscope are you using?
 -> tem2_setup ->
 - Great.
 
--> first_time_today
-
-== first_time_today
-
 Check HT Voltage.
 
-* HT Voltage is off (red) or less than 80.
-Someone is in the middle of increasing the HT Voltage, probably because they installed a new filament.
--> increase_ht_voltage ->
+* HT Voltage is off (red)
+    If HT is 80 you can just turn it on again.
+    ** Done
+* HT Voltage is on, but less than 80.
+    Someone is in the middle of increasing the HT Voltage, probably because they installed a new filament. See the filament change protocol.
+    ** Go to filament change tutorial -> filament_change
 * HT Voltage is on (green) and at 80.
 
-- (new_capture) If Serial EM is open from a previous capture, close it. Do not save anything.
-* Ok.
-- -> rod_out ->
-Flip the Pump switch to AIR.
-Watch V18 and V16 in the TEM Center window.
+- (new_capture) If Serial EM is open from a previous capture, look at its overview.
 
-* V18 and V16 have turned green, then back to black (closed).
-- Remove the rod all the way and place it in its holder.
+Does the overview look good enough to annotate?
+* No, it has artifacts which caused the tiles to align poorly
+    You'll have to recapture it.
+    ~ recapture = true
+    ~ next_section = false
+* No, the section broke while capturing.
+    Open the excel file at \\MarcLab\Data\RC3 Materials\Section_Directory.
+    Find the row for the section that broke and make a note in the capture notes column.
+    ** Done
 
-Remove the grid from the rod and place it back in the container where it came from. Insert a new grid. Mark where it came from on a sticky note.
+* No, whole portions of the polygon are black.
+    The filament either blew out or turned off during the capture. Try turning it on again. See if it stays on.
+    ** It turns off again by itself
+        The filament is blown.
+        *** Go to filament change protocol -> filament_change
+**it stays on.
+    The filament may have turned off because of an arcing event. Continue this set up as a recapture.
+    ~ recapture = true
+    ~ next_section = false
+* Yes
 
--> rod_in ->
-
-Flip the pump switch to PUMP. The yellow light should be on!
-
-* Yellow pump light is on, specimen chamber in TEM Center is GREEN.
-- You can now twist and insert the rod completely.
-
+- { next_section:
+    -> put_next_section ->
+}
 * HT is at 80, and turned on.
-- * Penning Gauge is on and below 30.
+- {tem2_setup: The Penning Gauge will take a little while to turn on and stabilize.}
+  {tem1_setup: The Penning Gauge may burp a little, but should be stable and below 30.}
+* Penning Gauge is on and stable below 30.
 - Turn on the filament.
 Open SerialEM.
 Make sure the screen is raised.
@@ -92,8 +92,10 @@ Turn the aperture dial to the red dot.
 - Wait until the filament is fully on (the button should be bright green and stop blinking).
 Then lower the screen. (This is the {tem1_setup: F1|Screen Up} button on the right-hand physical control panel.)
 Examine the section for damage or large dirt.
-* There is damage/large dirt/holes in the formvar near the sample
--> kevin
+* There is large dirt on the sample
+    If the dirt is bad enough, It may be worth having the stainer try to clean it first. To do this,
+* There is damage/holes in the formvar near the sample
+TODO stuff
 * It looks good
 - Locate the center of the tissue (move using the scroll ball on the left-hand control panel if necessary).
 
@@ -218,7 +220,7 @@ Start Macro 1 (Burn Wobble).
 
 * Started it
 - Now you have to wait 7 minutes--but keep an eye on the process for any problems. I'll time that for you.
-~ timer("7 minutes")
+
 Now hit stop.
 
 * Done
@@ -226,27 +228,65 @@ Now hit stop.
 
 == rod_in
 
-Insert the specimen rod into safety position. THIS DOES NOT INVOLVE TWISTING I THINK.
+Do you have the next section ready in a rod?
+* Yes
+-
 
-TODO: More specific instructions/pictures.
+It's easiest to do this right if you're standing up.
+Line up the rod so the knob on the long part will fit the hole in the scope.
+Insert the rod, making sure that the thin part with the grid in it doesn't scrape or hit on the side of the hole.
+Stop inserting when you hit the first point of resistance. 
+
+This is called "safety position".
+
+* done
+
+
+-Flip the pump switch to PUMP. The yellow light should be on!
+
+- (yellow_light)
++ The yellow light isn't on
+    You can twist the rod a tiny bit counter-clockwise, or push it in a little more, to see if the light turns on
+    -> yellow_light
++ The yellow light was on but it turned off!
+You can twist the rod a tiny bit counter-clockwise, or push it in a little more, to see if the light turns on
+    -> yellow_light
+* Yellow pump light is on AND after a while, specimen chamber in TEM Center has turned GREEN.
+- You can now twist the rod clockwise twice and hold the rod as it is sucked in
 * Done
 ->->
 
 == rod_out
 
-Pull the specimen rod into safety position.
+Pull the specimen rod directly out until you can twist counter-clockwise, then twist, then pull again, then twist again. It will stay there.
 
-(Pull, twist, pull again. Click.)
-
-THIS PART IS VERY DELICATE AND CONFUSING. TODO: more specific instructions/pictures.
+This is called "safety position".
 
 * Done
+
+- Flip the Pump switch to AIR.
+Watch V18 and V16 in the TEM Center window.
+
+* V18 and V16 have turned green, then back to black (closed).
+- Remove the rod all the way.
+Counter-intuitively, it's safest to do this in one quick motion.
+Place the rod in its holder.
+* Done
+-
+
 ->->
 
-== increase_ht_voltage
-// TODO notes for this are handwritten
-// ->->
--> kevin
+== put_next_section
+-> rod_out ->
 
-== kevin
-Talk to Kevin.
+Remove the grid from the rod and place it back in the container where it came from. Insert a new grid. Mark the new grid's section number and slot (for example, A5 or E10) on your sticky note.
+
+-> rod_in ->
+
+->->
+
+== filament_change
+
+The filament change protocol hasn't been written as an interactive tutorial yet. Find the text file in temmy/protocols/filamentChange.txt
+
+-> DONE 

@@ -1,5 +1,8 @@
 1. In digital micrograph uninsert the camera
 2. On the camera controller (behind the monitors and column sitting on the casing with a glowing blue button) hold your thumb over the glowing blue button for something like 5 seconds.  It won't depress, but it is a button
+	(The blue light will start blinking on and off,  possibly never going completely dark)
 3. Wait like a few minutes for any sort of cache to clear
 4. Hold your thumb over the button again until it glows blue (again its a terrible button with no tactile feedback)
-5. you should now be able to reinsert the camera from digital micrograph
+5. reopen Digital micrograph and go into Help > User Mode > select POwer User mode
+6. you should now be able to reinsert the camera from Camera > Insert Camera
+the next time you press record in SerialEM, it may tell you that the camera's temperature is not yet stabilized. Wait a while before trying again.

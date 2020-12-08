@@ -15,6 +15,8 @@ WaitForShift(message) {
     Gui,help:+toolwindow
     Gui,help:Show
     KeyWait, LShift, D
+    ; Wait for release in case another screen position tries to confirm itself on the same input frame
+    KeyWait, LShift, U
     Gui, help: Destroy
 }
 

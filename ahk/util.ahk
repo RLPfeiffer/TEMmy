@@ -3,10 +3,24 @@
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
+; Test when run directly:
+If (A_ScriptName = "util.ahk") {
+    ConfirmScreenPosition(x, y, "FOO", "the foo button")
+    ConfirmScreenPosition(x, y, "BAR", "the bar button")
+	}
+
+; Source: https://www.autohotkey.com/boards/viewtopic.php?p=129052#p129052
+WaitForShift(message) {
+    Gui,help:Add, Text,     , %message%
+    Gui,help:+toolwindow
+    Gui,help:Show
+    KeyWait, LShift, D
+    Gui, help: Destroy
+}
+
 ConfirmScreenPosition(ByRef x, ByRef y, file, description) {
     if !FileExist(file) {
-        MsgBox, "Please move the mouse to the current position of %description% and press Shift."
-        KeyWait, LShift, D
+        WaitForShift("Please move the mouse to the current position of " . description . " and press Shift.")
         MouseGetPos, x, y
         fileOutput := x . "," . y
         fileObj := FileOpen(file, "w")
@@ -31,6 +45,3 @@ ConfirmScreenPosition(ByRef x, ByRef y, file, description) {
         }
     }
 }
-
-ConfirmScreenPosition(x, y, "FOO", "the foo button")
-ConfirmScreenPosition(x, y, "BAR", "the bar button")

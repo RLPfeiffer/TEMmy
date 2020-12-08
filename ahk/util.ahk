@@ -3,6 +3,8 @@
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
+CoordMode, Mouse, Screen
+
 ; Test when run directly:
 If (A_ScriptName = "util.ahk") {
     ConfirmScreenPosition(x, y, "FOO", "the foo button")

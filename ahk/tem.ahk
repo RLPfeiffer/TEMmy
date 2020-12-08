@@ -31,9 +31,10 @@ return  ; End of script's auto-execute section.
 
 SetSectionInfo:
 InputBox, SectionNum, Section #, Enter the section number:
-Screenshot1 := "Y:/DROPBOX/RC3 Center Points/RC3 " . SectionNum . " 150x.png"
-Screenshot2 := "Y:/DROPBOX/RC3 Center Points/RC3 " . SectionNum . " 600x.png"
-Screenshot3 := "Y:/DROPBOX/RC3 Center Points/RC3 " . SectionNum . " 2000x.png"
+; THE COMPUTER MUST HAVE Y: mapped to \\OpR-Marc-RC2\Data\Dropbox
+Screenshot1 := "Y:/RC3 Center Points/RC3 " . SectionNum . " 150x.png"
+Screenshot2 := "Y:/RC3 Center Points/RC3 " . SectionNum . " 600x.png"
+Screenshot3 := "Y:/RC3 Center Points/RC3 " . SectionNum . " 2000x.png"
 InputBox, GridNum, Grid #, Enter the grid number:
 InputBox, RodNum, Rod #, Enter the rod number:
 InputBox, Investigator, Investigator, Enter the investigator:, , , , , , , , Jones

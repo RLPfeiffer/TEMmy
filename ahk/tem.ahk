@@ -1,4 +1,3 @@
-#Include, CaptureScreen().ahk
 #Include, util.ahk
 
 SectionNum := ""
@@ -41,12 +40,6 @@ InputBox, Investigator, Investigator, Enter the investigator:, , , , , , , , Jon
 InputBox, Series, Series, Enter the experiment series:, , , , , , , , RC3
 InputBox, Capturer, Capturer, Enter the capturer:, , , , , , , , Nat Nelson
 return
-
-TakeScreenshot(File) {
-    ConfirmScreenPosition(Left, Top, "TOPLEFT", "Top left corner of the recording")
-    ConfirmScreenPosition(Right, Bottom, "BOTTOMRIGHT", "Bottom right corner of the recording")
-    CaptureScreen(Left . ", " . Top . ", " . Right . ", " . Bottom,,File)
-}
 
 TakeScreenShot1:
 TakeScreenshot(Screenshot1)

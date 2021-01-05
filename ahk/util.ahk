@@ -70,10 +70,13 @@ TakeScreenshots(Prefix) {
     ConfirmScreenPosition(Right, Bottom, "BOTTOMRIGHT", "Bottom right corner of the recording")
     ConfirmScreenPosition(ClickX, ClickY, "CLICKHERE", "Where to click for the next page")
     InputBox, pages, Number of pages
+    InputBox, milli1, Milliseconds for screen capture
+    InputBox, milli2, Milliseconds for page load
     Loop %pages% {
         CaptureScreen(Left . ", " . Top . ", " . Right . ", " . Bottom,,Prefix . A_Index . ".png")
+        Sleep, %milli1%
         MouseMove, ClickX, ClickY
         MouseClick, left
-        Sleep, 500
+        Sleep, %milli2%
     }
 }

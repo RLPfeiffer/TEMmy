@@ -47,16 +47,17 @@ Function SendStart 0 0
       ENDIF
    ENDIF
    echo .  Estimating $EstimatedCaptureHours hours to complete
-   CallFunction Notifications::SendMessage Capturing $NumTiles images on $ScopeName. Estimating $EstimatedCaptureHours hours to complete
+   CallFunction Notifications::SendMessage Started: Capturing $NumTiles images on $ScopeName. Estimating $EstimatedCaptureHours hours to complete
 EndFunction
 
 Function SendStop 0 0
    Call ScopeUtil
-   CallFunction Notifications::SendMessage Capture $CaptureDir done on $ScopeName. Overview and tiles have been copied to DROPBOX.
+   CallFunction Notifications::SendMessage Copied: $CaptureDir copied from $ScopeName to DROPBOX.
 EndFunction
 
 Function SendOverview 0 0
    Call ScopeUtil
    MakeDirectory $MessageDir
    CallFunction Images::SaveOverviewJpg $MessageDir\overview$CaptureDir.jpg
+   CallFunction Notifications::SendMessage Overview: $CaptureDir
 EndFunction

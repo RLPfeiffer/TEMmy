@@ -1,39 +1,47 @@
+use duct::cmd;
 use std::io::prelude::*;
 use std::io::BufReader;
-use std::process::{Command, Stdio};
 
 fn run_and_filter_output<F>(command: &str, process_line: F) -> Result<i32, std::io::Error> 
     where F: Fn(String) -> () {
-    match Command::new("cmd.exe")
-                    .arg("/C")
-                    .arg(command)
-                    .stdin(Stdio::piped())
-                    .stdout(Stdio::piped())
-                    .spawn() {
-        Ok(mut process) => {
-            let output = process.stdout.take().unwrap();
-            let mut reader = BufReader::new(output);
-            loop {
-                let mut s = String::new();
-                match reader.read_line(&mut s) {
-                    Ok(0) => return Ok(match process.try_wait() {
-                        Ok(Some(status)) => status.code().unwrap(),
-                        Ok(None) => process.wait().expect("").code().unwrap(),
-                        Err(err) => return Err(err) 
-                    }),
-                    Ok(_) => process_line(s),
-                    Err(err) => return Err(err)
+    let command = cmd!("cmd.exe", "/C", command);
+    let reader = command.stderr_to_stdout().reader()?;
+    let lines = BufReader::new(&reader).lines();
+    for line in lines {
+        match line {
+            Ok(line) => process_line(line),
+            Err(err) => return {
+                let err_str = format!("{}", err);
+                if err_str.contains("exited with code") {
+                    Ok(err_str.split(" ")
+                                .collect::<Vec<&str>>()
+                                .pop().unwrap()
+                                .parse::<i32>().unwrap())
+                } else {
+                    Err(err)
                 }
-            }
-        },
-        Err(err) => Err(err),
-    }
+            },
+        }
+    } 
+    Ok(0)
 }
 
-fn main() {
-    match run_and_filter_output("@echo Hello, world!", |s| println!("{}", s)) {
-        Ok(code) => println!("finished with {}", code),
-        Err(err) => println!("error {}", err)
+#[test]
+fn test_run_and_filter_output() {
+    match run_and_filter_output("@echo Hello, world!", |s| assert_eq!("Hello, world!", s)) {
+        Ok(code) => assert_eq!(0, code),
+        Err(err) => panic!("error {}", err)
+    };
+    match run_and_filter_output("@echo Hello, world! 1>&2", |s| assert_eq!("Hello, world! ", s)) {
+        Ok(code) => assert_eq!(0, code),
+        Err(err) => panic!("error {}", err)
+    };
+    match run_and_filter_output("exit /b 1", |s| println!("{}", s)) {
+        Ok(code) => assert_eq!(1, code),
+        Err(err) => panic!("error {}", err)
     };
 }
 
+fn main() {
+
+}

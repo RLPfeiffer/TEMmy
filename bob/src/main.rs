@@ -6,9 +6,13 @@ use std::time::Duration;
 use std::thread;
 use std::thread::JoinHandle;
 
-fn run_and_filter_output<F>(command: &str, process_line: F) -> Result<i32, Error> 
+fn run_and_filter_output<F>(command: &Vec<&str>, process_line: F) -> Result<i32, Error> 
     where F: Fn(String) -> () {
-    let command = cmd!("cmd.exe", "/C", command);
+    let mut args = vec!["/C"];
+    for arg in command {
+        args.push(arg);
+    }
+    let command = cmd("cmd.exe", args);
     let reader = command.stderr_to_stdout().reader()?;
     let lines = BufReader::new(&reader).lines();
     for line in lines {
@@ -32,80 +36,143 @@ fn run_and_filter_output<F>(command: &str, process_line: F) -> Result<i32, Error
 
 #[test]
 fn test_run_and_filter_output() {
-    match run_and_filter_output("@echo Hello, world!", |s| assert_eq!("Hello, world!", s)) {
+    match run_and_filter_output(vec!["@echo Hello, world!"], |s| assert_eq!("Hello, world!", s)) {
         Ok(code) => assert_eq!(0, code),
         Err(err) => panic!("error {}", err)
     };
-    match run_and_filter_output("@echo Hello, world! 1>&2", |s| assert_eq!("Hello, world! ", s)) {
+    match run_and_filter_output(vec!["@echo Hello, world! 1>&2"], |s| assert_eq!("Hello, world! ", s)) {
         Ok(code) => assert_eq!(0, code),
         Err(err) => panic!("error {}", err)
     };
-    match run_and_filter_output("exit /b 1", |s| println!("{}", s)) {
+    match run_and_filter_output(vec!["exit /b 1"], |s| println!("{}", s)) {
         Ok(code) => assert_eq!(1, code),
         Err(err) => panic!("error {}", err)
     };
 }
 
-fn run_chain_and_filter_output<F, G>(commands:Vec<&str>, process_line: F, command_on_error: &str, process_line_on_error: G) -> Result<i32, Error>
-    where F: Fn(String) -> (),
-            G: Fn(String) -> () {
-    
+fn run_and_print_output(command: Vec<&str>) -> Result<i32, Error> {
+    run_and_filter_output(&command, |output| {
+        println!("{}", output);
+    })
+}
+
+fn run_chain_and_filter_output<F>(commands:Vec<Vec<&str>>, process_line: F, command_on_error: Vec<&str>) -> Result<i32, Error>
+    where F: Fn(String) -> () {
+
     for command in commands {
-        match run_and_filter_output(command, &process_line) {
+        match run_and_filter_output(&command, &process_line) {
             Ok(0) => continue,
             Ok(error_code) => {
-                println!("Error code {} from {}", error_code, command);
-                return run_and_filter_output(command_on_error, process_line_on_error);
+                println!("Error code {} from {}", error_code, command.join(" "));
+                return run_and_print_output(command_on_error);
             },
             Err(err) => {
-                println!("Error {} from {}", err, command);
-                return run_and_filter_output(command_on_error, process_line_on_error);
+                println!("Error {} from {}", err, command.join(" "));
+                return run_and_print_output(command_on_error);
             },
         }
     }
     Ok(0)
 }
 
-fn run_on_interval_and_filter_output<F, G>(command: &str, process_line: F, seconds: u64, command_on_error: &str, process_line_on_error: G) -> Result<i32, Error>
-    where F: Fn(String) -> (),
-            G: Fn(String) -> () {
+fn run_on_interval_and_filter_output<F>(command: Vec<&str>, process_line: F, seconds: u64, command_on_error: Vec<&str>) -> Result<i32, Error>
+    where F: Fn(String) -> () {
     
     loop {
         match run_and_filter_output(&command, &process_line) {
             Ok(0) => (),
             Ok(error_code) => {
-                println!("Error code {} from {}", error_code, command);
-                return run_and_filter_output(command_on_error, process_line_on_error);
+                println!("Error code {} from {}", error_code, command.join(" "));
+                return run_and_print_output(command_on_error);
             },
             Err(err) => {
-                println!("Error {} from {}", err, command);
-                return run_and_filter_output(command_on_error, process_line_on_error);
+                println!("Error {} from {}", err, command.join(" "));
+                return run_and_print_output(command_on_error);
             },
         }
         thread::sleep(Duration::from_secs(seconds));
     }
 }
 
-
+fn spawn_copy_and_build_thread(section: String) -> JoinHandle<()> {
+    thread::spawn(move || {
+        run_chain_and_filter_output(
+            vec![
+                vec![
+                    "xcopy",
+                    format!(r#"Y:\Dropbox\TEMXCopy\{0}"#, section).as_str(),
+                    format!(r#"Z:\RawData\RC3\{0}\"#, section).as_str(),
+                    "/S"],
+                rito(format!("{0} copied to RawData", section).as_str()),
+                vec![
+                    "RC3Import",
+                    format!(r#"D:\Volumes\RC3{0}"#, section).as_str(),
+                    format!(r#"Y:\Dropbox\TEMXCopy\{0}"#, section).as_str(),
+                ],
+                vec![
+                    "RC3Build",
+                    format!(r#"D:\Volumes\RC3{0}"#, section).as_str(),
+                ],
+                rito(format!("{0} built automatically. Check it and merge it", section).as_str()),
+            ],
+            // TODO analyze and save xcopy/build script output in a nice way
+            |build_and_copy_output| {
+                println!("{}", build_and_copy_output);
+            },
+            rito(format!("automatic copy and build for {0} failed", section).as_str())
+        ).unwrap();
+    })
+}
 
 fn spawn_tem_message_reader_thread(tem_name: &'static str) -> JoinHandle<()> {
     thread::spawn(move || {
         run_on_interval_and_filter_output(
-            format!(r#"type N:\{0}\message.txt && break>N:\{0}\message.txt"#, tem_name).as_str(),
+            vec![format!(r#"type N:\{0}\message.txt && break>N:\{0}\message.txt"#, tem_name).as_str()],
             |output| {
+                println!("saving the Message output:");
+                run_and_print_output(vec![format!(r#"@echo {} >> N:\{}\processedMessage.txt"#, output, tem_name).as_str()]).unwrap();
                 // TODO do things with the message file lines
+                let mut tokens = output.split(": ");
+                match tokens.next() {
+                    Some("Copied") => {
+                        let section = tokens.next().unwrap().split(" ").next().unwrap();
+                        // TODO make sure it's an rc3 section in a more precise way
+                        if section.chars().count() == 4 {
+                            println!("{}", section);
+                            // copy to rawdata, automatically build to its own section
+                            // (but do this in another thread, so notifications still pipe to Slack for other messages)
+                            spawn_copy_and_build_thread(section.to_string());
+                        } else {
+                            // TODO handle core builds with TEMCoreBuildFast
+
+                        }
+                    }
+                    // TODO Some("overview")
+                    // also extract the section like "Copied" does, then downscale its overview (with rust imagemagick? :D) and send it to slack
+                    Some(other_label) => {
+                        println!("{}", other_label);
+                        run_and_print_output(rito(output.as_str())).unwrap();
+                    },
+                    None => ()
+                }
+
                 println!("{}", output);
             },
             60,
-            format!(r#"rito --slack tem-bot "bob the builder {} thread failed""#, tem_name).as_str(),
-            |_output| {});
-    })
+            rito(format!("bob the builder {} thread failed", tem_name).as_str())).unwrap();
+        }
+    )
+}
+
+fn rito(message: &str) -> Vec<&str> {
+    vec!["rito", "--slack", "tem-bot", message]
 }
 
 fn main() {
+    rito("test from rust");
     let t1 = spawn_tem_message_reader_thread("TEM1");
     let t2 = spawn_tem_message_reader_thread("TEM2");
 
-    t1.join();
-    t2.join();
+    t1.join().unwrap();
+    t2.join().unwrap();
 }

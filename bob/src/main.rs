@@ -146,8 +146,21 @@ fn spawn_tem_message_reader_thread(tem_name: &'static str) -> JoinHandle<()> {
                             // TODO handle core builds with TEMCoreBuildFast
 
                         }
-                    }
-                    // TODO Some("overview")
+                    },
+                    Some("Overview") => {
+                        let section = tokens.next().unwrap().split(" ").next().unwrap();
+                        let overview_path = format!(r#"N:\{}\overview{}.jpg"#, tem_name, section);
+                        let small_overview_path = format!(r#"N:\{}\overview{}-small.jpg"#, tem_name, section);
+                        run_chain_and_filter_output(
+                            vec![
+                                vec!["magick", "convert", &overview_path, "-resize", "500x500", &small_overview_path],
+                                rito_image(&small_overview_path),
+                            ],
+                            |output| {
+                                println!("{}", output);
+                            },
+                            rito(format!("overview -> slack failed for {}", section).as_str())).unwrap();
+                    },
                     // also extract the section like "Copied" does, then downscale its overview (with rust imagemagick? :D) and send it to slack
                     Some(other_label) => {
                         println!("{}", other_label);
@@ -166,6 +179,10 @@ fn spawn_tem_message_reader_thread(tem_name: &'static str) -> JoinHandle<()> {
 
 fn rito(message: &str) -> Vec<&str> {
     vec!["rito", "--slack", "tem-bot", message]
+}
+
+fn rito_image(path: &str) -> Vec<&str> {
+    vec!["rito", "--slack_image", "tem-bot", path]
 }
 
 fn main() {

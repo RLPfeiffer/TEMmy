@@ -1,22 +1,28 @@
 MacroName ScopeUtil
 
 # Globally set the variable $ScopeName
-ScopeName = TEM2
+ScopeName = TEM1
 
 # Globally set the variable $MessageDir
-MessageDir = \\192.168.3.10\Dropbox\Notification\$ScopeName
+MessageDir = N:\$ScopeName
 
 # Globally set the variable $MessagePath
 MessagePath = $MessageDir\message.txt
 
 # Globally set the variable $DropboxPath
-DropboxPath = Y:
+DropboxPath = Z:
 
 # Globally set the variable $CopyDir
 CopyPath = $DropboxPath\TEMXcopy
 
 # Globally set the variable $DataPath
-DataPath = G:
+DataPath = D:
 
 # Globally set the variable PrecookMontageD
-PrecookMontageD = 0
+PrecookMontageD = 1
+
+# Globally set the variable SecondsPerTile
+SecondsPerTile = 20
+
+# Globally set the variable MaxPercentChangeOverCapture
+MaxPercentChangeOverCapture = 0.20

@@ -1,0 +1,88 @@
+MacroName WaitForStableFilament
+
+# Bring in the SecondsPerTile and MaxPercentChangeOverCapture settings for this TEM:
+Call ScopeUtil
+
+#The maximum scalar of beam intensity change we want over the capture timeframe
+
+#################################
+# Change MaxPercentChangeOverCapture to adjust sensitivity of filament stability.  
+# Must be a value 0 to 1.0.
+#################################
+
+
+MaxPercentChangeOverCapturePercentage = $MaxPercentChangeOverCapture * 100
+
+Echo
+Echo Checking for stable filament
+Echo Beam intensity must change less than $MaxPercentChangeOverCapturePercentage% over capture to be considered stable
+
+EstimatedCaptureTime = 60 * 60
+
+ReportNumTableItems
+NumNavItems = $reportedvalue1
+IF $NumNavItems < 1
+    echo
+    echo Nav table does not have items indicating total capture time.  Using 1 hour as timeframe.    
+ELSE
+    ReportNumMontagePieces 1
+    NumTiles = $reportedvalue1
+
+    IF $NumTiles == 1
+        echo SerialEM claiming only 1 image in montage item.   Using 1 hour as timeframe.
+    ELSE    
+        EstimatedCaptureTime = $NumTiles * $SecondsPerTile
+        EstimatedCaptureHours =  $EstimatedCaptureTime / (60 * 60)
+        echo Capturing $NumTiles images.  Estimating $EstimatedCaptureHours hours to complete
+    ENDIF
+ENDIF
+
+resetclock
+Record
+ReportMeanCounts
+LastMeanCounts = $reportedvalue1
+reportclock
+LastCaptureTimeStamp = $reportedvalue1
+
+#Make the first check short in case the beam is stable.  If it isn't we'll see the greatest 
+#change in the beginning so we should still see the warmup change.
+
+#The beam has higher counts cold, and lower counts warm
+Delay 60 sec
+
+Loop 22 iLoop
+    Record
+    ReportMeanCounts
+    MeanCounts = $reportedvalue1
+    reportclock
+    CaptureTimeStamp = $reportedvalue1
+
+    TimeInterval = $CaptureTimeStamp - $LastCaptureTimeStamp
+    PercentChangeOverTimeInterval = 1.0 - ($MeanCounts / $LastMeanCounts) 
+    
+    #If the beam is warm, the tolerance is low, and the capture is long then normal fluctuations can prevent
+    #the test from passing.  So we only look for counts dropping.  If the counts increase we consider the filament
+    #warm 
+    #PercentChangeOverTimeInterval = ABS $PercentChangeOverTimeInterval 
+    ReadablePercentChangeOverTimeInterval = $PercentChangeOverTimeInterval * 100.0
+    echo Measured $ReadablePercentChangeOverTimeInterval% change in counts over $TimeInterval seconds
+
+    NumIntervalsOverCapture = $EstimatedCaptureTime / $TimeInterval
+    #echo Estimating $NumIntervalsOverCapture intervals
+    PercentChangeOverCapture = $PercentChangeOverTimeInterval * $NumIntervalsOverCapture
+    PercentChangeOverCapture = ABS $PercentChangeOverCapture 
+    ReadablePercentChangeOverCapture = $PercentChangeOverCapture * 100
+
+    echo Estimating $ReadablePercentChangeOverCapture% change in image counts over entire capture.
+     IF $PercentChangeOverCapture < $MaxPercentChangeOverCapture 
+        Echo Estimated change is below tolerance of $MaxPercentChangeOverCapturePercentage%. Filament is stable!
+        Echo
+        reportclock
+        Return
+     Endif
+
+     LastMeanCounts = $MeanCounts
+     LastCaptureTimeStamp = $CaptureTimeStamp
+
+     Delay 120 sec
+EndLoop

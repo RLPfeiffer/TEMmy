@@ -1,0 +1,14 @@
+CallFunction NQNWaitForMessage 5 C:\Documents and Settings\Gatanuser\Desktop\test.txt
+OKBox $ReportedValue1
+
+Function NQNWaitForMessage 1 1 interval file
+   Loop 86400 # can't do an infinite loop, but can loop once per second in 24 hours
+      ReadStringsFromFile content $file
+      OKBox $#content
+      If $#content > 1
+        ReportedValue1 = $content[2] 
+        Break
+      Endif
+      Delay $interval
+  EndLoop
+EndFunction

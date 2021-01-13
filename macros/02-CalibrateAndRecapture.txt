@@ -82,7 +82,12 @@ CallMacro 4 #Uncomment this line to verify the filament is warmed up
 MoveToNavItem 1
 
 CallFunction Notifications::SendStart
-Montage
+Try
+   Montage
+Catch
+   CallFunction Notifications::SendMessage Montage failed with error on $ScopeName
+   Return
+EndTry
 CallFunction Notifications::SendOverview
 
 # Copy the capture to DROPBOX

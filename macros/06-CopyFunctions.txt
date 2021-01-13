@@ -56,14 +56,15 @@ Function CheckSpaceForCopyDir 0 0
          CheckSpaceSucceeded = 1
       Endif
    Else
-      OKBox For some reason, CheckSpace units were $SourceUnits and $TargetUnits
+      CallFunction Notifications::SendMessage For some reason, CheckSpace units were $SourceUnits and $TargetUnits
    Endif
 EndFunction
 
 # INTERNAL helper function that copies a directory to CopyTarget without checking for space first.
+# (External-use functions all check before calling this one)
 Function CopyDirWithoutCheckingSpace 0 0
    RunInShell xcopy $CopySource $CopyTarget\$TargetDirName\ /S
    If $ReportedValue1 != 0
-      OKBox Automatically copying $CopySource failed! Check the open shell
+      CallFunction Notifications::SendMessage Automatically copying $CopySource to $CopyTarget failed!
    EndIf
 EndFunction 

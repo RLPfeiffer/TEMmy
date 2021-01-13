@@ -1,0 +1,5 @@
+MacroName Images
+
+Function SaveOverviewJpg 0 1 Filename
+   SaveToOtherFile B JPG -1 $Filename
+EndFunction

@@ -1,0 +1,4 @@
+G
+MoveStage -4 -4
+R
+S

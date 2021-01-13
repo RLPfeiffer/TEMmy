@@ -1,0 +1,10 @@
+MacroName DefocusCalibration
+
+G
+ChangeFocus -5
+Loop 16
+R
+S
+ChangeFocus .33
+EndLoop
+ChangeFocus -5

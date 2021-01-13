@@ -1,0 +1,3 @@
+NavItemFileToOpen  1
+echo $reportedvalue1
+RunExternalTool 1 $reportedvalue1

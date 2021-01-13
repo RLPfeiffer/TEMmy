@@ -1,0 +1,5 @@
+MacroName TurnOnFilament
+LongName Turn on filament and beam blank
+
+SetBeamBlank 1
+SetColumnOrGunValve 1

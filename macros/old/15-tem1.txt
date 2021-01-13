@@ -1,0 +1,10 @@
+Trial
+ReportStageXYZ
+MoveStage 0 -2
+Trial
+ReportStageXYZ
+MoveStage 0 4
+Trial
+ReportStageXYZ
+MoveStage 0 -2
+Trial

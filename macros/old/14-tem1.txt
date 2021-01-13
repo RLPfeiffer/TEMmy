@@ -1,0 +1,2 @@
+SetMag 5000
+#ChangeMag -3

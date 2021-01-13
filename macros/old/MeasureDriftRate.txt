@@ -1,0 +1,52 @@
+MacroName Measure Drift Rate
+
+dist = 7
+back = 0
+atend = 0 - $dist
+movedist = $dist - $back 
+
+echo  " "
+echo  " "
+echo BEGIN TEST
+
+ResetClock
+movestage 0 0
+focus
+movestage 0 0
+echo Stage Movement Time
+reportclock
+
+#movestage $back 0
+ResetClock 
+shot = Focus
+
+
+times = 20
+$shot
+totaldx = 0
+totaldy = 0
+tpixdx = 0
+tpixdy = 0
+Loop $times i
+    $shot
+    AlignTo B
+    ReportAlignShift
+    ClearAlignment
+    pdx = $reportedValue1
+    pdy = $reportedValue2
+    dx = $reportedValue3
+    dy = $reportedValue4
+    dist = sqrt $dx * $dx + $dy * $dy
+    totaldx = $totaldx + $dx
+    totaldy = $totaldy + $dy
+    tpixdx = $tpixdx + $pdx
+    tpixdy = $tpixdy + $pdy
+    reportclock
+#   echo dx,dy = $dx, $dy
+    echo Distance = $dist  nm
+
+EndLoop
+distnm = sqrt $totaldx * $totaldx + $totaldy * $totaldy distpix = sqrt $tpixdx * $tpixdx + $tpixdy * $tpixdy
+echo Total distance $tpixdx $tpixdy pixels   $totaldx $totaldy  nm on IS axes
+
+#movestage 0 $atend

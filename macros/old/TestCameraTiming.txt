@@ -1,0 +1,10 @@
+MacroName TestCameraTiming
+AutoFocus 
+Record
+MoveStage 3 0 0
+Record
+MoveStage -3 0 0
+Record
+MoveStage 0 3 0
+Record
+MoveStage 0 -3 0

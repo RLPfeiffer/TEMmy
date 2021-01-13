@@ -1,0 +1,53 @@
+MacroName PerimeterCooking
+
+ResetClock
+
+radius = 135
+diameter = $radius * 2
+angle = 0
+
+ ReportSpotSize
+StartingSpotSize = $reportedvalue1
+
+echo Starting spot size $StartingSpotSize
+SetSpotSize 2
+ 
+S = SIN $angle
+echo $S
+
+#Move the stage to the center of the NavItem
+MoveToNavItem 1
+
+#write down where the stage is
+ReportStageXYZ
+originX = $reportedValue1
+originY = $reportedValue2
+
+#Draw a line through center of capture area
+
+#OK, trace a circle
+lastX = $radius
+lastY = 0
+MoveStage $lastX $lastY
+
+Loop 120 iAngle
+    angle = $iAngle * 3
+    echo $angle
+    reportclock
+    y = SIN $angle
+    x = COS $angle
+    y = $y * $radius
+    x = $x * $radius
+
+    stageX = $originX + $x
+    stageY = $originY + $y
+
+    MoveStageTo $stageX $stageY
+
+    echo $angle
+EndLoop
+
+SetSpotSize $startingSpotSize
+MoveToNavItem 1
+echo "Cooking done!"
+reportclock

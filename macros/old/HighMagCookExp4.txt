@@ -1,0 +1,87 @@
+MacroName HighMagCookExp4
+LongName James Experiment 4
+
+ScreenDown
+
+echo "James Experiment 3"
+echo "Cooking Begins!"
+ReportMag
+StartingMag = $reportedvalue2
+
+IF $reportedvalue2 == 1
+    echo Attempting HighMagCook in Low Mag mode, aborting. 
+    echo Go to high magnification mode before using this macro.
+    Return
+ENDIF
+
+ReportSpotSize
+StartingSpotSize = $reportedvalue1
+
+echo Starting spot size $StartingSpotSize
+
+SetSpotSize 2
+
+#Move the stage to the center of the NavItem
+MoveToNavItem 1
+
+PreCookMontage 4
+
+SetSpotSize $StartingSpotSize
+
+MoveToNavItem 1
+echo "Cooking done!"
+reportclock
+
+echo "Taking focus image to raise screen and close shutters"
+Focus
+
+CalibrateImageShift
+Eucentricity
+
+#CallMacro 4 #Uncomment this line to verify the filament is warmed up
+
+Montage
+EndMacro
+Macro	6
+MacroName ReportBeamIntensity
+
+
+Loop 20 iLoop
+   ReportScreenCurrent
+   ReportFilamentCurrent
+   Delay 15
+EndLoop
+EndMacro
+Macro	7
+xmove = 20
+ymove = 0
+nloop = 15
+wait = 1
+SetProperty JeolReadStageForWait 0
+SuppressReports 1
+Loop 2
+echo moving $xmove $ymove
+Loop 2 ind1
+   Loop $nloop ind2
+  #    echo ==========  $ind1 $ind2
+      ResetClock
+      ReportStageXYZ
+      MoveStage $xmove $ymove
+      ReportClock
+      #ReportStageBusy
+      ReportStageXYZ firstX firstY
+      delay $wait
+      ReportStageXYZ
+      if  diffabs $repVal1 $firstX < 0.5 and diffabs $repVal2 $firstY < 0.5
+         echo SUCCEEDED
+      Else
+         echo FAILED
+      Endif
+   EndLoop
+   xmove = 0 - $xmove
+   ymove = 0 - $ymove
+EndLoop
+temp = $xmove
+xmove = $ymove
+ymove = $temp
+EndLoop 

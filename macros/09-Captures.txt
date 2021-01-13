@@ -1,0 +1,122 @@
+MacroName Captures
+
+Function Capture 1 0 CookFirst
+   Call ScopeUtil
+   echo
+   If $CookFirst == 0
+      echo This macro performs an image stabilization calibration,
+   Else
+      echo This macro performs a high mag cook, image stabilization calibration,
+   EndIf
+   echo verifies the beam current is stable, focuses the scope and captures
+   echo a montage.  
+   echo 
+   echo The Navigator table should contain the following entries for this macro:
+   echo     Item1: The 2D region of interest to be captured
+   echo     Item2: A point surrounded by at least 10um of empty formvar
+   echo                  used for the current stability check
+   echo     Item3: An optional point to focus upon.  The point should contain
+   echo                  sufficient texture for autofocus to succeed.  If not specified 
+   echo                  the center of the capture region will be used instead. 
+   echo
+
+   ReportNumTableItems
+   NumNavItems = $reportedvalue1
+
+   IF $NumNavItems < 1
+      echo
+      echo ERROR: Nav table does not have items described in help text above.
+      echo Exiting
+      return
+   ELSEIF $NumNavItems < 2
+      echo
+      echo ERROR: Nav table does not have a point in empty formvar for filament stability check.
+      echo Exiting
+      return
+   ENDIF
+
+   ReportMag
+   StartingMag = $reportedvalue2
+
+   IF $reportedvalue2 == 1
+      echo Attempting Capture in Low Mag mode, aborting. 
+      echo Go to high magnification mode before using this macro.
+      Return
+   ENDIF
+
+   NavItemFileToOpen  1
+   echo $reportedvalue1
+
+   #Prompt the user for the directory the capture will be placed
+   EnterString CaptureDir Directory of the capture, relative to your data drive?
+   #Prompt the user to create capture notes
+   RunExternalTool 1
+   ### FOCUS ###
+
+   IF $NumNavItems < 3
+      MoveToNavItem 1
+   ELSE
+      MoveToNavItem 3
+   ENDIF
+
+   Delay 3
+
+   Focus
+
+   ### CALIBRATE IMAGE SHIFT ###
+
+
+   CalibrateImageShift
+
+   ScreenDown
+
+   ReportAlpha
+   ReportBeamShift
+   ReportBeamTilt
+
+   If $CookFirst = 1
+      #### COOKING ####
+      echo "Cooking Begins!"
+      ReportSpotSize
+      StartingSpotSize = $reportedvalue1
+
+      echo Setting spot size for high-mag cook
+
+      SetSpotSize 2 #Commented for test of a lower power cook
+
+      ReportSpotSize
+
+      PreCookMontage $PrecookMontageD 2 0 0
+
+      echo Restoring spot size after cook
+      SetSpotSize $StartingSpotSize
+
+      echo "Cooking done!"
+      reportclock
+   EndIf
+
+   ###  BEAM STABILITY CHECK ####
+   #Move the stage to the area we've been told to use
+
+   MoveToNavItem 2
+   CallMacro WaitForStableFilament #Uncomment this line to verify the filament is warmed up
+
+   ### Center on montage and capture ###
+   MoveToNavItem 1
+
+   CallFunction Notifications::SendStart
+   Try
+      Montage
+   Catch
+      CallFunction Notifications::SendMessage Montage failed with error on $ScopeName
+      Return
+   EndTry
+   CallFunction Notifications::SendOverview
+
+   # Copy the capture to DROPBOX
+   CopySource = $DataPath\$CaptureDir
+   CopyTarget = $CopyPath
+   TargetDirName = $CaptureDir
+   CallFunction CopyFunctions::CopyDir
+   CallFunction Notifications::SendStop
+EndFunction

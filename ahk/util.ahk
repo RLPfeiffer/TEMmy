@@ -8,9 +8,9 @@ CoordMode, Mouse, Screen
 
 ; Test when run directly:
 If (A_ScriptName = "util.ahk") {
-    TakeScreenshots("hey")
-    ConfirmScreenPosition(x, y, "FOO", "the foo button")
-    ConfirmScreenPosition(x, y, "BAR", "the bar button")
+    ; TakeScreenshots("hey")
+    ; ConfirmScreenPosition(x, y, "FOO", "the foo button")
+    ;ConfirmScreenPosition(x, y, "BAR", "the bar button")
 }
 
 ; Source: https://www.autohotkey.com/boards/viewtopic.php?p=129052#p129052
@@ -65,6 +65,14 @@ TakeScreenshot(File) {
     CaptureScreen(Left . ", " . Top . ", " . Right . ", " . Bottom,,File)
 }
 
+TakeFullScreenshot(File) {
+    CaptureScreen(0,,File)
+}
+
+PrintScreen::
+    TakeFullScreenshot(A_Now . ".jpg")
+Return
+
 TakeScreenshots(Prefix) {
     ConfirmScreenPosition(Left, Top, "TOPLEFT", "Top left corner of the recording")
     ConfirmScreenPosition(Right, Bottom, "BOTTOMRIGHT", "Bottom right corner of the recording")
@@ -72,8 +80,18 @@ TakeScreenshots(Prefix) {
     InputBox, pages, Number of pages
     InputBox, milli1, Milliseconds for screen capture
     InputBox, milli2, Milliseconds for page load
+    Sleep, %milli2%
     Loop %pages% {
-        CaptureScreen(Left . ", " . Top . ", " . Right . ", " . Bottom,,Prefix . A_Index . ".png")
+        PaddingNeeded = StrLen(pages) - StrLen("" . A_Index)
+        Number = "" . A_Index
+        Loop %PaddingNeeded% {
+            Number = "0" . Number
+        }
+
+        MsgBox, 4,gfggg, "" . Number
+
+
+        CaptureScreen(Left . ", " . Top . ", " . Right . ", " . Bottom,,Prefix . Number . ".png")
         Sleep, %milli1%
         MouseMove, ClickX, ClickY
         MouseClick, left

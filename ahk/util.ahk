@@ -8,7 +8,7 @@ CoordMode, Mouse, Screen
 
 ; Test when run directly:
 If (A_ScriptName = "util.ahk") {
-    ; TakeScreenshots("hey")
+    TakeScreenshots("hey")
     ; ConfirmScreenPosition(x, y, "FOO", "the foo button")
     ;ConfirmScreenPosition(x, y, "BAR", "the bar button")
 }
@@ -82,14 +82,12 @@ TakeScreenshots(Prefix) {
     InputBox, milli2, Milliseconds for page load
     Sleep, %milli2%
     Loop %pages% {
-        PaddingNeeded = StrLen(pages) - StrLen("" . A_Index)
-        Number = "" . A_Index
+        Number = %A_Index%
+        PaddingNeeded := StrLen(pages) - StrLen(Number)
+        Number := A_Index
         Loop %PaddingNeeded% {
-            Number = "0" . Number
+            Number := "0" . Number
         }
-
-        MsgBox, 4,gfggg, "" . Number
-
 
         CaptureScreen(Left . ", " . Top . ", " . Right . ", " . Bottom,,Prefix . Number . ".png")
         Sleep, %milli1%

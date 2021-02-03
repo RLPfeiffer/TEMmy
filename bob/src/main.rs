@@ -124,6 +124,26 @@ fn spawn_copy_and_build_thread(section: String) -> JoinHandle<()> {
     })
 }
 
+fn spawn_core_build_thread(section: String) -> JoinHandle<()> {
+    thread::spawn(move || {
+        run_chain_and_filter_output(
+            vec![
+                vec![
+                    "TEMCoreBuildFast",
+                    format!(r#"D:\Volumes\{0}"#, section).as_str(),
+                    format!(r#"Y:\Dropbox\TEMXCopy\{0}"#, section).as_str()
+                ],
+                rito(format!("{0} built automatically.", section).as_str()),
+            ],
+            // TODO analyze and save core build script output in a nice way
+            |build_and_copy_output| {
+                println!("{}", build_and_copy_output);
+            },
+            rito(format!("automatic core build for {0} failed", section).as_str())
+        ).unwrap();
+    })
+}
+
 fn spawn_tem_message_reader_thread(tem_name: &'static str) -> JoinHandle<()> {
     thread::spawn(move || {
         run_on_interval_and_filter_output(
@@ -136,15 +156,16 @@ fn spawn_tem_message_reader_thread(tem_name: &'static str) -> JoinHandle<()> {
                 match tokens.next() {
                     Some("Copied") => {
                         let section = tokens.next().unwrap().split(" ").next().unwrap();
-                        // TODO make sure it's an rc3 section in a more precise way
-                        if section.chars().count() == 4 {
+                        // handle core builds with TEMCoreBuildFast
+                        if section.starts_with("core") {
+                            spawn_core_build_thread(section.to_string());
+                        }
+                        // handle RC3 builds by copying to rawdata, importing and building
+                        else {
                             println!("{}", section);
                             // copy to rawdata, automatically build to its own section
                             // (but do this in another thread, so notifications still pipe to Slack for other messages)
                             spawn_copy_and_build_thread(section.to_string());
-                        } else {
-                            // TODO handle core builds with TEMCoreBuildFast
-
                         }
                     },
                     Some("Overview") => {

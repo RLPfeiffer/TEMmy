@@ -1,13 +1,16 @@
 use duct::cmd;
+use uuid::Uuid;
 use std::io::prelude::*;
 use std::io::BufReader;
+use std::io::BufWriter;
 use std::io::Error;
 use std::time::Duration;
 use std::thread;
+use std::env;
 use std::thread::JoinHandle;
 
-fn run_and_filter_output<F>(command: &Vec<&str>, process_line: F) -> Result<i32, Error> 
-    where F: Fn(String) -> () {
+fn run_and_filter_output<F>(command: &Vec<&str>, mut process_line: F) -> Result<i32, Error> 
+    where F: FnMut(String) -> () {
     let mut args = vec!["/C"];
     for arg in command {
         args.push(arg);
@@ -56,6 +59,7 @@ fn run_and_print_output(command: Vec<&str>) -> Result<i32, Error> {
     })
 }
 
+/* If greater flexibility is needed than run_chain_and_save_output, this might be worth bringing back
 fn run_chain_and_filter_output<F>(commands:Vec<Vec<&str>>, process_line: F, command_on_error: Vec<&str>) -> Result<i32, Error>
     where F: Fn(String) -> () {
 
@@ -63,11 +67,40 @@ fn run_chain_and_filter_output<F>(commands:Vec<Vec<&str>>, process_line: F, comm
         match run_and_filter_output(&command, &process_line) {
             Ok(0) => continue,
             Ok(error_code) => {
-                println!("Error code {} from {}", error_code, command.join(" "));
+                println!("Error code {} from {:?}", error_code, command);
                 return run_and_print_output(command_on_error);
             },
             Err(err) => {
-                println!("Error {} from {}", err, command.join(" "));
+                println!("Error {} from {:?}", err, command);
+                return run_and_print_output(command_on_error);
+            },
+        }
+    }
+    Ok(0)
+}
+*/
+
+fn run_chain_and_save_output(commands:Vec<Vec<&str>>, command_on_error: Vec<&str>) -> Result<i32, Error> {
+    for command in commands {
+        let uuid = Uuid::new_v4();
+        let output_file = format!("bob-output/{}.txt", uuid);
+        let file = File::create(output_file).unwrap();
+        let mut buffer = BufWriter::new(file);
+        buffer.write_all(format!("{:?}\n", command).as_bytes()).unwrap();
+        buffer.flush().unwrap();
+        println!("{} {:?}", uuid, command);
+        match run_and_filter_output(&command, |line| {
+            buffer.write_all(line.as_bytes()).unwrap();
+            buffer.write_all(b"\r\n").unwrap();
+            buffer.flush().unwrap();
+        }) {
+            Ok(0) => continue,
+            Ok(error_code) => {
+                println!("Error code {} from {:?}", error_code, command);
+                return run_and_print_output(command_on_error);
+            },
+            Err(err) => {
+                println!("Error {} from {:?}", err, command);
                 return run_and_print_output(command_on_error);
             },
         }
@@ -82,11 +115,11 @@ fn run_on_interval_and_filter_output<F>(command: Vec<&str>, process_line: F, sec
         match run_and_filter_output(&command, &process_line) {
             Ok(0) => (),
             Ok(error_code) => {
-                println!("Error code {} from {}", error_code, command.join(" "));
+                println!("Error code {} from {:?}", error_code, command);
                 return run_and_print_output(command_on_error);
             },
             Err(err) => {
-                println!("Error {} from {}", err, command.join(" "));
+                println!("Error {} from {:?}", err, command);
                 return run_and_print_output(command_on_error);
             },
         }
@@ -96,7 +129,7 @@ fn run_on_interval_and_filter_output<F>(command: Vec<&str>, process_line: F, sec
 
 fn spawn_copy_and_build_thread(section: String) -> JoinHandle<()> {
     thread::spawn(move || {
-        run_chain_and_filter_output(
+        run_chain_and_save_output(
             vec![
                 vec![
                     "xcopy",
@@ -115,10 +148,6 @@ fn spawn_copy_and_build_thread(section: String) -> JoinHandle<()> {
                 ],
                 rito(format!("{0} built automatically. Check it and merge it", section).as_str()),
             ],
-            // TODO analyze and save xcopy/build script output in a nice way
-            |build_and_copy_output| {
-                println!("{}", build_and_copy_output);
-            },
             rito(format!("automatic copy and build for {0} failed", section).as_str())
         ).unwrap();
     })
@@ -126,7 +155,7 @@ fn spawn_copy_and_build_thread(section: String) -> JoinHandle<()> {
 
 fn spawn_core_build_thread(section: String) -> JoinHandle<()> {
     thread::spawn(move || {
-        run_chain_and_filter_output(
+        run_chain_and_save_output(
             vec![
                 vec![
                     "TEMCoreBuildFast",
@@ -135,13 +164,22 @@ fn spawn_core_build_thread(section: String) -> JoinHandle<()> {
                 ],
                 rito(format!("{0} built automatically.", section).as_str()),
             ],
-            // TODO analyze and save core build script output in a nice way
-            |build_and_copy_output| {
-                println!("{}", build_and_copy_output);
-            },
             rito(format!("automatic core build for {0} failed", section).as_str())
         ).unwrap();
     })
+}
+
+// Source: https://stackoverflow.com/a/35820003
+use std::{
+    fs::File,
+    path::Path,
+};
+fn lines_from_file(filename: impl AsRef<Path>) -> Vec<String> {
+    let file = File::open(filename).expect("no such file");
+    let buf = BufReader::new(file);
+    buf.lines()
+        .map(|l| l.expect("Could not parse line"))
+        .collect()
 }
 
 fn spawn_tem_message_reader_thread(tem_name: &'static str) -> JoinHandle<()> {
@@ -168,21 +206,18 @@ fn spawn_tem_message_reader_thread(tem_name: &'static str) -> JoinHandle<()> {
                             spawn_copy_and_build_thread(section.to_string());
                         }
                     },
+                    // also extract the section like "Copied" does, then downscale its overview (with rust imagemagick? :D) and send it to slack
                     Some("Overview") => {
                         let section = tokens.next().unwrap().split(" ").next().unwrap();
                         let overview_path = format!(r#"N:\{}\overview{}.jpg"#, tem_name, section);
                         let small_overview_path = format!(r#"N:\{}\overview{}-small.jpg"#, tem_name, section);
-                        run_chain_and_filter_output(
+                        run_chain_and_save_output(
                             vec![
                                 vec!["magick", "convert", &overview_path, "-resize", "500x500", &small_overview_path],
                                 rito_image(&small_overview_path),
                             ],
-                            |output| {
-                                println!("{}", output);
-                            },
                             rito(format!("overview -> slack failed for {}", section).as_str())).unwrap();
                     },
-                    // also extract the section like "Copied" does, then downscale its overview (with rust imagemagick? :D) and send it to slack
                     Some(other_label) => {
                         println!("{}", other_label);
                         run_and_print_output(rito(output.as_str())).unwrap();
@@ -207,10 +242,30 @@ fn rito_image(path: &str) -> Vec<&str> {
 }
 
 fn main() {
-    rito("test from rust");
-    let t1 = spawn_tem_message_reader_thread("TEM1");
-    let t2 = spawn_tem_message_reader_thread("TEM2");
+    let argv: Vec<_> = env::args().map(|v| v.to_owned()).collect();
+    let mut argv: Vec<_> = argv.iter().map(|s| &**s).collect();
+    argv.drain(0 .. 1);
 
-    t1.join().unwrap();
-    t2.join().unwrap();
+    match argv.as_slice() {
+        // When run with the `queue` subcommand, queue commands from a text file and save their outputs:
+        ["queue", queue_file] => {
+            println!("called as queue");
+
+            let queue = lines_from_file(queue_file);
+            let queue: Vec<Vec<&str>> = queue.iter().map(|s| s.split("~").collect()).collect();
+            // The file has to tokenize command arguments like~this~"even though it's weird"
+            run_chain_and_save_output(queue, rito("bob queue failed")).unwrap();
+        },
+        // Default behavior: monitor for TEM events and run data copies/builds
+        [] => {
+            let t1 = spawn_tem_message_reader_thread("TEM1");
+            let t2 = spawn_tem_message_reader_thread("TEM2");
+
+            t1.join().unwrap();
+            t2.join().unwrap();
+        },
+        _ => {
+            panic!("bad invocation of bob");
+        }
+    };
 }

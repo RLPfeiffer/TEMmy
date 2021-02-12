@@ -132,12 +132,6 @@ fn spawn_copy_and_build_thread(section: String) -> JoinHandle<()> {
         run_chain_and_save_output(
             vec![
                 vec![
-                    "xcopy",
-                    format!(r#"Y:\Dropbox\TEMXCopy\{0}"#, section).as_str(),
-                    format!(r#"Z:\RawData\RC3\{0}\"#, section).as_str(),
-                    "/S"],
-                rito(format!("{0} copied to RawData", section).as_str()),
-                vec![
                     "RC3Import",
                     format!(r#"D:\Volumes\RC3{0}"#, section).as_str(),
                     format!(r#"Y:\Dropbox\TEMXCopy\{0}"#, section).as_str(),
@@ -147,6 +141,14 @@ fn spawn_copy_and_build_thread(section: String) -> JoinHandle<()> {
                     format!(r#"D:\Volumes\RC3{0}"#, section).as_str(),
                 ],
                 rito(format!("{0} built automatically. Check it and merge it", section).as_str()),
+                vec![
+                    "xcopy",
+                    format!(r#"Y:\Dropbox\TEMXCopy\{0}"#, section).as_str(),
+                    format!(r#"\\OpR-Marc-Syn3\Data\RawData\RC3\{0}\"#, section).as_str(),
+                    "/S"
+                ],
+                rito(format!("{0} copied to RawData", section).as_str()),
+
             ],
             rito(format!("automatic copy and build for {0} failed", section).as_str())
         ).unwrap();

@@ -141,11 +141,25 @@ fn spawn_copy_and_build_thread(section: String) -> JoinHandle<()> {
                     format!(r#"D:\Volumes\RC3{0}"#, section).as_str(),
                 ],
                 rito(format!("{0} built automatically. Check it and merge it", section).as_str()),
+                // TODO make a robocopy move function that makes this out of source/dest string args:
                 vec![
-                    "xcopy",
-                    format!(r#"Y:\Dropbox\TEMXCopy\{0}"#, section).as_str(),
+                    "robocopy",
+                    format!(r#"\\OpR-Marc-RC2\Data\DROPBOX\TEMXCopy\{0}"#, section).as_str(),
                     format!(r#"\\OpR-Marc-Syn3\Data\RawData\RC3\{0}\"#, section).as_str(),
-                    "/S"
+                    "/MT:32",
+                    "/LOG:RC3Robocopy.log",
+                    "/MOVE",
+                    "/nfl",
+                    "/nc",
+                    "/ns",
+                    "/np",
+                    "/E",
+                    "/TEE",
+                    "/R:3",
+                    "/W:1",
+                    "/REG",
+                    "/DCOPY:DAT",
+                    "/XO",
                 ],
                 rito(format!("{0} copied to RawData", section).as_str()),
 

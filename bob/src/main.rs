@@ -95,6 +95,7 @@ fn run_chain_and_save_output(commands:Vec<Vec<&str>>, command_on_error: Vec<&str
             buffer.flush().unwrap();
         }) {
             Ok(0) => continue,
+            Ok(error_code) if command[0] == "robocopy" && (error_code == 1 || error_code == 3) => continue, // Robocopy returns 1 on success. yikes
             Ok(error_code) => {
                 println!("Error code {} from {:?}", error_code, command);
                 return run_and_print_output(command_on_error);

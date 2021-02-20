@@ -134,42 +134,53 @@ fn run_on_interval_and_filter_output<F>(command: Vec<&str>, process_line: F, sec
 
 fn spawn_copy_and_build_thread(section: String) -> JoinHandle<()> {
     thread::spawn(move || {
+        let temp_volume_dir = format!(r#"D:\Volumes\RC3{}"#, section);
+        let dropbox_dir = r#"\\OpR-Marc-RC2\Data\DROPBOX"#;
+        let mosaic_report_dest = format!(r#"{}\MosaicReports\{}\MosaicReport.html"#, dropbox_dir, section);
+        let queue_file_dest = format!(r#"C:\Python37\Scripts\queue{}.txt"#, section);
         run_chain_and_save_output(
             vec![
                 vec![
                     "RC3Import",
-                    format!(r#"D:\Volumes\RC3{0}"#, section).as_str(),
-                    format!(r#"Y:\Dropbox\TEMXCopy\{0}"#, section).as_str(),
+                    temp_volume_dir.as_str(),
+                    format!(r#"{}\TEMXCopy\{}"#, dropbox_dir, section).as_str(),
                 ],
                 vec![
                     "RC3Build",
-                    format!(r#"D:\Volumes\RC3{0}"#, section).as_str(),
+                    temp_volume_dir.as_str(),
                 ],
-                rito(format!("{0} built automatically. Check it and merge it", section).as_str()),
-                // TODO make a robocopy move function that makes this out of source/dest string args:
+                // Automatic build finished with code 0. Prepare a queue file for the next build step.
                 vec![
-                    "robocopy",
-                    format!(r#"\\OpR-Marc-RC2\Data\DROPBOX\TEMXCopy\{0}"#, section).as_str(),
-                    format!(r#"\\OpR-Marc-Syn3\Data\RawData\RC3\{0}\"#, section).as_str(),
-                    "/MT:32",
-                    "/LOG:RC3Robocopy.log",
-                    "/MOVE",
-                    "/nfl",
-                    "/nc",
-                    "/ns",
-                    "/np",
-                    "/E",
-                    "/TEE",
-                    "/R:3",
-                    "/W:1",
-                    "/REG",
-                    "/DCOPY:DAT",
-                    "/XO",
+                    "@echo",
+                    format!(r#"copy-section-links~W:\Volumes\RC3\TEM\VolumeData.xml~{}\TEM\VolumeData.xml~bob-output"#, temp_volume_dir).as_str(),
+                    ">>",
+                    queue_file_dest.as_str(),
                 ],
-                rito(format!("{0} copied to RawData", section).as_str()),
-
+                vec![
+                    "@echo",
+                    format!(r#"robocopy~{}\TEM~W:\Volumes\RC3\TEM\~/MT:32~/LOG:RC3Robocopy.log~/MOVE~/nfl~/nc~/ns~/np~/E~/TEE~/R:3~/W:1~/REG~/DCOPY:DAT~/XO"#, temp_volume_dir).as_str(),
+                    ">>",
+                    queue_file_dest.as_str(),
+                ],
+                // TODO the queue file could also delete itself after it finishes 
+                // Move the automatic build's mosaicreport files to DROPBOX and send a link.
+                // If the mosaicreport files aren't there, the chain will fail (as it should) because that's
+                // a secondary indicator of build failure
+                robocopy_move(
+                    format!(r#"{}\MosaicReport"#, temp_volume_dir).as_str(),
+                    format!(r#"{}\MosaicReports\{}\MosaicReport\"#, dropbox_dir, section).as_str()),
+                vec![
+                    "move",
+                    format!(r#"{}\MosaicReport.html"#, temp_volume_dir).as_str(),
+                    mosaic_report_dest.as_str(),
+                ],
+                rito(format!("{} built automatically. Check {} and run `cd C:/Python37/Scripts && bob queue {}` on Build1 if it looks good", section, mosaic_report_dest, queue_file_dest).as_str()),
+                robocopy_move(
+                    format!(r#"{}\TEMXCopy\{}"#, dropbox_dir, section).as_str(),
+                    format!(r#"\\OpR-Marc-Syn3\Data\RawData\RC3\{}\"#, section).as_str()),
+                rito(format!("{} copied to RawData", section).as_str()),
             ],
-            rito(format!("automatic copy and build for {0} failed", section).as_str())
+            rito(format!("automatic copy and build for {} failed", section).as_str())
         ).unwrap();
     })
 }
@@ -262,6 +273,28 @@ fn rito_image(path: &str) -> Vec<&str> {
     vec!["rito", "--slack_image", "tem-bot", path]
 }
 
+fn robocopy_move<'a>(source: &'a str, dest: &'a str) -> Vec<&'a str> {
+    vec![
+        "robocopy",
+        source,
+        dest,
+        "/MT:32",
+        "/LOG:RC3Robocopy.log",
+        "/MOVE",
+        "/nfl",
+        "/nc",
+        "/ns",
+        "/np",
+        "/E",
+        "/TEE",
+        "/R:3",
+        "/W:1",
+        "/REG",
+        "/DCOPY:DAT",
+        "/XO",
+    ]
+}
+
 fn main() {
     let argv: Vec<_> = env::args().map(|v| v.to_owned()).collect();
     let mut argv: Vec<_> = argv.iter().map(|s| &**s).collect();
@@ -271,9 +304,10 @@ fn main() {
         // When run with the `queue` subcommand, queue commands from a text file and save their outputs:
         ["queue", queue_file] => {
             println!("called as queue");
+            // TODO allow queueing multiple queue files with varargs
 
             let queue = lines_from_file(queue_file);
-            let queue: Vec<Vec<&str>> = queue.iter().map(|s| s.split("~").collect()).collect();
+            let queue: Vec<Vec<&str>> = queue.iter().map(|line| line.split("~").map(|token| token.trim()).collect()).collect();
             // The file has to tokenize command arguments like~this~"even though it's weird"
             run_chain_and_save_output(queue, rito("bob queue failed")).unwrap();
         },

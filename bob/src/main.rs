@@ -39,16 +39,20 @@ fn run_and_filter_output<F>(command: &Vec<&str>, mut process_line: F) -> Result<
 
 #[test]
 fn test_run_and_filter_output() {
-    match run_and_filter_output(vec!["@echo Hello, world!"], |s| assert_eq!("Hello, world!", s)) {
+    match run_and_filter_output(&vec!["@echo Hello, world!"], |s| assert_eq!("Hello, world!", s)) {
         Ok(code) => assert_eq!(0, code),
         Err(err) => panic!("error {}", err)
     };
-    match run_and_filter_output(vec!["@echo Hello, world! 1>&2"], |s| assert_eq!("Hello, world! ", s)) {
+    match run_and_filter_output(&vec!["@echo Hello, world! 1>&2"], |s| assert_eq!("Hello, world! ", s)) {
         Ok(code) => assert_eq!(0, code),
         Err(err) => panic!("error {}", err)
     };
-    match run_and_filter_output(vec!["exit /b 1"], |s| println!("{}", s)) {
+    match run_and_filter_output(&vec!["exit /b 1"], |s| println!("{}", s)) {
         Ok(code) => assert_eq!(1, code),
+        Err(err) => panic!("error {}", err)
+    };
+    match run_and_filter_output(&vec!["@echo", "Hey", ">", "file.txt"], |_| {}) {
+        Ok(code) => assert_eq!(0, code),
         Err(err) => panic!("error {}", err)
     };
 }

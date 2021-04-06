@@ -74,7 +74,7 @@ Function Capture 1 0 CookFirst
    ReportBeamShift
    ReportBeamTilt
 
-   If $CookFirst = 1
+   If $CookFirst == 1
       #### COOKING ####
       echo "Cooking Begins!"
       ReportSpotSize
@@ -99,7 +99,7 @@ Function Capture 1 0 CookFirst
    #Move the stage to the area we've been told to use
 
    MoveToNavItem 2
-   Call WaitForStableFilament #Uncomment this line to verify the filament is warmed up
+   Call WaitForStableFilament
 
    ### Center on montage and capture ###
    MoveToNavItem 1

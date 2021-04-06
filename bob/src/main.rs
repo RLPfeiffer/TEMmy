@@ -304,6 +304,9 @@ fn main() {
         // When run with the `queue` subcommand, queue commands from a text file and save their outputs:
         ["queue", queue_file] => {
             println!("called as queue");
+            // TODO q as alias for queue
+            // TODO allow passing arguments to a queue
+            // TODO convert cmd files to queue.txt files
             // TODO allow queueing multiple queue files with varargs
 
             let queue = lines_from_file(queue_file);

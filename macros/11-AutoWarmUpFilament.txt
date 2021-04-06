@@ -1,0 +1,26 @@
+MacroName AutoWarmUpFilament
+
+MinutesBeforeMidnight = 24 * 60
+
+WarmUpHour = 9
+WarmUpMinute = 0
+
+MinutesAfterMidnight = $WarmUpHour * 60 + $WarmUpMinute
+
+MinutesBeforeTurnOff = 120
+
+ReportColumnOrGunValve
+SetColumnOrGunValve 0
+ReportColumnOrGunValve
+CallFunction Notifications::SendMessage Turned filament off after capture.
+
+Echo waiting
+CallFunction Notifications::SendMessage Filament will automatically be turned on at $WarmUpHour : $WarmUpMinute
+WaitForMidnight $MinutesBeforeMidnight $MinutesAfterMidnight
+Echo Done waiting
+Call TurnOnFilament
+CallFunction Notifications::SendMessage Filament automatically turned on. As a failsafe, it will turn off again in $MinutesBeforeTurnOff minutes. 
+Delay $MinutesBeforeTurnOff min
+SetColumnOrGunValve 0
+ReportColumnOrGunValve
+CallFunction Notifications::SendMessage Filament turned off.

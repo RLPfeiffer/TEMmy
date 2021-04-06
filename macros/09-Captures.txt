@@ -99,7 +99,7 @@ Function Capture 1 0 CookFirst
    #Move the stage to the area we've been told to use
 
    MoveToNavItem 2
-   CallMacro WaitForStableFilament #Uncomment this line to verify the filament is warmed up
+   Call WaitForStableFilament #Uncomment this line to verify the filament is warmed up
 
    ### Center on montage and capture ###
    MoveToNavItem 1

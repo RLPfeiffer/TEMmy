@@ -8,6 +8,12 @@ use std::time::Duration;
 use std::thread;
 use std::env;
 use std::thread::JoinHandle;
+use std::sync::{Arc, Mutex};
+
+const DROPBOX_DIR: &str = r#"D:\DROPBOX"#;
+const BUILD_TARGET: &str = r#"W:\Volumes"#;
+const PYTHON_ENV: &str = r#"C:\Python39\Scripts"#;
+const RAW_DATA_DIR: &str = r#"\\OpR-Marc-Syn3\Data\RawData"#;
 
 fn run_and_filter_output<F>(command: &Vec<&str>, mut process_line: F) -> Result<i32, Error> 
     where F: FnMut(String) -> () {
@@ -87,6 +93,7 @@ fn run_chain_and_filter_output<F>(commands:Vec<Vec<&str>>, process_line: F, comm
 fn run_chain_and_save_output(commands:Vec<Vec<&str>>, command_on_error: Vec<&str>) -> Result<i32, Error> {
     for command in commands {
         let uuid = Uuid::new_v4();
+        // TODO this requires first making the bob-output folder manually:
         let output_file = format!("bob-output/{}.txt", uuid);
         let file = File::create(output_file).unwrap();
         let mut buffer = BufWriter::new(file);
@@ -132,18 +139,18 @@ fn run_on_interval_and_filter_output<F>(command: Vec<&str>, process_line: F, sec
     }
 }
 
-fn spawn_copy_and_build_thread(section: String) -> JoinHandle<()> {
+fn spawn_copy_and_build_thread(section: String, mutex: Arc<Mutex<i32>>) -> JoinHandle<()> {
     thread::spawn(move || {
-        let temp_volume_dir = format!(r#"D:\Volumes\RC3{}"#, section);
-        let dropbox_dir = r#"\\OpR-Marc-RC2\Data\DROPBOX"#;
-        let mosaic_report_dest = format!(r#"{}\MosaicReports\{}\MosaicReport.html"#, dropbox_dir, section);
-        let queue_file_dest = format!(r#"C:\Python37\Scripts\queue{}.txt"#, section);
+        let _ = mutex.lock().unwrap();
+        let temp_volume_dir = format!(r#"{}\RC3{}"#, BUILD_TARGET, section);
+        let mosaic_report_dest = format!(r#"{}\MosaicReports\{}\MosaicReport.html"#, DROPBOX_DIR, section);
+        let queue_file_dest = format!(r#"{}\queue{}.txt"#, PYTHON_ENV, section);
         run_chain_and_save_output(
             vec![
                 vec![
                     "RC3Import",
                     temp_volume_dir.as_str(),
-                    format!(r#"{}\TEMXCopy\{}"#, dropbox_dir, section).as_str(),
+                    format!(r#"{}\TEMXCopy\{}"#, DROPBOX_DIR, section).as_str(),
                 ],
                 vec![
                     "RC3Build",
@@ -168,16 +175,16 @@ fn spawn_copy_and_build_thread(section: String) -> JoinHandle<()> {
                 // a secondary indicator of build failure
                 robocopy_move(
                     format!(r#"{}\MosaicReport"#, temp_volume_dir).as_str(),
-                    format!(r#"{}\MosaicReports\{}\MosaicReport\"#, dropbox_dir, section).as_str()),
+                    format!(r#"{}\MosaicReports\{}\MosaicReport\"#, DROPBOX_DIR, section).as_str()),
                 vec![
                     "move",
                     format!(r#"{}\MosaicReport.html"#, temp_volume_dir).as_str(),
                     mosaic_report_dest.as_str(),
                 ],
-                rito(format!("{} built automatically. Check {} and run `cd C:/Python37/Scripts && bob queue {}` on Build1 if it looks good", section, mosaic_report_dest, queue_file_dest).as_str()),
+                rito(format!("{} built automatically. Check {} and run `cd {} && bob queue {}` on Build1 if it looks good", section, mosaic_report_dest, PYTHON_ENV, queue_file_dest).as_str()),
                 robocopy_move(
-                    format!(r#"{}\TEMXCopy\{}"#, dropbox_dir, section).as_str(),
-                    format!(r#"\\OpR-Marc-Syn3\Data\RawData\RC3\{}\"#, section).as_str()),
+                    format!(r#"{}\TEMXCopy\{}"#, DROPBOX_DIR, section).as_str(),
+                    format!(r#"{}\RC3\{}\"#, RAW_DATA_DIR, section).as_str()),
                 rito(format!("{} copied to RawData", section).as_str()),
             ],
             rito(format!("automatic copy and build for {} failed", section).as_str())
@@ -185,14 +192,28 @@ fn spawn_copy_and_build_thread(section: String) -> JoinHandle<()> {
     })
 }
 
-fn spawn_core_build_thread(section: String) -> JoinHandle<()> {
+fn spawn_core_build_thread(section: String, mutex: Arc<Mutex<i32>>) -> JoinHandle<()> {
     thread::spawn(move || {
+        let _ = mutex.lock().unwrap();
+        let volume_dir = format!(r#"{}\TEMXCopy\{}volume"#, DROPBOX_DIR, section);
+        let build_target = format!(r#"{}\{}"#, BUILD_TARGET, section);
+        let section_dir = format!(r#"{}\TEMXCopy\{}"#, DROPBOX_DIR, section);
         run_chain_and_save_output(
             vec![
+                // Put the section in a "volume" folder because TEMCoreBuildFast expects a volume, not a single section
+                vec![
+                    "mkdir",
+                    volume_dir.as_str(),
+                ],
+                vec![
+                    "move",
+                    section_dir.as_str(),
+                    volume_dir.as_str(),
+                ],
                 vec![
                     "TEMCoreBuildFast",
-                    format!(r#"D:\Volumes\{0}"#, section).as_str(),
-                    format!(r#"Y:\Dropbox\TEMXCopy\{0}"#, section).as_str()
+                    build_target.as_str(),
+                    volume_dir.as_str(),
                 ],
                 rito(format!("{0} built automatically.", section).as_str()),
             ],
@@ -214,28 +235,27 @@ fn lines_from_file(filename: impl AsRef<Path>) -> Vec<String> {
         .collect()
 }
 
-fn spawn_tem_message_reader_thread(tem_name: &'static str) -> JoinHandle<()> {
+fn spawn_tem_message_reader_thread(tem_name: &'static str, mutex: Arc<Mutex<i32>>) -> JoinHandle<()> {
     thread::spawn(move || {
         run_on_interval_and_filter_output(
             vec![format!(r#"type N:\{0}\message.txt && break>N:\{0}\message.txt"#, tem_name).as_str()],
             |output| {
                 println!("saving the Message output:");
                 run_and_print_output(vec![format!(r#"@echo {} >> N:\{}\processedMessage.txt"#, output, tem_name).as_str()]).unwrap();
-                // TODO do things with the message file lines
                 let mut tokens = output.split(": ");
                 match tokens.next() {
                     Some("Copied") => {
                         let section = tokens.next().unwrap().split(" ").next().unwrap();
                         // handle core builds with TEMCoreBuildFast
                         if section.starts_with("core") {
-                            spawn_core_build_thread(section.to_string());
+                            spawn_core_build_thread(section.to_string(), Arc::clone(&mutex));
                         }
                         // handle RC3 builds by copying to rawdata, importing and building
                         else {
                             println!("{}", section);
                             // copy to rawdata, automatically build to its own section
                             // (but do this in another thread, so notifications still pipe to Slack for other messages)
-                            spawn_copy_and_build_thread(section.to_string());
+                            spawn_copy_and_build_thread(section.to_string(), Arc::clone(&mutex));
                         }
                     },
                     // also extract the section like "Copied" does, then downscale its overview (with rust imagemagick? :D) and send it to slack
@@ -250,10 +270,12 @@ fn spawn_tem_message_reader_thread(tem_name: &'static str) -> JoinHandle<()> {
                             ],
                             rito(format!("overview -> slack failed for {}", section).as_str())).unwrap();
                     },
+                    // This case will be used even if there's no colon in the message
                     Some(other_label) => {
                         println!("{}", other_label);
                         run_and_print_output(rito(output.as_str())).unwrap();
                     },
+                    // This case should never be used
                     None => ()
                 }
 
@@ -310,14 +332,18 @@ fn main() {
             // TODO allow queueing multiple queue files with varargs
 
             let queue = lines_from_file(queue_file);
+            // TODO tokenize queue files by passing the lines through a filter that just prints each arg on a line
             let queue: Vec<Vec<&str>> = queue.iter().map(|line| line.split("~").map(|token| token.trim()).collect()).collect();
             // The file has to tokenize command arguments like~this~"even though it's weird"
             run_chain_and_save_output(queue, rito("bob queue failed")).unwrap();
         },
         // Default behavior: monitor for TEM events and run data copies/builds
         [] => {
-            let t1 = spawn_tem_message_reader_thread("TEM1");
-            let t2 = spawn_tem_message_reader_thread("TEM2");
+            // Make a mutex to ensure only one build runs at a time:
+            let mutex = Arc::new(Mutex::new(0));
+
+            let t1 = spawn_tem_message_reader_thread("TEM1", Arc::clone(&mutex));
+            let t2 = spawn_tem_message_reader_thread("TEM2", Arc::clone(&mutex));
 
             t1.join().unwrap();
             t2.join().unwrap();

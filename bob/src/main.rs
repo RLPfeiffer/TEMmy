@@ -141,7 +141,9 @@ fn run_on_interval_and_filter_output<F>(command: Vec<&str>, process_line: F, sec
 
 fn spawn_copy_and_build_thread(section: String, mutex: Arc<Mutex<i32>>) -> JoinHandle<()> {
     thread::spawn(move || {
+        println!("waiting for mutex to build {}", section);
         let _ = mutex.lock().unwrap();
+        println!("acquired mutex to build {}", section);
         let temp_volume_dir = format!(r#"{}\RC3{}"#, BUILD_TARGET, section);
         let mosaic_report_dest = format!(r#"{}\MosaicReports\{}\MosaicReport.html"#, DROPBOX_DIR, section);
         let queue_file_dest = format!(r#"{}\queue{}.txt"#, PYTHON_ENV, section);
@@ -194,7 +196,9 @@ fn spawn_copy_and_build_thread(section: String, mutex: Arc<Mutex<i32>>) -> JoinH
 
 fn spawn_core_build_thread(section: String, mutex: Arc<Mutex<i32>>) -> JoinHandle<()> {
     thread::spawn(move || {
+        println!("waiting for mutex to build {}", section);
         let _ = mutex.lock().unwrap();
+        println!("acquired mutex to build {}", section);
         let volume_dir = format!(r#"{}\TEMXCopy\{}volume"#, DROPBOX_DIR, section);
         let build_target = format!(r#"{}\{}"#, BUILD_TARGET, section);
         let section_dir = format!(r#"{}\TEMXCopy\{}"#, DROPBOX_DIR, section);

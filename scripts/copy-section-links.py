@@ -18,9 +18,9 @@ if __name__ == "__main__":
     new_volume_data = sys.argv[2]
     backup_dir = sys.argv[3]
 
-    if not (existing_volume_data.endswith('.xml') and new_volume_data.endswith('.temp')):
-        print("You are probably passing the first two arguments in backwards")
-        exit(1)
+    #if not (existing_volume_data.endswith('.xml') and new_volume_data.endswith('.temp')):
+    #    print("You are probably passing the first two arguments in backwards")
+    #    exit(1)
 
     # Before automatically doing anything to a volume's files, make a backup
     timestamp = datetime.now().strftime("%d-%b-%Y-%H-%M-%S")

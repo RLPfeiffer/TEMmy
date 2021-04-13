@@ -1,0 +1,3 @@
+MacroName TurnOnFilament
+SetColumnOrGunValve 1
+SetBeamBlank 1

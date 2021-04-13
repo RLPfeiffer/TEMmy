@@ -8,7 +8,7 @@ if __name__ == "__main__":
     import shutil
 
     # Get a timestamp for reuse:
-    timestamp = datetime.now().strftime("%d-%b-%Y-%H-%M-%S")
+    timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
     # Package TEM macros
     def write_macro(macro, content, file):

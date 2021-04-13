@@ -91,8 +91,17 @@ fn run_chain_and_filter_output<F>(commands:Vec<Vec<&str>>, process_line: F, comm
 }
 */
 
-fn run_chain_and_save_output(commands:Vec<Vec<&str>>, command_on_error: Vec<&str>) -> Result<i32, Error> {
+// TODO implement .bob fileformat for queues, that also include a command on error at the end & can be parsed to this
+struct CommandChain<'a> {
+    commands: Vec<Vec<&'a str>>,
+    command_on_error: Vec<&'a str>,
+}
+
+fn run_chain_and_save_output(chain: CommandChain) -> Result<i32, Error> {
+    let commands = chain.commands;
+    let command_on_error = chain.command_on_error;
     for command in commands {
+        // TODO uuids are confusing for this when they could be timestamps.
         let uuid = Uuid::new_v4();
         // TODO this requires first making the bob-output folder manually:
         let output_file = format!("bob-output/{}.txt", uuid);
@@ -149,49 +158,50 @@ fn spawn_copy_and_build_thread(section: String, mutex: Arc<Mutex<i32>>) -> JoinH
         let mosaic_report_dest = format!(r#"{}\MosaicReports\{}\MosaicReport.html"#, DROPBOX_LINK_DIR, section);
         let queue_file_dest = format!(r#"{}\queue{}.txt"#, PYTHON_ENV, section);
         run_chain_and_save_output(
-            vec![
-                vec![
-                    "RC3Import",
-                    temp_volume_dir.as_str(),
-                    format!(r#"{}\TEMXCopy\{}"#, DROPBOX_DIR, section).as_str(),
+            CommandChain {
+                commands: vec![
+                    vec![
+                        "RC3Import",
+                        temp_volume_dir.as_str(),
+                        format!(r#"{}\TEMXCopy\{}"#, DROPBOX_DIR, section).as_str(),
+                    ],
+                    vec![
+                        "RC3Build",
+                        temp_volume_dir.as_str(),
+                    ],
+                    // Automatic build finished with code 0. Prepare a queue file for the next build step.
+                    vec![
+                        "@echo",
+                        format!(r#"copy-section-links~W:\Volumes\RC3\TEM\VolumeData.xml~{}\TEM\VolumeData.xml~bob-output"#, temp_volume_dir).as_str(),
+                        ">>",
+                        queue_file_dest.as_str(),
+                    ],
+                    vec![
+                        "@echo",
+                        format!(r#"robocopy~{}\TEM~W:\Volumes\RC3\TEM\~/MT:32~/LOG:RC3Robocopy.log~/MOVE~/nfl~/nc~/ns~/np~/E~/TEE~/R:3~/W:1~/REG~/DCOPY:DAT~/XO"#, temp_volume_dir).as_str(),
+                        ">>",
+                        queue_file_dest.as_str(),
+                    ],
+                    // TODO the queue file could also delete itself after it finishes 
+                    // Move the automatic build's mosaicreport files to DROPBOX and send a link.
+                    // If the mosaicreport files aren't there, the chain will fail (as it should) because that's
+                    // a secondary indicator of build failure
+                    robocopy_move(
+                        format!(r#"{}\MosaicReport"#, temp_volume_dir).as_str(),
+                        format!(r#"{}\MosaicReports\{}\MosaicReport\"#, DROPBOX_DIR, section).as_str()),
+                    vec![
+                        "move",
+                        format!(r#"{}\MosaicReport.html"#, temp_volume_dir).as_str(),
+                        mosaic_report_dest.as_str(),
+                    ],
+                    rito(format!("{} built automatically. Check {} and run `cd {} && bob queue {}` on Build1 if it looks good", section, mosaic_report_dest, PYTHON_ENV, queue_file_dest).as_str()),
+                    robocopy_move(
+                        format!(r#"{}\TEMXCopy\{}"#, DROPBOX_DIR, section).as_str(),
+                        format!(r#"{}\RC3\{}\"#, RAW_DATA_DIR, section).as_str()),
+                    rito(format!("{} copied to RawData", section).as_str()),
                 ],
-                vec![
-                    "RC3Build",
-                    temp_volume_dir.as_str(),
-                ],
-                // Automatic build finished with code 0. Prepare a queue file for the next build step.
-                vec![
-                    "@echo",
-                    format!(r#"copy-section-links~W:\Volumes\RC3\TEM\VolumeData.xml~{}\TEM\VolumeData.xml~bob-output"#, temp_volume_dir).as_str(),
-                    ">>",
-                    queue_file_dest.as_str(),
-                ],
-                vec![
-                    "@echo",
-                    format!(r#"robocopy~{}\TEM~W:\Volumes\RC3\TEM\~/MT:32~/LOG:RC3Robocopy.log~/MOVE~/nfl~/nc~/ns~/np~/E~/TEE~/R:3~/W:1~/REG~/DCOPY:DAT~/XO"#, temp_volume_dir).as_str(),
-                    ">>",
-                    queue_file_dest.as_str(),
-                ],
-                // TODO the queue file could also delete itself after it finishes 
-                // Move the automatic build's mosaicreport files to DROPBOX and send a link.
-                // If the mosaicreport files aren't there, the chain will fail (as it should) because that's
-                // a secondary indicator of build failure
-                robocopy_move(
-                    format!(r#"{}\MosaicReport"#, temp_volume_dir).as_str(),
-                    format!(r#"{}\MosaicReports\{}\MosaicReport\"#, DROPBOX_DIR, section).as_str()),
-                vec![
-                    "move",
-                    format!(r#"{}\MosaicReport.html"#, temp_volume_dir).as_str(),
-                    mosaic_report_dest.as_str(),
-                ],
-                rito(format!("{} built automatically. Check {} and run `cd {} && bob queue {}` on Build1 if it looks good", section, mosaic_report_dest, PYTHON_ENV, queue_file_dest).as_str()),
-                robocopy_move(
-                    format!(r#"{}\TEMXCopy\{}"#, DROPBOX_DIR, section).as_str(),
-                    format!(r#"{}\RC3\{}\"#, RAW_DATA_DIR, section).as_str()),
-                rito(format!("{} copied to RawData", section).as_str()),
-            ],
-            rito(format!("automatic copy and build for {} failed", section).as_str())
-        ).unwrap();
+                command_on_error: rito(format!("automatic copy and build for {} failed", section).as_str())
+        }).unwrap();
     })
 }
 
@@ -204,26 +214,27 @@ fn spawn_core_build_thread(section: String, mutex: Arc<Mutex<i32>>) -> JoinHandl
         let build_target = format!(r#"{}\{}"#, BUILD_TARGET, section);
         let section_dir = format!(r#"{}\TEMXCopy\{}"#, DROPBOX_DIR, section);
         run_chain_and_save_output(
-            vec![
-                // Put the section in a "volume" folder because TEMCoreBuildFast expects a volume, not a single section
-                vec![
-                    "mkdir",
-                    volume_dir.as_str(),
+            CommandChain {
+                commands: vec![
+                    // Put the section in a "volume" folder because TEMCoreBuildFast expects a volume, not a single section
+                    vec![
+                        "mkdir",
+                        volume_dir.as_str(),
+                    ],
+                    vec![
+                        "move",
+                        section_dir.as_str(),
+                        volume_dir.as_str(),
+                    ],
+                    vec![
+                        "TEMCoreBuildFast",
+                        build_target.as_str(),
+                        volume_dir.as_str(),
+                    ],
+                    rito(format!("{0} built automatically.", section).as_str()),
                 ],
-                vec![
-                    "move",
-                    section_dir.as_str(),
-                    volume_dir.as_str(),
-                ],
-                vec![
-                    "TEMCoreBuildFast",
-                    build_target.as_str(),
-                    volume_dir.as_str(),
-                ],
-                rito(format!("{0} built automatically.", section).as_str()),
-            ],
-            rito(format!("automatic core build for {0} failed", section).as_str())
-        ).unwrap();
+                command_on_error: rito(format!("automatic core build for {0} failed", section).as_str())
+            }).unwrap();
     })
 }
 
@@ -269,11 +280,14 @@ fn spawn_tem_message_reader_thread(tem_name: &'static str, mutex: Arc<Mutex<i32>
                         let overview_path = format!(r#"N:\{}\overview{}.jpg"#, tem_name, section);
                         let small_overview_path = format!(r#"N:\{}\overview{}-small.jpg"#, tem_name, section);
                         run_chain_and_save_output(
-                            vec![
-                                vec!["magick", "convert", &overview_path, "-resize", "500x500", &small_overview_path],
-                                rito_image(&small_overview_path),
-                            ],
-                            rito(format!("overview -> slack failed for {}", section).as_str())).unwrap();
+                            CommandChain {
+                                commands: vec![
+                                    vec!["magick", "convert", &overview_path, "-resize", "500x500", &small_overview_path],
+                                    rito_image(&small_overview_path),
+                                ],
+
+                                command_on_error: rito(format!("overview -> slack failed for {}", section).as_str())
+                            }).unwrap();
                     },
                     // This case will be used even if there's no colon in the message
                     Some(other_label) => {
@@ -339,8 +353,11 @@ fn main() {
             let queue = lines_from_file(queue_file);
             // TODO tokenize queue files by passing the lines through a filter that just prints each arg on a line
             let queue: Vec<Vec<&str>> = queue.iter().map(|line| line.split("~").map(|token| token.trim()).collect()).collect();
-            // The file has to tokenize command arguments like~this~"even though it's weird"
-            run_chain_and_save_output(queue, rito("bob queue failed")).unwrap();
+            // TODO The file has to tokenize command arguments like~this~"even though it's weird"
+            run_chain_and_save_output(CommandChain {
+                commands: queue, 
+                command_on_error: rito("bob queue failed")
+            }).unwrap();
         },
         // Default behavior: monitor for TEM events and run data copies/builds
         [] => {

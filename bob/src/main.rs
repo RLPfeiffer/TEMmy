@@ -11,6 +11,7 @@ use std::thread::JoinHandle;
 use std::sync::{Arc, Mutex};
 
 const DROPBOX_DIR: &str = r#"D:\DROPBOX"#;
+const DROPBOX_LINK_DIR: &str = r#"\\OpR-Marc-RC2\Data\DROPBOX"#;
 const BUILD_TARGET: &str = r#"W:\Volumes"#;
 const PYTHON_ENV: &str = r#"C:\Python39\Scripts"#;
 const RAW_DATA_DIR: &str = r#"\\OpR-Marc-Syn3\Data\RawData"#;
@@ -145,7 +146,7 @@ fn spawn_copy_and_build_thread(section: String, mutex: Arc<Mutex<i32>>) -> JoinH
         let _ = mutex.lock().unwrap();
         println!("acquired mutex to build {}", section);
         let temp_volume_dir = format!(r#"{}\RC3{}"#, BUILD_TARGET, section);
-        let mosaic_report_dest = format!(r#"{}\MosaicReports\{}\MosaicReport.html"#, DROPBOX_DIR, section);
+        let mosaic_report_dest = format!(r#"{}\MosaicReports\{}\MosaicReport.html"#, DROPBOX_LINK_DIR, section);
         let queue_file_dest = format!(r#"{}\queue{}.txt"#, PYTHON_ENV, section);
         run_chain_and_save_output(
             vec![

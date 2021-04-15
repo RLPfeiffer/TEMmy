@@ -9,3 +9,4 @@ edition = "2018"
 [dependencies]
 duct = "0.13.4"
 uuid = { version = "0.8", features = ["v4"] }
+rustyline = "8.0.0"

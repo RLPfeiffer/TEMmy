@@ -285,14 +285,40 @@ fn robocopy_move<'a>(source: String, dest: String) -> Vec<String> {
     ]
 }
 
+use rustyline::error::ReadlineError;
+use rustyline::Editor;
+
 // TODO cli thread should allow raw commands to be run
 // TODO cli thread could allow serialization/suspension of chains to restart bob????
 // TODO set up commandchain reading so that .cmd files are already valid (ignore rem, tokenize, etc)
 fn spawn_cli_thread(sender: Sender<String>) -> JoinHandle<()> {
     thread::spawn(move || {
-        loop {
-
+        let mut rl = Editor::<()>::new();
+        if rl.load_history("history.txt").is_err() {
+            println!("No previous history.");
         }
+        loop {
+            let readline = rl.readline(">> ");
+            match readline {
+                Ok(line) => {
+                    rl.add_history_entry(line.as_str());
+                    sender.send(line).unwrap();
+                },
+                Err(ReadlineError::Interrupted) => {
+                    println!("CTRL-C");
+                    break
+                },
+                Err(ReadlineError::Eof) => {
+                    println!("CTRL-D");
+                    break
+                },
+                Err(err) => {
+                    println!("Error: {:?}", err);
+                    break
+                }
+            }
+        }
+        rl.save_history("history.txt").unwrap();
     })
     // TODO use rustyline to accept commands such as `queue` and `raw`
     /*

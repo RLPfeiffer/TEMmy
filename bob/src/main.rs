@@ -163,8 +163,9 @@ fn send_rc3_build_chain(section: String, sender: &Sender<CommandChain>) {
                 ],
                 vec![
                     "RC3Build".to_string(),
-                    temp_volume_dir.clone(),
+                    temp_volume_dir.clone()
                 ],
+                // TODO check that a tileset was generated
                 // Automatic build finished with code 0. Prepare a queue file for the next build step.
                 vec![
                     "@echo".to_string(),
@@ -241,54 +242,13 @@ fn lines_from_file(filename: impl AsRef<Path>) -> Vec<String> {
         .collect()
 }
 
-fn spawn_tem_message_reader_thread(tem_name: &'static str, sender: Sender<CommandChain>) -> JoinHandle<()> {
+fn spawn_tem_message_reader_thread(tem_name: &'static str, sender: Sender<String>) -> JoinHandle<()> {
     thread::spawn(move || {
         run_on_interval_and_filter_output(
             vec![format!(r#"type N:\{0}\message.txt && break>N:\{0}\message.txt"#, tem_name)],
             |output| {
-                println!("saving the Message output: {}", output);
-                run_and_print_output(vec![format!(r#"@echo {} >> N:\{}\processedMessage.txt"#, output, tem_name)]).unwrap();
-                let mut tokens = output.split(": ");
-                match tokens.next() {
-                    Some("Copied") => {
-                        let section = tokens.next().unwrap().split(" ").next().unwrap();
-                        // handle core builds with TEMCoreBuildFast
-                        if section.starts_with("core") {
-                            send_core_build_chain(section.to_string(), &sender);
-                        }
-                        // handle RC3 builds by copying to rawdata, importing and building
-                        else {
-                            println!("{}", section);
-                            // copy to rawdata, automatically build to its own section
-                            // (but do this in another thread, so notifications still pipe to Slack for other messages)
-                            send_rc3_build_chain(section.to_string(), &sender);
-                        }
-                    },
-                    // also extract the section like "Copied" does, then downscale its overview (with rust imagemagick? :D) and send it to slack
-                    Some("Overview") => {
-                        let section = tokens.next().unwrap().split(" ").next().unwrap();
-                        let overview_path = format!(r#"N:\{}\overview{}.jpg"#, tem_name, section);
-                        let small_overview_path = format!(r#"N:\{}\overview{}-small.jpg"#, tem_name, section);
-                        run_chain_and_save_output(
-                            CommandChain {
-                                commands: vec![
-                                    vec!["magick".to_string(), "convert".to_string(), overview_path, "-resize".to_string(), "500x500".to_string(), small_overview_path.clone()],
-                                    rito_image(small_overview_path),
-                                ],
-
-                                command_on_error: rito(format!("overview -> slack failed for {}", section))
-                            }).unwrap();
-                    },
-                    // This case will be used even if there's no colon in the message
-                    Some(other_label) => {
-                        println!("{}", other_label);
-                        run_and_print_output(rito(output)).unwrap();
-                    },
-                    // This case should never be used
-                    None => ()
-                }
-
-            },
+                sender.send(format!("{}: {}", tem_name, output)).unwrap();
+            }, 
             60,
             rito(format!("bob the builder {} thread failed", tem_name))).unwrap();
         }
@@ -328,7 +288,7 @@ fn robocopy_move<'a>(source: String, dest: String) -> Vec<String> {
 // TODO cli thread should allow raw commands to be run
 // TODO cli thread could allow serialization/suspension of chains to restart bob????
 // TODO set up commandchain reading so that .cmd files are already valid (ignore rem, tokenize, etc)
-fn spawn_cli_thread(sender: Sender<CommandChain>) -> JoinHandle<()> {
+fn spawn_cli_thread(sender: Sender<String>) -> JoinHandle<()> {
     thread::spawn(move || {
         loop {
 
@@ -370,16 +330,71 @@ fn spawn_worker_thread(receiver: Receiver<CommandChain>) -> JoinHandle<()> {
     })
 }
 
+fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>) -> JoinHandle<()> {
+    thread::spawn(move || {
+        loop {
+            let next_command = receiver.recv().unwrap();
+            println!("saving the Message output: {}", next_command);
+            let mut tokens = next_command.split(": ");
+            let tem_name = tokens.next().unwrap();
+            run_and_print_output(vec![format!(r#"@echo {} >> N:\{}\processedMessage.txt"#, next_command, tem_name)]).unwrap();
+            match tokens.next() {
+                Some("Copied") => {
+                    let section = tokens.next().unwrap().split(" ").next().unwrap();
+                    // handle core builds with TEMCoreBuildFast
+                    if section.starts_with("core") {
+                        send_core_build_chain(section.to_string(), &sender);
+                    }
+                    // handle RC3 builds by copying to rawdata, importing and building
+                    else {
+                        println!("{}", section);
+                        // copy to rawdata, automatically build to its own section
+                        // (but do this in another thread, so notifications still pipe to Slack for other messages)
+                        send_rc3_build_chain(section.to_string(), &sender);
+                    }
+                },
+                // also extract the section like "Copied" does, then downscale its overview (with rust imagemagick? :D) and send it to slack
+                Some("Overview") => {
+                    let section = tokens.next().unwrap().split(" ").next().unwrap();
+                    let overview_path = format!(r#"N:\{}\overview{}.jpg"#, tem_name, section);
+                    let small_overview_path = format!(r#"N:\{}\overview{}-small.jpg"#, tem_name, section);
+                    run_chain_and_save_output(
+                        CommandChain {
+                            commands: vec![
+                                vec!["magick".to_string(), "convert".to_string(), overview_path, "-resize".to_string(), "500x500".to_string(), small_overview_path.clone()],
+                                rito_image(small_overview_path),
+                            ],
+
+                            command_on_error: rito(format!("overview -> slack failed for {}", section))
+                        }).unwrap();
+                },
+                // This case will be used even if there's no colon in the message
+                Some(other_label) => {
+                    println!("{}", other_label);
+                    run_and_print_output(rito(next_command)).unwrap();
+                },
+                // This case should never be used
+                None => ()
+            }
+        }
+    })
+}
+
 fn main() {
+    // Create a channel for all Bob commands to be sent safely to a command processor thread:
+    let (command_sender, command_receiver) = channel();
+
     // Create a channel for all Bob jobs to be sent safely to a single worker thread as CommandChains:
-    let (sender, receiver) = channel();
+    let (chain_sender, chain_receiver) = channel();
 
-    spawn_worker_thread(receiver);    
+    spawn_command_thread(command_receiver, chain_sender);
+    spawn_worker_thread(chain_receiver);    
 
-    // Two threads simply monitor the notification text files from the TEMs, and will send CommandChains to the worker thread:
-    spawn_tem_message_reader_thread("TEM1", sender.clone());
-    spawn_tem_message_reader_thread("TEM2", sender.clone());
+    // Two threads simply monitor the notification text files from the TEMs,
+    // and will send lines from them to the command processor thread
+    spawn_tem_message_reader_thread("TEM1", command_sender.clone());
+    spawn_tem_message_reader_thread("TEM2", command_sender.clone());
 
     // The CLI thread listens for manually entered CommandChains via queues or raw commands
-    spawn_cli_thread(sender.clone()).join().unwrap();
+    spawn_cli_thread(command_sender.clone()).join().unwrap();
 }

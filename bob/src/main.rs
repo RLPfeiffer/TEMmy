@@ -9,6 +9,7 @@ use std::thread;
 use std::thread::JoinHandle;
 use std::sync::mpsc::{channel, Sender, Receiver};
 
+// TODO put these in a yaml file for easier deployment on new servers:
 const DROPBOX_DIR: &str = r#"D:\DROPBOX"#;
 const DROPBOX_LINK_DIR: &str = r#"\\OpR-Marc-RC2\Data\DROPBOX"#;
 const BUILD_TARGET: &str = r#"W:\Volumes"#;
@@ -149,17 +150,20 @@ fn run_on_interval_and_filter_output<F>(command: Vec<String>, process_line: F, s
     }
 }
 
-fn send_rc3_build_chain(section: String, sender: &Sender<CommandChain>) {
+fn send_rc3_build_chain(section: String, is_rebuild: bool, sender: &Sender<CommandChain>) {
     let temp_volume_dir = format!(r#"{}\RC3{}"#, BUILD_TARGET, section);
     let mosaic_report_dest = format!(r#"{}\MosaicReports\{}\MosaicReport.html"#, DROPBOX_LINK_DIR, section);
     let queue_file_dest = format!(r#"{}\queue{}.txt"#, PYTHON_ENV, section);
-    sender.send(
-        CommandChain {
-            commands: vec![
+    let source = if is_rebuild {
+        format!(r#"{}\RC3\{}"#, RAW_DATA_DIR, section)
+    } else {
+        format!(r#"{}\TEMXCopy\{}"#, DROPBOX_DIR, section)
+    };
+    let mut commands = vec![
                 vec![
                     "RC3Import".to_string(),
                     temp_volume_dir.clone(),
-                    format!(r#"{}\TEMXCopy\{}"#, DROPBOX_DIR, section),
+                    source,
                 ],
                 vec![
                     "RC3Build".to_string(),
@@ -170,7 +174,7 @@ fn send_rc3_build_chain(section: String, sender: &Sender<CommandChain>) {
                 vec![
                     "@echo".to_string(),
                     format!(r#"copy-section-links~W:\Volumes\RC3\TEM\VolumeData.xml~{}\TEM\VolumeData.xml~bob-output"#, temp_volume_dir),
-                    ">>".to_string(),
+                    ">".to_string(),
                     queue_file_dest.clone(),
                 ],
                 vec![
@@ -191,17 +195,25 @@ fn send_rc3_build_chain(section: String, sender: &Sender<CommandChain>) {
                     format!(r#"{}\MosaicReport.html"#, temp_volume_dir),
                     mosaic_report_dest.clone(),
                 ],
+                // TODO bob queue is no longer a console command, you type Queue: {file} into the CLI
                 rito(format!("{} built automatically. Check {} and run `cd {} && bob queue {}` on Build1 if it looks good", section, mosaic_report_dest, PYTHON_ENV, queue_file_dest)),
-                robocopy_move(
+            ];
+
+        if !is_rebuild {
+            commands.push(robocopy_move(
                     format!(r#"{}\TEMXCopy\{}"#, DROPBOX_DIR, section),
-                    format!(r#"{}\RC3\{}\"#, RAW_DATA_DIR, section)),
-                rito(format!("{} copied to RawData", section)),
-            ],
+                    format!(r#"{}\RC3\{}\"#, RAW_DATA_DIR, section)));
+            commands.push(rito(format!("{} copied to RawData", section)));
+        }
+    sender.send(
+        CommandChain {
+            commands: commands,
             command_on_error: rito(format!("automatic copy and build for {} failed", section))
         }).unwrap();
 }
 
-fn send_core_build_chain(section: String, sender: &Sender<CommandChain>) {
+// TODO handle rebuild requests (don't make a volume folder, etc.)
+fn send_core_build_chain(section: String, is_rebuild: bool, sender: &Sender<CommandChain>) {
     let volume_dir = format!(r#"{}\TEMXCopy\{}volume"#, DROPBOX_DIR, section);
     let build_target = format!(r#"{}\{}"#, BUILD_TARGET, section);
     let section_dir = format!(r#"{}\TEMXCopy\{}"#, DROPBOX_DIR, section);
@@ -302,7 +314,8 @@ fn spawn_cli_thread(sender: Sender<String>) -> JoinHandle<()> {
             match readline {
                 Ok(line) => {
                     rl.add_history_entry(line.as_str());
-                    sender.send(line).unwrap();
+                    // Pretend it's from a scope called CLI so the command gets saved to processed messages:
+                    sender.send(format!("CLI: {}", line)).unwrap();
                 },
                 Err(ReadlineError::Interrupted) => {
                     println!("CTRL-C");
@@ -320,31 +333,9 @@ fn spawn_cli_thread(sender: Sender<String>) -> JoinHandle<()> {
         }
         rl.save_history("history.txt").unwrap();
     })
-    // TODO use rustyline to accept commands such as `queue` and `raw`
-    /*
-    let argv: Vec<_> = env::args().map(|v| v.to_owned()).collect();
-    let mut argv: Vec<_> = argv.iter().map(|s| &**s).collect();
-    argv.drain(0 .. 1);
+    // TODO raw command
 
-    match argv.as_slice() {
-        // When run with the `queue` subcommand, queue commands from a text file and save their outputs:
-        ["queue", queue_file] => {
-            println!("called as queue");
-            // TODO q as alias for queue
-            // TODO allow passing arguments to a queue
-            // TODO convert cmd files to queue.txt files
-            // TODO allow queueing multiple queue files with varargs
 
-            let queue = lines_from_file(queue_file);
-            // TODO tokenize queue files by passing the lines through a filter that just prints each arg on a line
-            let queue: Vec<Vec<&str>> = queue.iter().map(|line| line.split("~").map(|token| token.trim()).collect()).collect();
-            // TODO The file has to tokenize command arguments like~this~"even though it's weird"
-            run_chain_and_save_output(CommandChain {
-                commands: queue, 
-                command_on_error: rito(format!("bob queue {} failed", queue_file).as_str())
-            }).unwrap();
-        },
-*/
 }
 
 fn spawn_worker_thread(receiver: Receiver<CommandChain>) -> JoinHandle<()> {
@@ -369,30 +360,59 @@ fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>
                     let section = tokens.next().unwrap().split(" ").next().unwrap();
                     // handle core builds with TEMCoreBuildFast
                     if section.starts_with("core") {
-                        send_core_build_chain(section.to_string(), &sender);
+                        send_core_build_chain(section.to_string(), false, &sender);
                     }
-                    // handle RC3 builds by copying to rawdata, importing and building
+                    // handle RC3 builds by importing and building, then copying to rawdata
                     else {
                         println!("{}", section);
                         // copy to rawdata, automatically build to its own section
                         // (but do this in another thread, so notifications still pipe to Slack for other messages)
-                        send_rc3_build_chain(section.to_string(), &sender);
+                        send_rc3_build_chain(section.to_string(), false, &sender);
                     }
                 },
-                // also extract the section like "Copied" does, then downscale its overview (with rust imagemagick? :D) and send it to slack
-                Some("Overview") => {
+                Some("Rebuild") => {
                     let section = tokens.next().unwrap().split(" ").next().unwrap();
-                    let overview_path = format!(r#"N:\{}\overview{}.jpg"#, tem_name, section);
-                    let small_overview_path = format!(r#"N:\{}\overview{}-small.jpg"#, tem_name, section);
+                    // handle core builds with TEMCoreBuildFast
+                    if section.starts_with("core") {
+                        send_core_build_chain(section.to_string(), true, &sender);
+                    }
+                    // handle RC3 rebuilds by building FROM rawdata
+                    else {
+                        println!("rebuilding {}", section);
+                        // copy to rawdata, automatically build to its own section
+                        // (but do this in another thread, so notifications still pipe to Slack for other messages)
+                        send_rc3_build_chain(section.to_string(), true, &sender);
+                    }
+
+                },
+                // Send snapshots to #tem-bot as images
+                Some("Snapshot") => {
+                    let snapshot_name = tokens.next().unwrap();
+                    let snapshot_path = format!(r#"{}\{}"#, DROPBOX_DIR, snapshot_name);
                     run_chain_and_save_output(
                         CommandChain {
                             commands: vec![
-                                vec!["magick".to_string(), "convert".to_string(), overview_path, "-resize".to_string(), "500x500".to_string(), small_overview_path.clone()],
-                                rito_image(small_overview_path),
+                                rito_image(snapshot_path),
                             ],
 
-                            command_on_error: rito(format!("overview -> slack failed for {}", section))
+                            command_on_error: rito(format!("snapshot -> slack failed for {}", snapshot_name))
                         }).unwrap();
+                },
+                // When run with the `queue` subcommand, queue commands from a text file and save their outputs:
+                Some("Queue") => {
+                    println!("called as queue");
+                    // TODO allow passing arguments to a queue
+                    // TODO convert cmd files to queue.txt files
+            
+                    let queue_file = tokens.next().unwrap().split(" ").next().unwrap();
+                    let queue = lines_from_file(queue_file);
+                    // TODO tokenize queue files by passing the lines through a filter that just prints each arg on a line
+                    let queue: Vec<Vec<String>> = queue.iter().map(|line| line.split("~").map(|token| token.trim().to_string()).collect()).collect();
+                    // TODO The file has to tokenize command arguments like~this~"even though it's weird"
+                    sender.send(CommandChain {
+                        commands: queue, 
+                        command_on_error: rito(format!("bob queue {} failed", queue_file))
+                    }).unwrap();
                 },
                 // This case will be used even if there's no colon in the message
                 Some(other_label) => {

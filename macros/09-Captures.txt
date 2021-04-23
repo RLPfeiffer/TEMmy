@@ -115,7 +115,9 @@ Function Capture 1 0 CookFirst
       CallFunction Notifications::SendMessage Montage failed with error on $ScopeName
       Return
    EndTry
-   CallFunction Notifications::SendOverview
+   
+   # Send the overview to Slack
+   CallFunction Snapshot::TakeSnapshot 1 overview$CaptureDir
 
    # Copy the capture to DROPBOX
    CopySource = $DataPath\$CaptureDir

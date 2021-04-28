@@ -24,7 +24,16 @@ Function TakeSnapshot 1 1 SendToSlack Name
    # If JPG or JPEG is entered for 'typ', a true JPEG file will be written, not a JPEG-compressed TIFF, and the compression 
    # entry does not matter (but must be present before the filename file). 
    # SnapshotToFile #S #T feat typ cmp file
-   SnapshotToFile 0 0 0 JPG -1 $FilenameInDropbox
+   Try
+      SnapshotToFile 0 0 0 JPG -1 $FilenameInDropbox
+   Catch
+      Try
+         SaveToOtherFile B JPG -1 $FilenameInDropbox
+      Catch
+         CallFunction Notifications::SendMessage SnapshotToFile and SaveToOtherFile both failed for snapshot $Filename
+         Return
+      EndTry
+   EndTry
    If $SendToSlack != 0
       CallFunction Notifications::SendMessage Snapshot: $Filename
    EndIf

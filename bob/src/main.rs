@@ -8,6 +8,7 @@ use std::thread;
 use std::thread::JoinHandle;
 use std::sync::mpsc::{channel, Sender, Receiver};
 use std::time::SystemTime;
+use std::fs;
 use humantime::format_rfc3339;
 
 
@@ -104,7 +105,10 @@ fn run_chain_and_save_output(chain: CommandChain) -> Result<i32, Error> {
     let command_on_error = chain.command_on_error;
     for command in commands {
         let timestamp = make_timestamp();
-        // TODO this requires first making the bob-output folder manually:
+        // make a folder for bob output files
+        if fs::create_dir("bob-output").is_ok() {
+            println!("created bob-output directory");
+        } 
         let output_file = format!("bob-output/{}.txt", timestamp);
         let file = File::create(output_file).unwrap();
         let mut buffer = BufWriter::new(file);

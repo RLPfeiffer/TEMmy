@@ -10,14 +10,31 @@ use std::sync::mpsc::{channel, Sender, Receiver};
 use std::time::SystemTime;
 use std::fs;
 use humantime::format_rfc3339;
+extern crate yaml_rust;
+use yaml_rust::YamlLoader;
 
+struct Config {
+    dropbox_dir: String,
+    dropbox_link_dir: String,
+    build_target: String,
+    python_env: String,
+    raw_data_dir: String
+}
 
-// TODO put these in a yaml file for easier deployment on new servers:
-const DROPBOX_DIR: &str = r#"D:\DROPBOX"#;
-const DROPBOX_LINK_DIR: &str = r#"\\OpR-Marc-RC2\Data\DROPBOX"#;
-const BUILD_TARGET: &str = r#"W:\Volumes"#;
-const PYTHON_ENV: &str = r#"C:\Python39\Scripts"#;
-const RAW_DATA_DIR: &str = r#"\\OpR-Marc-Syn3\Data\RawData"#;
+fn config_from_yaml() -> Config {
+    let yaml_str = fs::read_to_string("bob-config.yaml").expect("bob requires a bob-config.yaml file");
+    let docs = YamlLoader::load_from_str(&yaml_str).unwrap();
+    let yaml = &docs[0];
+    Config {
+        dropbox_dir: yaml["dropbox_dir"].as_str().unwrap().to_string(),
+        dropbox_link_dir: yaml["dropbox_link_dir"].as_str().unwrap().to_string(),
+        build_target: yaml["build_target"].as_str().unwrap().to_string(),
+        python_env: yaml["python_env"].as_str().unwrap().to_string(),
+        raw_data_dir: yaml["raw_data_dir"].as_str().unwrap().to_string(),
+    }
+    // TODO have a list of volumes in the yaml file and let them define
+    // import/build/merge/align script chains
+}
 
 fn run_and_filter_output<F>(command: Vec<String>, mut process_line: F) -> Result<i32, Error> 
     where F: FnMut(String) -> () {
@@ -43,7 +60,7 @@ fn run_and_filter_output<F>(command: Vec<String>, mut process_line: F) -> Result
                 }
             },
         }
-    } 
+    }
     Ok(0)
 }
 
@@ -156,13 +173,14 @@ fn run_on_interval_and_filter_output<F>(command: Vec<String>, process_line: F, s
 }
 
 fn send_rc3_build_chain(section: String, is_rebuild: bool, sender: &Sender<CommandChain>) {
-    let temp_volume_dir = format!(r#"{}\RC3{}"#, BUILD_TARGET, section);
-    let mosaic_report_dest = format!(r#"{}\MosaicReports\{}\MosaicReport.html"#, DROPBOX_LINK_DIR, section);
-    let queue_file_dest = format!(r#"{}\queue{}.txt"#, PYTHON_ENV, section);
+    let config = config_from_yaml();
+    let temp_volume_dir = format!(r#"{}\RC3{}"#, config.build_target, section);
+    let mosaic_report_dest = format!(r#"{}\MosaicReports\{}\MosaicReport.html"#, config.dropbox_link_dir, section);
+    let queue_file_dest = format!(r#"{}\queue{}.txt"#, config.python_env, section);
     let source = if is_rebuild {
-        format!(r#"{}\RC3\{}"#, RAW_DATA_DIR, section)
+        format!(r#"{}\RC3\{}"#, config.raw_data_dir, section)
     } else {
-        format!(r#"{}\TEMXCopy\{}"#, DROPBOX_DIR, section)
+        format!(r#"{}\TEMXCopy\{}"#, config.dropbox_dir, section)
     };
     let mut commands = vec![
                 vec![
@@ -194,20 +212,20 @@ fn send_rc3_build_chain(section: String, is_rebuild: bool, sender: &Sender<Comma
                 // a secondary indicator of build failure
                 robocopy_move(
                     format!(r#"{}\MosaicReport"#, temp_volume_dir.clone()),
-                    format!(r#"{}\MosaicReports\{}\MosaicReport\"#, DROPBOX_DIR, section)),
+                    format!(r#"{}\MosaicReports\{}\MosaicReport\"#, config.dropbox_dir, section)),
                 vec![
                     "move".to_string(),
                     format!(r#"{}\MosaicReport.html"#, temp_volume_dir),
                     mosaic_report_dest.clone(),
                 ],
                 // TODO bob queue is no longer a console command, you type Queue: {file} into the CLI
-                rito(format!("{} built automatically. Check {} and run `cd {} && bob queue {}` on Build1 if it looks good", section, mosaic_report_dest, PYTHON_ENV, queue_file_dest)),
+                rito(format!("{} built automatically. Check {} and run `cd {} && bob queue {}` on Build1 if it looks good", section, mosaic_report_dest, config.python_env, queue_file_dest)),
             ];
 
         if !is_rebuild {
             commands.push(robocopy_move(
-                    format!(r#"{}\TEMXCopy\{}"#, DROPBOX_DIR, section),
-                    format!(r#"{}\RC3\{}\"#, RAW_DATA_DIR, section)));
+                    format!(r#"{}\TEMXCopy\{}"#, config.dropbox_dir, section),
+                    format!(r#"{}\RC3\{}\"#, config.raw_data_dir, section)));
             commands.push(rito(format!("{} copied to RawData", section)));
         }
     sender.send(
@@ -219,9 +237,10 @@ fn send_rc3_build_chain(section: String, is_rebuild: bool, sender: &Sender<Comma
 
 // TODO handle rebuild requests (don't make a volume folder, etc.)
 fn send_core_build_chain(section: String, is_rebuild: bool, sender: &Sender<CommandChain>) {
-    let volume_dir = format!(r#"{}\TEMXCopy\{}volume"#, DROPBOX_DIR, section);
-    let build_target = format!(r#"{}\{}"#, BUILD_TARGET, section);
-    let section_dir = format!(r#"{}\TEMXCopy\{}"#, DROPBOX_DIR, section);
+    let config = config_from_yaml();
+    let volume_dir = format!(r#"{}\TEMXCopy\{}volume"#, config.dropbox_dir, section);
+    let build_target = format!(r#"{}\{}"#, config.build_target, section);
+    let section_dir = format!(r#"{}\TEMXCopy\{}"#, config.dropbox_dir, section);
     sender.send(
         CommandChain {
             commands: vec![
@@ -353,6 +372,7 @@ fn spawn_worker_thread(receiver: Receiver<CommandChain>) -> JoinHandle<()> {
 }
 
 fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>) -> JoinHandle<()> {
+    let config = config_from_yaml();
     thread::spawn(move || {
         loop {
             let next_command = receiver.recv().unwrap();
@@ -393,7 +413,7 @@ fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>
                 // Send snapshots to #tem-bot as images
                 Some("Snapshot") => {
                     let snapshot_name = tokens.next().unwrap();
-                    let snapshot_path = format!(r#"{}\{}"#, DROPBOX_DIR, snapshot_name);
+                    let snapshot_path = format!(r#"{}\{}"#, config.dropbox_dir, snapshot_name);
                     run_chain_and_save_output(
                         CommandChain {
                             commands: vec![

@@ -58,7 +58,7 @@ fn test_run_and_filter_output() {
         Ok(code) => assert_eq!(1, code),
         Err(err) => panic!("error {}", err)
     };
-    match run_and_filter_output(vec!["@echo", "Hey", ">".to_string(), "file.txt".to_string()], |_| {}) {
+    match run_and_filter_output(vec!["@echo".to_string(), "Hey".to_string(), ">".to_string(), "file.txt".to_string()], |_| {}) {
         Ok(code) => assert_eq!(0, code),
         Err(err) => panic!("error {}", err)
     };

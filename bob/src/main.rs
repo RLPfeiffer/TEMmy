@@ -439,6 +439,15 @@ fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>
                         command_on_error: rito(format!("bob queue {} failed", queue_file))
                     }).unwrap();
                 },
+                // Add a raw shell command to the queue (i.e. RC3Align)
+                Some("Raw") => {
+                    let command_string = tokens.next().unwrap();
+                    let command:Vec<String> = command_string.split("~").map(|arg| arg.trim().to_string()).collect();
+                    sender.send(CommandChain {
+                        commands: vec![command],
+                        command_on_error: rito(format!("bob raw command '{}' failed", command_string))
+                    }).unwrap();
+                },
                 // This case will be used even if there's no colon in the message
                 Some(other_label) => {
                     println!("{}", other_label);

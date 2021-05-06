@@ -1,5 +1,4 @@
 use duct::cmd;
-use uuid::Uuid;
 use std::io::prelude::*;
 use std::io::BufReader;
 use std::io::BufWriter;
@@ -8,6 +7,9 @@ use std::time::Duration;
 use std::thread;
 use std::thread::JoinHandle;
 use std::sync::mpsc::{channel, Sender, Receiver};
+use std::time::SystemTime;
+use humantime::format_rfc3339;
+
 
 // TODO put these in a yaml file for easier deployment on new servers:
 const DROPBOX_DIR: &str = r#"D:\DROPBOX"#;
@@ -101,15 +103,14 @@ fn run_chain_and_save_output(chain: CommandChain) -> Result<i32, Error> {
     let commands = chain.commands;
     let command_on_error = chain.command_on_error;
     for command in commands {
-        // TODO uuids are confusing for this when they could be timestamps.
-        let uuid = Uuid::new_v4();
+        let timestamp = make_timestamp();
         // TODO this requires first making the bob-output folder manually:
-        let output_file = format!("bob-output/{}.txt", uuid);
+        let output_file = format!("bob-output/{}.txt", timestamp);
         let file = File::create(output_file).unwrap();
         let mut buffer = BufWriter::new(file);
         buffer.write_all(format!("{:?}\n", command).as_bytes()).unwrap();
         buffer.flush().unwrap();
-        println!("{} {:?}", uuid, command);
+        println!("{} {:?}", timestamp, command);
         let is_robocopy = command[0] == "robocopy";
         match run_and_filter_output(command.clone(), |line| {
             buffer.write_all(line.as_bytes()).unwrap();
@@ -426,6 +427,20 @@ fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>
     })
 }
 
+fn make_timestamp() -> String {
+    let sys_time = SystemTime::now();
+    format!("{}", format_rfc3339(sys_time)).replace(":", "-")
+}
+
+#[test]
+fn test_make_timestamp() {
+    // The timestamp needs to contain hour/min/sec to disambiguate from others
+    match make_timestamp() {
+        stamp if stamp.chars().count() >= 20 => println!("good"),
+        _ => panic!("timestamp too short")
+    };
+}
+ 
 fn main() {
     // Create a channel for all Bob commands to be sent safely to a command processor thread:
     let (command_sender, command_receiver) = channel();

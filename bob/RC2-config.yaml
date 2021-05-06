@@ -1,0 +1,5 @@
+dropbox_dir: 'D:\DROPBOX'
+dropbox_link_dir: '\\OpR-Marc-RC2\Data\DROPBOX'
+build_target: 'W:\Volumes'
+python_env: 'C:\Python39\Scripts'
+raw_data_dir: '\\OpR-Marc-Syn3\Data\RawData'

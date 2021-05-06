@@ -433,14 +433,14 @@ fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>
 
 fn make_timestamp() -> String {
     let sys_time = SystemTime::now();
-    format!("{}", format_rfc3339(sys_time)).replace(":", "-")
+    format!("{}", format_rfc3339(sys_time)).replace(":", "-").replace(".", "-")
 }
 
 #[test]
 fn test_make_timestamp() {
     // The timestamp needs to contain hour/min/sec to disambiguate from others
     match make_timestamp() {
-        stamp if stamp.chars().count() >= 20 => println!("good"),
+        stamp if stamp.chars().count() >= 20 => println!("{}", stamp),
         _ => panic!("timestamp too short")
     };
 }

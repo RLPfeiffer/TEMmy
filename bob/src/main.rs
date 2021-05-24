@@ -18,7 +18,8 @@ struct Config {
     dropbox_link_dir: String,
     build_target: String,
     python_env: String,
-    raw_data_dir: String
+    raw_data_dir: String,
+    notification_dir: String,
 }
 
 fn config_from_yaml() -> Config {
@@ -31,6 +32,7 @@ fn config_from_yaml() -> Config {
         build_target: yaml["build_target"].as_str().unwrap().to_string(),
         python_env: yaml["python_env"].as_str().unwrap().to_string(),
         raw_data_dir: yaml["raw_data_dir"].as_str().unwrap().to_string(),
+        notification_dir: yaml["notification_dir"].as_str().unwrap().to_string(),
     }
     // TODO have a list of volumes in the yaml file and let them define
     // import/build/merge/align script chains
@@ -279,9 +281,10 @@ fn lines_from_file(filename: impl AsRef<Path>) -> Vec<String> {
 }
 
 fn spawn_tem_message_reader_thread(tem_name: &'static str, sender: Sender<String>) -> JoinHandle<()> {
+    let config = config_from_yaml();
     thread::spawn(move || {
         run_on_interval_and_filter_output(
-            vec![format!(r#"type N:\{0}\message.txt && break>N:\{0}\message.txt"#, tem_name)],
+            vec![format!(r#"type {0}\{1}\message.txt && break>{0}\{1}\message.txt"#, config.notification_dir, tem_name)],
             |output| {
                 sender.send(format!("{}: {}", tem_name, output)).unwrap();
             }, 

@@ -8,4 +8,4 @@ Setup:
 
 1. Install [rito](github.com/nqnstudios/rito) and set up environment variables for rito slack support
 1. Map network drives for RawData, W:, DROPBOX, Notification, etc. 
-1. make bob-config.yaml
+1. copy RC2-config.yaml or Build1-config.yaml to your Python Scripts directory/bob-config.yaml and edit the values as needed

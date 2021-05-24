@@ -185,51 +185,54 @@ fn send_rc3_build_chain(section: String, is_rebuild: bool, sender: &Sender<Comma
         format!(r#"{}\TEMXCopy\{}"#, config.dropbox_dir, section)
     };
     let mut commands = vec![
-                vec![
-                    "RC3Import".to_string(),
-                    temp_volume_dir.clone(),
-                    source,
-                ],
-                vec![
-                    "RC3Build".to_string(),
-                    temp_volume_dir.clone()
-                ],
-                // TODO check that a tileset was generated
-                // Automatic build finished with code 0. Prepare a queue file for the next build step.
-                vec![
-                    "@echo".to_string(),
-                    format!(r#"copy-section-links~W:\Volumes\RC3\TEM\VolumeData.xml~{}\TEM\VolumeData.xml~bob-output"#, temp_volume_dir),
-                    ">".to_string(),
-                    queue_file_dest.clone(),
-                ],
-                vec![
-                    "@echo".to_string(),
-                    format!(r#"robocopy~{}\TEM~W:\Volumes\RC3\TEM\~/MT:32~/LOG:RC3Robocopy.log~/MOVE~/nfl~/nc~/ns~/np~/E~/TEE~/R:3~/W:1~/REG~/DCOPY:DAT~/XO"#, temp_volume_dir),
-                    ">>".to_string(),
-                    queue_file_dest.clone(),
-                ],
-                // TODO the queue file could also delete itself after it finishes 
-                // Move the automatic build's mosaicreport files to DROPBOX and send a link.
-                // If the mosaicreport files aren't there, the chain will fail (as it should) because that's
-                // a secondary indicator of build failure
-                robocopy_move(
-                    format!(r#"{}\MosaicReport"#, temp_volume_dir.clone()),
-                    format!(r#"{}\MosaicReports\{}\MosaicReport\"#, config.dropbox_dir, section)),
-                vec![
-                    "move".to_string(),
-                    format!(r#"{}\MosaicReport.html"#, temp_volume_dir),
-                    mosaic_report_dest.clone(),
-                ],
-                // TODO bob queue is no longer a console command, you type Queue: {file} into the CLI
-                rito(format!("{} built automatically. Check {} and run `cd {} && bob queue {}` on Build1 if it looks good", section, mosaic_report_dest, config.python_env, queue_file_dest)),
-            ];
+        vec![
+            "RC3Import".to_string(),
+            temp_volume_dir.clone(),
+            source,
+        ],
+        vec![
+            "RC3Build".to_string(),
+            temp_volume_dir.clone()
+        ],
+        // TODO check that a tileset was generated.
+        // Automatic build finished with code 0. Prepare a queue file for the next build step.
+        vec![
+            "@echo".to_string(),
+            format!(r#"copy-section-links~W:\Volumes\RC3\TEM\VolumeData.xml~{}\TEM\VolumeData.xml~bob-output"#, temp_volume_dir),
+            ">".to_string(),
+            queue_file_dest.clone(),
+        ],
+        vec![
+            "@echo".to_string(),
+            format!(r#"robocopy~{}\TEM~W:\Volumes\RC3\TEM\~/MT:32~/LOG:RC3Robocopy.log~/MOVE~/nfl~/nc~/ns~/np~/E~/TEE~/R:3~/W:1~/REG~/DCOPY:DAT~/XO"#, temp_volume_dir),
+            ">>".to_string(),
+            queue_file_dest.clone(),
+        ],
+        // TODO the queue file could also delete itself after it finishes 
 
-        if !is_rebuild {
-            commands.push(robocopy_move(
-                    format!(r#"{}\TEMXCopy\{}"#, config.dropbox_dir, section),
-                    format!(r#"{}\RC3\{}\"#, config.raw_data_dir, section)));
-            commands.push(rito(format!("{} copied to RawData", section)));
-        }
+        // Move the automatic build's mosaicreport files to DROPBOX and send a link.
+        // If the mosaicreport files aren't there, the chain will fail (as it should) because that's
+        // a secondary indicator of build failure
+        robocopy_move(
+            format!(r#"{}\MosaicReport"#, temp_volume_dir.clone()),
+            format!(r#"{}\MosaicReports\{}\MosaicReport\"#, config.dropbox_dir, section)),
+        vec![
+            "move".to_string(),
+            format!(r#"{}\MosaicReport.html"#, temp_volume_dir),
+            mosaic_report_dest.clone(),
+        ],
+        // TODO bob queue is no longer a console command, you type Queue: {file} into the CLI
+        // and soon enough, you type Merge:
+        rito(format!("{} built automatically. Check {} and run `cd {} && bob queue {}` on Build1 if it looks good", section, mosaic_report_dest, config.python_env, queue_file_dest)),
+    ];
+
+    if !is_rebuild {
+        commands.push(robocopy_move(
+                format!(r#"{}\TEMXCopy\{}"#, config.dropbox_dir, section),
+                format!(r#"{}\RC3\{}\"#, config.raw_data_dir, section)));
+        commands.push(rito(format!("{} copied to RawData", section)));
+    }
+
     sender.send(
         CommandChain {
             commands: commands,
@@ -237,34 +240,59 @@ fn send_rc3_build_chain(section: String, is_rebuild: bool, sender: &Sender<Comma
         }).unwrap();
 }
 
-// TODO handle rebuild requests (don't make a volume folder, etc.)
 fn send_core_build_chain(section: String, is_rebuild: bool, sender: &Sender<CommandChain>) {
     let config = config_from_yaml();
-    let volume_dir = format!(r#"{}\TEMXCopy\{}volume"#, config.dropbox_dir, section);
-    let build_target = format!(r#"{}\{}"#, config.build_target, section);
+
     let section_dir = format!(r#"{}\TEMXCopy\{}"#, config.dropbox_dir, section);
-    sender.send(
-        CommandChain {
-            commands: vec![
-                // Put the section in a "volume" folder because TEMCoreBuildFast expects a volume, not a single section
-                vec![
-                    "mkdir".to_string(),
-                    volume_dir.clone(),
-                ],
-                vec![
-                    "move".to_string(),
-                    section_dir,
-                    volume_dir.clone(),
-                ],
-                vec![
-                    "TEMCoreBuildFast".to_string(),
-                    build_target,
-                    volume_dir,
-                ],
-                rito(format!("{0} built automatically.", section)),
-            ],
-            command_on_error: rito(format!("automatic core build for {0} failed", section))
-        }).unwrap();
+    let section_parts = section.split("_").collect::<Vec<&str>>();
+
+    match &section_parts[..] {
+        ["core", volume, section_number] => {
+            let volume_dir = format!(r#"{}\TEMXCopy\{}"#, config.dropbox_dir, volume.clone());
+            let mosaic_report_dest = format!(r#"{}\MosaicReports\{}\MosaicReport.html"#, config.dropbox_link_dir, volume.clone());
+            let build_target = format!(r#"{}\{}"#, config.build_target, volume.clone());
+
+            // If the volume dir doesn't exist, make it
+            fs::create_dir_all(&volume_dir).unwrap();
+
+            sender.send(
+                CommandChain {
+                    commands: vec![
+                        // Move section into volume dir
+                        vec![
+                            "move".to_string(),
+                            section_dir,
+                            format!(r#"{}\{}"#, volume_dir.clone(), section_number.clone()),
+                        ],
+
+                        // Run TEMCoreBuildFast
+                        vec![
+                            "TEMCoreBuildFast".to_string(),
+                            build_target.clone(),
+                            volume_dir.clone(),
+                        ],
+
+                        // Move the automatic build's mosaicreport files to DROPBOX and send a link.
+                        // If the mosaicreport files aren't there, the chain will fail (as it should) because that's
+                        // a secondary indicator of build failure
+                        robocopy_move(
+                            format!(r#"{}\MosaicReport"#, volume_dir.clone()),
+                            format!(r#"{}\MosaicReports\{}\MosaicReport\"#, config.dropbox_dir, volume.clone())),
+                        vec![
+                            "move".to_string(),
+                            format!(r#"{}\MosaicReport.html"#, build_target.clone()),
+                            mosaic_report_dest.clone(),
+                        ],
+                        rito(format!("{} built automatically. Check {} and run `Raw: TEMCoreBuildOptimizeTiles~{}` if it looks good", volume, mosaic_report_dest, volume_dir)),
+                    ],
+                    command_on_error: rito(format!("automatic core build for {0} failed", section))
+                }).unwrap();
+        },
+        _ => {
+            run_and_print_output(rito(format!("{0} should be named with pattern core_[volume]_[section] and was not built automatically", section))).unwrap();
+        },
+    };
+    
 }
 
 // Source: https://stackoverflow.com/a/35820003
@@ -284,7 +312,7 @@ fn spawn_tem_message_reader_thread(tem_name: &'static str, sender: Sender<String
     let config = config_from_yaml();
     thread::spawn(move || {
         run_on_interval_and_filter_output(
-            vec![format!(r#"type {0}\{1}\message.txt && break>{0}\{1}\message.txt"#, config.notification_dir, tem_name)],
+            vec![format!(r#"type {0}\{1}\message.txt && break>N:\{1}\message.txt"#, config.notification_dir, tem_name)],
             |output| {
                 sender.send(format!("{}: {}", tem_name, output)).unwrap();
             }, 

@@ -108,12 +108,13 @@ fn run_chain_and_save_output(chain: CommandChain) -> Result<i32, Error> {
             println!("created bob-output directory");
         } 
         let output_file = format!("bob-output/{}.txt", timestamp);
-        let file = File::create(output_file).unwrap();
+        let file = File::create(output_file.clone()).unwrap();
         let mut buffer = BufWriter::new(file);
         buffer.write_all(format!("{:?}\n", command).as_bytes()).unwrap();
         buffer.flush().unwrap();
         println!("{} {:?}", timestamp, command);
         let is_robocopy = command[0] == "robocopy";
+
         match run_and_filter_output(command.clone(), |line| {
             buffer.write_all(line.as_bytes()).unwrap();
             buffer.write_all(b"\r\n").unwrap();
@@ -123,10 +124,14 @@ fn run_chain_and_save_output(chain: CommandChain) -> Result<i32, Error> {
             Ok(error_code) if is_robocopy && (error_code == 1 || error_code == 3) => continue, // Robocopy returns 1 on success. yikes
             Ok(error_code) => {
                 println!("Error code {} from {:?}", error_code, command);
+                run_and_print_output(rito(format!("Error code {} from {:?}", error_code, command)))?;
+                run_and_print_output(rito_image(output_file.clone()))?;
                 return run_and_print_output(command_on_error);
             },
             Err(err) => {
                 println!("Error {} from {:?}", err, command);
+                run_and_print_output(rito(format!("Error {} from {:?}", err, command)))?;
+                run_and_print_output(rito_image(output_file.clone()))?;
                 return run_and_print_output(command_on_error);
             },
         }
@@ -142,10 +147,12 @@ fn run_on_interval_and_filter_output<F>(command: Vec<String>, process_line: F, s
             Ok(0) => (),
             Ok(error_code) => {
                 println!("Error code {} from {:?}", error_code, command);
+                run_and_print_output(rito(format!("Error code {} from {:?}", error_code, command)))?;
                 return run_and_print_output(command_on_error);
             },
             Err(err) => {
                 println!("Error {} from {:?}", err, command);
+                run_and_print_output(rito(format!("Error {} from {:?}", err, command)))?;
                 return run_and_print_output(command_on_error);
             },
         }

@@ -341,7 +341,7 @@ fn spawn_tem_message_reader_thread(tem_name: &'static str, sender: Sender<String
     let config = config_from_yaml();
     thread::spawn(move || {
         run_on_interval_and_filter_output(
-            vec![format!(r#"type {0}\{1}\message.txt && break>N:\{1}\message.txt"#, config.notification_dir, tem_name)],
+            vec![format!(r#"type {0}\{1}\message.txt && break>{0}\{1}\message.txt"#, config.notification_dir, tem_name)],
             |output| {
                 sender.send(format!("{}: {}", tem_name, output)).unwrap();
             }, 
@@ -439,7 +439,7 @@ fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>
             println!("saving the Message output: {}", next_command);
             let mut tokens = next_command.split(": ");
             let tem_name = tokens.next().unwrap();
-            run_and_print_output(vec![format!(r#"@echo {} >> N:\{}\processedMessage.txt"#, next_command, tem_name)]).unwrap();
+            run_and_print_output(vec![format!(r#"@echo {} >> {}\{}\processedMessage.txt"#, config.notification_dir, next_command, tem_name)]).unwrap();
             match tokens.next() {
                 Some("Copied") => {
                     let section = tokens.next().unwrap().split(" ").next().unwrap();

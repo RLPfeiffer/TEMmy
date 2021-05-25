@@ -12,15 +12,11 @@ import xml.etree.ElementTree as ET
 
 if __name__ == "__main__":
     if len(sys.argv) != 4:
-        print("copy-section-links requires args [volumedata.xml] [volumedata.temp] [backup directory]")
+        print("copy-section-links requires args [volumedata.xml of the main volume] [volumedata.xml of the temporary volume] [backup directory]")
         exit(1)
     existing_volume_data = sys.argv[1]
     new_volume_data = sys.argv[2]
     backup_dir = sys.argv[3]
-
-    #if not (existing_volume_data.endswith('.xml') and new_volume_data.endswith('.temp')):
-    #    print("You are probably passing the first two arguments in backwards")
-    #    exit(1)
 
     # Before automatically doing anything to a volume's files, make a backup
     timestamp = datetime.now().strftime("%d-%b-%Y-%H-%M-%S")

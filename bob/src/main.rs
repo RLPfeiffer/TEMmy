@@ -180,7 +180,6 @@ fn send_rc3_build_chain(section: String, is_rebuild: bool, sender: &Sender<Comma
     let config = config_from_yaml();
     let temp_volume_dir = format!(r#"{}\RC3{}"#, config.build_target, section);
     let mosaic_report_dest = format!(r#"{}\MosaicReports\{}\MosaicReport.html"#, config.dropbox_link_dir, section);
-    let queue_file_dest = format!(r#"{}\queue{}.txt"#, config.python_env, section);
     let source = if is_rebuild {
         format!(r#"{}\RC3\{}"#, config.raw_data_dir, section)
     } else {
@@ -196,21 +195,9 @@ fn send_rc3_build_chain(section: String, is_rebuild: bool, sender: &Sender<Comma
             "RC3Build".to_string(),
             temp_volume_dir.clone()
         ],
+        // Automatic build finished with code 0. 
+
         // TODO check that a tileset was generated.
-        // Automatic build finished with code 0. Prepare a queue file for the next build step.
-        vec![
-            "@echo".to_string(),
-            format!(r#"copy-section-links~W:\Volumes\RC3\TEM\VolumeData.xml~{}\TEM\VolumeData.xml~bob-output"#, temp_volume_dir),
-            ">".to_string(),
-            queue_file_dest.clone(),
-        ],
-        vec![
-            "@echo".to_string(),
-            format!(r#"robocopy~{}\TEM~W:\Volumes\RC3\TEM\~/MT:32~/LOG:RC3Robocopy.log~/MOVE~/nfl~/nc~/ns~/np~/E~/TEE~/R:3~/W:1~/REG~/DCOPY:DAT~/XO"#, temp_volume_dir),
-            ">>".to_string(),
-            queue_file_dest.clone(),
-        ],
-        // TODO the queue file could also delete itself after it finishes 
 
         // Move the automatic build's mosaicreport files to DROPBOX and send a link.
         // If the mosaicreport files aren't there, the chain will fail (as it should) because that's
@@ -223,9 +210,7 @@ fn send_rc3_build_chain(section: String, is_rebuild: bool, sender: &Sender<Comma
             format!(r#"{}\MosaicReport.html"#, temp_volume_dir),
             mosaic_report_dest.clone(),
         ],
-        // TODO bob queue is no longer a console command, you type Queue: {file} into the CLI
-        // and soon enough, you type Merge:
-        rito(format!("{} built automatically. Check {} and run `cd {} && bob queue {}` on Build1 if it looks good", section, mosaic_report_dest, config.python_env, queue_file_dest)),
+        rito(format!("{0} built automatically. Check {1} and run `Merge: {0}` if it looks good", section, mosaic_report_dest)),
     ];
 
     if !is_rebuild {
@@ -239,6 +224,36 @@ fn send_rc3_build_chain(section: String, is_rebuild: bool, sender: &Sender<Comma
         CommandChain {
             commands: commands,
             command_on_error: rito(format!("automatic copy and build for {} failed", section))
+        }).unwrap();
+}
+
+// TODO not all merges will be RC3 merges forever
+fn send_rc3_merge_chain(section: String, sender: &Sender<CommandChain>) {
+    let config = config_from_yaml();
+
+    let temp_volume_dir = format!(r#"{}\RC3{}"#, config.build_target, section);
+
+    sender.send(
+        CommandChain {
+            commands: vec![
+                vec![    
+                    "copy-section-links".to_string(),
+                    r#"W:\Volumes\RC3\TEM\VolumeData.xml"#.to_string(), // TODO this is RC3 hard-coded
+                    format!(r#"{}\TEM\VolumeData.xml"#, temp_volume_dir),
+                    "bob-output".to_string()
+                ],
+                robocopy_move(
+                    format!(r#"{}\TEM"#, temp_volume_dir),
+                    r#"W:\Volumes\RC3\TEM\"#.to_string()),
+                // Delete the temp volume
+                vec![
+                    "rmdir".to_string(),
+                    "/S".to_string(),
+                    "/Q".to_string(),
+                    temp_volume_dir
+                ],
+            ],
+            command_on_error: rito(format!("automatic merge for {} failed", section))
         }).unwrap();
 }
 
@@ -482,6 +497,11 @@ fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>
 
                             command_on_error: rito(format!("snapshot -> slack failed for {}", snapshot_name))
                         }).unwrap();
+                },
+                // Merge automatically-built RC3 sections with the full volume
+                Some("Merge") => {
+                    let section = tokens.next().unwrap();
+                    send_rc3_merge_chain(section.to_string(), &sender);
                 },
                 // When run with the `queue` subcommand, queue commands from a text file and save their outputs:
                 Some("Queue") => {

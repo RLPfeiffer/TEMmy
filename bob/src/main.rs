@@ -17,7 +17,6 @@ struct Config {
     dropbox_dir: String,
     dropbox_link_dir: String,
     build_target: String,
-    python_env: String,
     raw_data_dir: String,
     notification_dir: String,
     core_deployment_dir: String,
@@ -31,7 +30,6 @@ fn config_from_yaml() -> Config {
         dropbox_dir: yaml["dropbox_dir"].as_str().unwrap().to_string(),
         dropbox_link_dir: yaml["dropbox_link_dir"].as_str().unwrap().to_string(),
         build_target: yaml["build_target"].as_str().unwrap().to_string(),
-        python_env: yaml["python_env"].as_str().unwrap().to_string(),
         raw_data_dir: yaml["raw_data_dir"].as_str().unwrap().to_string(),
         notification_dir: yaml["notification_dir"].as_str().unwrap().to_string(),
         core_deployment_dir: yaml["core_deployment_dir"].as_str().unwrap().to_string(),
@@ -94,28 +92,7 @@ fn run_and_print_output(command: Vec<String>) -> Result<i32, Error> {
     })
 }
 
-/* If greater flexibility is needed than run_chain_and_save_output, this might be worth bringing back
-fn run_chain_and_filter_output<F>(commands:Vec<Vec<&str>>, process_line: F, command_on_error: Vec<&str>) -> Result<i32, Error>
-    where F: Fn(String) -> () {
-
-    for command in commands {
-        match run_and_filter_output(&command, &process_line) {
-            Ok(0) => continue,
-            Ok(error_code) => {
-                println!("Error code {} from {:?}", error_code, command);
-                return run_and_print_output(command_on_error);
-            },
-            Err(err) => {
-                println!("Error {} from {:?}", err, command);
-                return run_and_print_output(command_on_error);
-            },
-        }
-    }
-    Ok(0)
-}
-*/
-
-// TODO implement .bob fileformat for queues, that also include a command on error at the end & can be parsed to this
+// TODO allow parsing .cmd files into this (will need to arguments tokenize properly) (ignoring REM and other things)
 struct CommandChain {
     commands: Vec<Vec<String>>,
     command_on_error: Vec<String>,
@@ -257,7 +234,7 @@ fn send_rc3_merge_chain(section: String, sender: &Sender<CommandChain>) {
         }).unwrap();
 }
 
-fn send_core_build_chain(section: String, is_rebuild: bool, sender: &Sender<CommandChain>) {
+fn send_core_build_chain(section: String, _is_rebuild: bool, sender: &Sender<CommandChain>) {
     let config = config_from_yaml();
 
     let section_dir = format!(r#"{}\TEMXCopy\{}"#, config.dropbox_dir, section);
@@ -275,6 +252,7 @@ fn send_core_build_chain(section: String, is_rebuild: bool, sender: &Sender<Comm
             sender.send(
                 CommandChain {
                     commands: vec![
+                        // TODO rebuilds don't need to do this:
                         // Move section into volume dir
                         vec![
                             "move".to_string(),
@@ -479,8 +457,7 @@ fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>
                     // handle RC3 rebuilds by building FROM rawdata
                     else {
                         println!("rebuilding {}", section);
-                        // copy to rawdata, automatically build to its own section
-                        // (but do this in another thread, so notifications still pipe to Slack for other messages)
+                        // build FROM rawdata, and don't need to copy to it afterwards.
                         send_rc3_build_chain(section.to_string(), true, &sender);
                     }
 

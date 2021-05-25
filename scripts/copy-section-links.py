@@ -1,5 +1,5 @@
 '''
-Append section links from a D:\ drive build to the existing volume's VolumeData.xml section links.
+Append section links from a temporary volume to an existing volume's VolumeData.xml section links.
 '''
 
 import sys

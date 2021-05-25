@@ -20,6 +20,7 @@ struct Config {
     python_env: String,
     raw_data_dir: String,
     notification_dir: String,
+    core_deployment_dir: String,
 }
 
 fn config_from_yaml() -> Config {
@@ -33,6 +34,7 @@ fn config_from_yaml() -> Config {
         python_env: yaml["python_env"].as_str().unwrap().to_string(),
         raw_data_dir: yaml["raw_data_dir"].as_str().unwrap().to_string(),
         notification_dir: yaml["notification_dir"].as_str().unwrap().to_string(),
+        core_deployment_dir: yaml["core_deployment_dir"].as_str().unwrap().to_string(),
     }
     // TODO have a list of volumes in the yaml file and let them define
     // import/build/merge/align script chains
@@ -276,14 +278,14 @@ fn send_core_build_chain(section: String, is_rebuild: bool, sender: &Sender<Comm
                         // If the mosaicreport files aren't there, the chain will fail (as it should) because that's
                         // a secondary indicator of build failure
                         robocopy_move(
-                            format!(r#"{}\MosaicReport"#, volume_dir.clone()),
+                            format!(r#"{}\MosaicReport"#, build_target.clone()),
                             format!(r#"{}\MosaicReports\{}\MosaicReport\"#, config.dropbox_dir, volume.clone())),
                         vec![
                             "move".to_string(),
                             format!(r#"{}\MosaicReport.html"#, build_target.clone()),
                             mosaic_report_dest.clone(),
                         ],
-                        rito(format!("{} built automatically. Check {} and run `Raw: TEMCoreBuildOptimizeTiles~{}` if it looks good", volume, mosaic_report_dest, volume_dir)),
+                        rito(format!("{0} built automatically. Check {1}, and if all sections have been built properly, run `Deploy: {0}` if it looks good", volume, mosaic_report_dest)),
                     ],
                     command_on_error: rito(format!("automatic core build for {0} failed", section))
                 }).unwrap();
@@ -293,6 +295,33 @@ fn send_core_build_chain(section: String, is_rebuild: bool, sender: &Sender<Comm
         },
     };
     
+}
+
+fn send_core_deploy_chain(volume: String, sender: &Sender<CommandChain>) {
+    let config = config_from_yaml();
+
+    let volume_dir = format!(r#"{}\{}"#, config.build_target.clone(), volume.clone());
+    let deploy_dir = format!(r#"{}\{}"#, config.core_deployment_dir.clone(), volume.clone());
+
+    sender.send(
+        CommandChain {
+            commands: vec![
+                robocopy_move(
+                    volume_dir.clone(),
+                    format!(r#"{}\"#,deploy_dir.clone())),
+                vec![
+                    "TEMCoreBuildOptimizeTiles".to_string(),
+                    deploy_dir.clone(),
+                ],
+                vec![
+                    "add-volume-path".to_string(),
+                    format!(r#"{}\Mosaic.VikingXML"#, deploy_dir.clone()),
+                    "bob-output".to_string() // backup dir for Mosaic.VikingXML files
+                ],
+                rito(format!(r#"{0} might be ready! Check http://storage1.connectomes.utah.edu/{0}/Mosaic.VikingXML in Viking"#, volume))
+            ],
+            command_on_error: rito(format!("automatic core deployment for {0} failed", volume))
+        }).unwrap();
 }
 
 // Source: https://stackoverflow.com/a/35820003
@@ -478,6 +507,11 @@ fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>
                         commands: vec![command],
                         command_on_error: rito(format!("bob raw command '{}' failed", command_string))
                     }).unwrap();
+                },
+                // Deploy a core capture volume
+                Some("Deploy") => {
+                    let volume = tokens.next().unwrap();
+                    send_core_deploy_chain(volume.to_string(), &sender);
                 },
                 // This case will be used even if there's no colon in the message
                 Some(other_label) => {

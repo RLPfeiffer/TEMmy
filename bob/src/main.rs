@@ -241,7 +241,7 @@ fn send_rc3_merge_chain(section: String, sender: &Sender<CommandChain>) {
         }).unwrap();
 }
 
-fn send_core_build_chain(section: String, _is_rebuild: bool, sender: &Sender<CommandChain>) {
+fn send_core_build_chain(section: String, is_rebuild: bool, sender: &Sender<CommandChain>) {
     let config = config_from_yaml();
 
     let section_dir = format!(r#"{}\TEMXCopy\{}"#, config.dropbox_dir, section);
@@ -256,37 +256,41 @@ fn send_core_build_chain(section: String, _is_rebuild: bool, sender: &Sender<Com
             // If the volume dir doesn't exist, make it
             fs::create_dir_all(&volume_dir).unwrap();
 
+            let mut commands = vec![
+                // Run TEMCoreBuildFast
+                vec![
+                    "TEMCoreBuildFast".to_string(),
+                    build_target.clone(),
+                    volume_dir.clone(),
+                ],
+
+                // Move the automatic build's mosaicreport files to DROPBOX and send a link.
+                // If the mosaicreport files aren't there, the chain will fail (as it should) because that's
+                // a secondary indicator of build failure
+                robocopy_move(
+                    format!(r#"{}\MosaicReport"#, build_target.clone()),
+                    format!(r#"{}\MosaicReports\{}\MosaicReport\"#, config.dropbox_dir, volume.clone())),
+                vec![
+                    "move".to_string(),
+                    format!(r#"{}\MosaicReport.html"#, build_target.clone()),
+                    mosaic_report_dest.clone(),
+                ],
+                rito(format!("{0} built automatically. Check {1}, and if all sections have been built properly, run `Deploy: {0}` if it looks good", volume, mosaic_report_dest)),
+            ];
+
+            // Unless this a rebuild attempt, sections need to be moved to their volume directory:
+            if !is_rebuild {
+                // Move section into volume dir
+                commands.insert(0, vec![
+                    "move".to_string(),
+                    section_dir,
+                    format!(r#"{}\{}"#, volume_dir.clone(), section_number.clone()),
+                ]);
+            }
+
             sender.send(
                 CommandChain {
-                    commands: vec![
-                        // TODO rebuilds don't need to do this:
-                        // Move section into volume dir
-                        vec![
-                            "move".to_string(),
-                            section_dir,
-                            format!(r#"{}\{}"#, volume_dir.clone(), section_number.clone()),
-                        ],
-
-                        // Run TEMCoreBuildFast
-                        vec![
-                            "TEMCoreBuildFast".to_string(),
-                            build_target.clone(),
-                            volume_dir.clone(),
-                        ],
-
-                        // Move the automatic build's mosaicreport files to DROPBOX and send a link.
-                        // If the mosaicreport files aren't there, the chain will fail (as it should) because that's
-                        // a secondary indicator of build failure
-                        robocopy_move(
-                            format!(r#"{}\MosaicReport"#, build_target.clone()),
-                            format!(r#"{}\MosaicReports\{}\MosaicReport\"#, config.dropbox_dir, volume.clone())),
-                        vec![
-                            "move".to_string(),
-                            format!(r#"{}\MosaicReport.html"#, build_target.clone()),
-                            mosaic_report_dest.clone(),
-                        ],
-                        rito(format!("{0} built automatically. Check {1}, and if all sections have been built properly, run `Deploy: {0}` if it looks good", volume, mosaic_report_dest)),
-                    ],
+                    commands: commands,
                     command_on_error: rito(format!("automatic core build for {0} failed", section))
                 }).unwrap();
         },

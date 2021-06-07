@@ -112,7 +112,7 @@ fn run_chain_and_save_output(chain: CommandChain) -> Result<i32, Error> {
         let mut buffer = BufWriter::new(file);
         buffer.write_all(format!("{:?}\n", command).as_bytes()).unwrap();
         buffer.flush().unwrap();
-        println!("{} {:?}", timestamp, command);
+        println!("{} {:?}", output_file.clone(), command);
         let is_robocopy = command[0] == "robocopy";
 
         match run_and_filter_output(command.clone(), |line| {

@@ -9,9 +9,11 @@ use std::thread::JoinHandle;
 use std::sync::mpsc::{channel, Sender, Receiver};
 use std::time::SystemTime;
 use std::fs;
+use std::convert::TryInto;
 use humantime::format_rfc3339;
 extern crate yaml_rust;
 use yaml_rust::YamlLoader;
+use threadpool::ThreadPool;
 
 struct Config {
     dropbox_dir: String,
@@ -20,6 +22,7 @@ struct Config {
     raw_data_dir: String,
     notification_dir: String,
     core_deployment_dir: String,
+    worker_threads: i64,
 }
 
 fn config_from_yaml() -> Config {
@@ -33,6 +36,7 @@ fn config_from_yaml() -> Config {
         raw_data_dir: yaml["raw_data_dir"].as_str().unwrap().to_string(),
         notification_dir: yaml["notification_dir"].as_str().unwrap().to_string(),
         core_deployment_dir: yaml["core_deployment_dir"].as_str().unwrap().to_string(),
+        worker_threads: yaml["worker_threads"].as_i64().unwrap(),
     }
     // TODO have a list of volumes in the yaml file and let them define
     // import/build/merge/align script chains
@@ -427,10 +431,14 @@ fn spawn_cli_thread(sender: Sender<String>) -> JoinHandle<()> {
 }
 
 fn spawn_worker_thread(receiver: Receiver<CommandChain>) -> JoinHandle<()> {
+    let config = config_from_yaml();
+    let pool = ThreadPool::new(config.worker_threads.try_into().unwrap());
     thread::spawn(move || {
         loop {
             let next_chain = receiver.recv().unwrap();
-            run_chain_and_save_output(next_chain).unwrap();
+            pool.execute(move || {
+                run_chain_and_save_output(next_chain).unwrap();
+            });
         }
     })
 }

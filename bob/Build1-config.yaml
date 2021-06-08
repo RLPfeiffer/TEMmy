@@ -5,3 +5,4 @@ python_env: 'C:\Python39\Scripts'
 raw_data_dir: '\\OpR-Marc-Syn3\Data\RawData'
 notification_dir: 'Y:\DROPBOX\Notification'
 core_deployment_dir: 'X:\Volumes'
+worker_threads: 2

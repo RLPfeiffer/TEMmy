@@ -23,6 +23,7 @@ struct Config {
     notification_dir: String,
     core_deployment_dir: String,
     worker_threads: i64,
+    process_tem_output: bool,
 }
 
 fn config_from_yaml() -> Config {
@@ -37,6 +38,7 @@ fn config_from_yaml() -> Config {
         notification_dir: yaml["notification_dir"].as_str().unwrap().to_string(),
         core_deployment_dir: yaml["core_deployment_dir"].as_str().unwrap().to_string(),
         worker_threads: yaml["worker_threads"].as_i64().unwrap(),
+        process_tem_output: yaml["process_tem_output"].as_bool().unwrap(),
     }
     // TODO have a list of volumes in the yaml file and let them define
     // import/build/merge/align script chains
@@ -556,6 +558,8 @@ fn test_make_timestamp() {
 }
  
 fn main() {
+    let config = config_from_yaml();
+
     // Create a channel for all Bob commands to be sent safely to a command processor thread:
     let (command_sender, command_receiver) = channel();
 
@@ -565,10 +569,12 @@ fn main() {
     spawn_command_thread(command_receiver, chain_sender);
     spawn_worker_thread(chain_receiver);    
 
-    // Two threads simply monitor the notification text files from the TEMs,
-    // and will send lines from them to the command processor thread
-    spawn_tem_message_reader_thread("TEM1", command_sender.clone());
-    spawn_tem_message_reader_thread("TEM2", command_sender.clone());
+    if config.process_tem_output {
+        // Two threads simply monitor the notification text files from the TEMs,
+        // and will send lines from them to the command processor thread
+        spawn_tem_message_reader_thread("TEM1", command_sender.clone());
+        spawn_tem_message_reader_thread("TEM2", command_sender.clone());
+    }
 
     // The CLI thread listens for manually entered CommandChains via queues or raw commands
     spawn_cli_thread(command_sender.clone()).join().unwrap();

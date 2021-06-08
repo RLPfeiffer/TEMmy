@@ -16,7 +16,7 @@ DropboxPath = Y:\DROPBOX
 CopyPath = $DropboxPath\TEMXcopy
 
 # Globally set the variable $DataPath
-DataPath = C:\Users\VALUEDGATANCUSTOMER\Data
+DataPath = E:
 
 # Globally set the variable PrecookMontageD
 PrecookMontageD = 0

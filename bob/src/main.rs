@@ -131,13 +131,13 @@ fn run_chain_and_save_output(chain: CommandChain) -> Result<i32, Error> {
             Ok(error_code) => {
                 println!("Error code {} from {:?}", error_code, command);
                 run_and_print_output(rito(format!("Error code {} from {:?}", error_code, command)))?;
-                run_and_print_output(rito_image(output_file.clone()))?;
+                run_and_print_output(rito_file(output_file.clone()))?;
                 return run_and_print_output(command_on_error);
             },
             Err(err) => {
                 println!("Error {} from {:?}", err, command);
                 run_and_print_output(rito(format!("Error {} from {:?}", err, command)))?;
-                run_and_print_output(rito_image(output_file.clone()))?;
+                run_and_print_output(rito_file(output_file.clone()))?;
                 return run_and_print_output(command_on_error);
             },
         }
@@ -367,6 +367,10 @@ fn rito(message: String) -> Vec<String> {
 
 fn rito_image(path: String) -> Vec<String> {
     vec!["rito".to_string(), "--slack_image".to_string(), "tem-bot".to_string(), path]
+}
+
+fn rito_file(path: String) -> Vec<String> {
+    vec!["rito".to_string(), "--slack_file".to_string(), "tem-bot".to_string(), path]
 }
 
 fn robocopy_move<'a>(source: String, dest: String) -> Vec<String> {

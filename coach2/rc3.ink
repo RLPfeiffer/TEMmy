@@ -34,12 +34,16 @@ Both montages should send a "Started Capturing" message to Slack. Once they do, 
 -> log_in ->
 Next, -> remove_rod ->
 Grab the sticky note. Take it, and the rod, with you to the counter where RC3 grids are kept.
--> switch_grids ->
-Take the rod and sticky note back to the TEM.
++ Another rod is prepared with the next section in it
++ The next section needs to be put in a rod
+    -> switch_grids ->
+- Take the rod and sticky note back to the TEM.
 -> insert_rod ->
+Turn the aperture dial to the red dot. Press "Low mag" on the right-side control panel.
 Wait for the Penning Gauge to stabilize below 30. If you're on TEM2, it will start red and take some time to turn on.
 -> turn_on_filament ->
 On the right-side control panel, ress "Screen Up/Down" on TEM2 or "F2" on TEM1, to lower the screen.
+If the mirror is down, raise it.
 Mag should be 150x, Spot size should be 3. Change it to 1, so you can see the sample better.
 Use the scroll ball to find the center of the tissue.
 Condense the beam to the inner brackets.
@@ -60,7 +64,7 @@ Switch the aperture dial to the second white dot.
 TODO clockwise/counterclockwise?
 On the right-side control panel, press "Mag" on TEM2 or "Mag1" on TEM1.
 On the right-side control panel, turn the "Magnification" dial counter-clockwise to go to mag 2000x.
-Lower the screen. Center the beam. Focus.
+Lower the screen. Center the beam. On TEM1, center the aperture. Focus.
 Press Record.
 Find the center point. Click on it.
 Save a snapshot.
@@ -85,6 +89,7 @@ If the green number representing your polygon's center has shifted, click "Move 
 TODO check for gain referencable artifacts.
 If the image appears, well-focused,
 Navigator > Acquire at Items > HighMagCook/CalibrateAndRecapture
+For high mag cook, move the mirror out of the way.
 Run Script After: Beam Blank if someone will run another capture today, AutoWarmupFilament if someone will run a capture in the morning, or "Turn Off Filament" if it's the last capture on Friday.
 Click "Go"
 When a dialog box opens, type in the folder name where you put the IDOC.
@@ -107,16 +112,16 @@ On TEM1, press the F4 button on the right-side control panel.
 ->->
 
 == turn_off_filament
-Press the Filament "Off" button in TEM Center on the left-side computer. Wait for the "On" button to turn completely gray.
+Press the Filament "Off" button in TEM Center on the TEM computer. Wait for the "On" button to turn completely gray.
 ->->
 
 == log_in
 Wake up the computers by moving the mouse.
-+ The right-side computer is logged out
++ The camera computer is logged out
     Click the mouse or press the spacebar.
     Log into the user account VALUEDGATANCUSTOMER with the password $admin
     ++ Done
-+ The right-side computer is logged in.
++ The camera computer is logged in.
 - + A SerialEM window is open with an overview on it.
     ++ The overview has something very wrong with it
         -> message_nat
@@ -126,7 +131,7 @@ Wake up the computers by moving the mouse.
 + No SerialEM window
 - Open SerialEM.
 
-Check the TEM Center window on the left-side computer.
+Check the TEM Center window on the TEM computer.
 + The Filament "On" button is green
     -> turn_off_filament ->
 + The Filament is off
@@ -155,6 +160,7 @@ Put the lid on the holder and secure both buckles. Very carefully pull up on the
 - ->->
 
 == switch_grids
+
 Set down the sticky note. Take the lid off the rod holder.
 Note the section number and Grid slot from the sticky note.
 Place the foam triangle on the black cylinder so the tip of the rod is above it.

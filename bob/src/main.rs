@@ -14,6 +14,7 @@ use humantime::format_rfc3339;
 extern crate yaml_rust;
 use yaml_rust::YamlLoader;
 use threadpool::ThreadPool;
+use crate::RobocopyType::*;
 
 struct Config {
     dropbox_dir: String,
@@ -122,6 +123,8 @@ fn run_chain_and_save_output(chain: CommandChain) -> Result<i32, Error> {
         let is_robocopy = command[0] == "robocopy";
 
         match run_and_filter_output(command.clone(), |line| {
+            // TODO check if the line matches a set of known error patterns, i.e. 64-thread python error
+            
             buffer.write_all(line.as_bytes()).unwrap();
             buffer.write_all(b"\r\n").unwrap();
             buffer.flush().unwrap();
@@ -189,14 +192,14 @@ fn send_rc3_build_chain(section: String, is_rebuild: bool, sender: &Sender<Comma
 
         // TODO check that a tileset was generated.
 
-        // Move the automatic build's mosaicreport files to DROPBOX and send a link.
+        // Copy the automatic build's mosaicreport files to DROPBOX and send a link.
         // If the mosaicreport files aren't there, the chain will fail (as it should) because that's
         // a secondary indicator of build failure
-        robocopy_move(
+        robocopy_copy(
             format!(r#"{}\MosaicReport"#, temp_volume_dir.clone()),
             format!(r#"{}\MosaicReports\{}\MosaicReport\"#, config.dropbox_dir, section)),
         vec![
-            "move".to_string(),
+            "copy".to_string(),
             format!(r#"{}\MosaicReport.html"#, temp_volume_dir),
             mosaic_report_dest.clone(),
         ],
@@ -270,14 +273,14 @@ fn send_core_build_chain(section: String, is_rebuild: bool, sender: &Sender<Comm
                     volume_dir.clone(),
                 ],
 
-                // Move the automatic build's mosaicreport files to DROPBOX and send a link.
+                // Copy the automatic build's mosaicreport files to DROPBOX and send a link.
                 // If the mosaicreport files aren't there, the chain will fail (as it should) because that's
                 // a secondary indicator of build failure
-                robocopy_move(
+                robocopy_copy(
                     format!(r#"{}\MosaicReport"#, build_target.clone()),
                     format!(r#"{}\MosaicReports\{}\MosaicReport\"#, config.dropbox_dir, volume.clone())),
                 vec![
-                    "move".to_string(),
+                    "copy".to_string(),
                     format!(r#"{}\MosaicReport.html"#, build_target.clone()),
                     mosaic_report_dest.clone(),
                 ],
@@ -373,14 +376,18 @@ fn rito_file(path: String) -> Vec<String> {
     vec!["rito".to_string(), "--slack_file".to_string(), "tem-bot".to_string(), path]
 }
 
-fn robocopy_move<'a>(source: String, dest: String) -> Vec<String> {
-    vec![
+enum RobocopyType {
+    Move,
+    Copy,
+}
+
+fn robocopy<'a>(typ: RobocopyType, source: String, dest: String) -> Vec<String> {
+    let mut command = vec![
         "robocopy".to_string(),
         source,
         dest,
         "/MT:32".to_string(),
         "/LOG:RC3Robocopy.log".to_string(),
-        "/MOVE".to_string(),
         "/nfl".to_string(),
         "/nc".to_string(),
         "/ns".to_string(),
@@ -392,7 +399,22 @@ fn robocopy_move<'a>(source: String, dest: String) -> Vec<String> {
         "/REG".to_string(),
         "/DCOPY:DAT".to_string(),
         "/XO".to_string(),
-    ]
+    ];
+    match typ {
+        Move => {
+            command.push("/MOVE".to_string());
+        },
+        Copy => (),
+    }
+    command
+}
+
+fn robocopy_move<'a>(source: String, dest: String) -> Vec<String> {
+    robocopy(Move, source, dest)
+}
+
+fn robocopy_copy<'a>(source: String, dest: String) -> Vec<String> {
+    robocopy(Copy, source, dest)
 }
 
 use rustyline::error::ReadlineError;

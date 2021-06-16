@@ -68,8 +68,6 @@ fn run_and_filter_output<F>(command: Vec<String>, mut process_line: F) -> Result
                     let re = Regex::new(&fatal_error_regex).unwrap();
                     if re.is_match(&line) {
                         let message = format!("Fatal error `{}` from {:?}", line, command);
-                        run_and_print_output(rito(message.clone())).unwrap();
-                        println!("{}", message);
                         reader.kill().unwrap();
                         return Err(Error::new(ErrorKind::Other, message));
                     }

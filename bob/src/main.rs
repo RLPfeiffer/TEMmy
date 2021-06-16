@@ -3,6 +3,7 @@ use std::io::prelude::*;
 use std::io::BufReader;
 use std::io::BufWriter;
 use std::io::Error;
+use std::io::ErrorKind;
 use std::time::Duration;
 use std::thread;
 use std::thread::JoinHandle;
@@ -15,6 +16,7 @@ extern crate yaml_rust;
 use yaml_rust::YamlLoader;
 use threadpool::ThreadPool;
 use crate::RobocopyType::*;
+use regex::Regex;
 
 struct Config {
     dropbox_dir: String,
@@ -25,6 +27,7 @@ struct Config {
     core_deployment_dir: String,
     worker_threads: i64,
     process_tem_output: bool,
+    fatal_errors: Vec<String>,
 }
 
 fn config_from_yaml() -> Config {
@@ -40,6 +43,7 @@ fn config_from_yaml() -> Config {
         core_deployment_dir: yaml["core_deployment_dir"].as_str().unwrap().to_string(),
         worker_threads: yaml["worker_threads"].as_i64().unwrap(),
         process_tem_output: yaml["process_tem_output"].as_bool().unwrap(),
+        fatal_errors: yaml["fatal_errors"].as_vec().unwrap().clone().iter().map(|y| y.as_str().unwrap().to_string()).collect(),
     }
     // TODO have a list of volumes in the yaml file and let them define
     // import/build/merge/align script chains
@@ -47,6 +51,8 @@ fn config_from_yaml() -> Config {
 
 fn run_and_filter_output<F>(command: Vec<String>, mut process_line: F) -> Result<i32, Error> 
     where F: FnMut(String) -> () {
+
+    let config = config_from_yaml();
     let mut args = vec![String::from("/C")];
     for arg in command {
         args.push(arg);
@@ -56,7 +62,21 @@ fn run_and_filter_output<F>(command: Vec<String>, mut process_line: F) -> Result
     let lines = BufReader::new(&reader).lines();
     for line in lines {
         match line {
-            Ok(line) => process_line(line),
+            Ok(line) => {
+                // check if the line matches a set of known error patterns, i.e. 64-thread python error
+                for fatal_error_regex in &config.fatal_errors {
+                    let re = Regex::new(&fatal_error_regex).unwrap();
+                    if re.is_match(&line) {
+                        let message = format!("Fatal error `{}` from {:?}", line, command);
+                        run_and_print_output(rito(message.clone())).unwrap();
+                        println!("{}", message);
+                        reader.kill().unwrap();
+                        return Err(Error::new(ErrorKind::Other, message));
+                    }
+                }
+ 
+                process_line(line);
+            },
             Err(err) => return {
                 let err_str = format!("{}", err);
                 if err_str.contains("exited with code") {
@@ -99,7 +119,7 @@ fn run_and_print_output(command: Vec<String>) -> Result<i32, Error> {
     })
 }
 
-// TODO allow parsing .cmd files into this (will need to arguments tokenize properly) (ignoring REM and other things)
+// TODO allow parsing .cmd files into this (will need arguments tokenize properly and %1 %2 interpolation) (ignoring REM and other things)
 struct CommandChain {
     commands: Vec<Vec<String>>,
     command_on_error: Vec<String>,
@@ -123,8 +143,7 @@ fn run_chain_and_save_output(chain: CommandChain) -> Result<i32, Error> {
         let is_robocopy = command[0] == "robocopy";
 
         match run_and_filter_output(command.clone(), |line| {
-            // TODO check if the line matches a set of known error patterns, i.e. 64-thread python error
-            
+           
             buffer.write_all(line.as_bytes()).unwrap();
             buffer.write_all(b"\r\n").unwrap();
             buffer.flush().unwrap();

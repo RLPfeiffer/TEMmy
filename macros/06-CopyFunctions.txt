@@ -2,7 +2,7 @@ MacroName CopyFunctions
 
 
 # These values need to be updated before testing
-CopySource = G:\0917
+CopySource = G:\old\
 CopyTarget = Y:\TEMXCopy\
 TargetDirName = 0917
 # Test the functions without side effects:
@@ -33,8 +33,8 @@ Function CheckSpaceForCopyDir 0 0
 
    # Sometimes this fails because cmd is slow and SerialEM doesn't wait for it
    Try
-      # Check the size and units of CopySource
-      RunInShell dir /-c $CopySource > output.txt
+      # Check the size and units of CopySource (using s flag for recursive file size)
+      RunInShell dir /-c /-s $CopySource > output.txt
       ReadStringsFromFile output output.txt
       output = $output[$#output-1]
       CallFunction StringTools::Tokenize $output
@@ -56,6 +56,7 @@ Function CheckSpaceForCopyDir 0 0
       CallFunction StringTools::StringEquals
       If $ReportedValue1 == 1
          If $SourceSize < $TargetSpace
+            Echo There is space to copy $SourceSize $SourceUnits into $TargetSpace $TargetUnits
             CheckSpaceSucceeded = 1
          Endif
       Else

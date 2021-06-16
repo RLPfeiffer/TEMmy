@@ -12,12 +12,12 @@ use std::time::SystemTime;
 use std::fs;
 use std::convert::TryInto;
 use humantime::format_rfc3339;
-extern crate yaml_rust;
-use yaml_rust::YamlLoader;
 use threadpool::ThreadPool;
 use crate::RobocopyType::*;
 use regex::Regex;
+use serde::{Serialize, Deserialize};
 
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 struct Config {
     dropbox_dir: String,
     dropbox_link_dir: String,
@@ -32,19 +32,7 @@ struct Config {
 
 fn config_from_yaml() -> Config {
     let yaml_str = fs::read_to_string("bob-config.yaml").expect("bob requires a bob-config.yaml file");
-    let docs = YamlLoader::load_from_str(&yaml_str).unwrap();
-    let yaml = &docs[0];
-    Config {
-        dropbox_dir: yaml["dropbox_dir"].as_str().unwrap().to_string(),
-        dropbox_link_dir: yaml["dropbox_link_dir"].as_str().unwrap().to_string(),
-        build_target: yaml["build_target"].as_str().unwrap().to_string(),
-        raw_data_dir: yaml["raw_data_dir"].as_str().unwrap().to_string(),
-        notification_dir: yaml["notification_dir"].as_str().unwrap().to_string(),
-        core_deployment_dir: yaml["core_deployment_dir"].as_str().unwrap().to_string(),
-        worker_threads: yaml["worker_threads"].as_i64().unwrap(),
-        process_tem_output: yaml["process_tem_output"].as_bool().unwrap(),
-        fatal_errors: yaml["fatal_errors"].as_vec().unwrap().clone().iter().map(|y| y.as_str().unwrap().to_string()).collect(),
-    }
+    serde_yaml::from_str(&yaml_str).unwrap()
     // TODO have a list of volumes in the yaml file and let them define
     // import/build/merge/align script chains
 }

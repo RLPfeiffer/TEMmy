@@ -27,6 +27,7 @@ struct Config {
     core_deployment_dir: String,
     worker_threads: i64,
     process_tem_output: bool,
+    automatic_builds: bool,
     fatal_errors: Vec<String>,
 }
 
@@ -476,6 +477,16 @@ fn spawn_worker_thread(receiver: Receiver<CommandChain>) -> JoinHandle<()> {
     })
 }
 
+fn send_build_chain(section:&str, is_rebuild: bool, sender: &Sender<CommandChain>) {
+    if section.starts_with("core") {
+        send_core_build_chain(section.to_string(), is_rebuild, &sender);
+    }
+    else {
+        println!("{}", section);
+        send_rc3_build_chain(section.to_string(), false, &sender);
+    }
+}
+
 fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>) -> JoinHandle<()> {
     let config = config_from_yaml();
     thread::spawn(move || {
@@ -487,32 +498,18 @@ fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>
             run_and_print_output(vec![format!(r#"@echo {} >> {}\{}\processedMessage.txt"#, config.notification_dir, next_command, tem_name)]).unwrap();
             match tokens.next() {
                 Some("Copied") => {
+                    if config.automatic_builds {
+                        let section = tokens.next().unwrap().split(" ").next().unwrap();
+                        send_build_chain(section, false, &sender);
+                    }
+                },
+                Some("Build") => {
                     let section = tokens.next().unwrap().split(" ").next().unwrap();
-                    // handle core builds with TEMCoreBuildFast
-                    if section.starts_with("core") {
-                        send_core_build_chain(section.to_string(), false, &sender);
-                    }
-                    // handle RC3 builds by importing and building, then copying to rawdata
-                    else {
-                        println!("{}", section);
-                        // copy to rawdata, automatically build to its own section
-                        // (but do this in another thread, so notifications still pipe to Slack for other messages)
-                        send_rc3_build_chain(section.to_string(), false, &sender);
-                    }
+                    send_build_chain(section, false, &sender);
                 },
                 Some("Rebuild") => {
                     let section = tokens.next().unwrap().split(" ").next().unwrap();
-                    // handle core builds with TEMCoreBuildFast
-                    if section.starts_with("core") {
-                        send_core_build_chain(section.to_string(), true, &sender);
-                    }
-                    // handle RC3 rebuilds by building FROM rawdata
-                    else {
-                        println!("rebuilding {}", section);
-                        // build FROM rawdata, and don't need to copy to it afterwards.
-                        send_rc3_build_chain(section.to_string(), true, &sender);
-                    }
-
+                    send_build_chain(section, true, &sender);
                 },
                 // Send snapshots to #tem-bot as images
                 Some("Snapshot") => {

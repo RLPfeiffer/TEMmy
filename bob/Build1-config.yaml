@@ -7,5 +7,6 @@ notification_dir: 'Y:\DROPBOX\Notification'
 core_deployment_dir: 'X:\Volumes'
 worker_threads: 2
 process_tem_output: false
+automatic_builds: false
 fatal_errors:
   - need at most 63 handles

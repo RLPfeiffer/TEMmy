@@ -7,4 +7,5 @@ notification_dir: 'D:\DROPBOX\Notification'
 core_deployment_dir: 'X:\Volumes'
 worker_threads: 1
 process_tem_output: true
+automatic_builds: true
 fatal_errors: []

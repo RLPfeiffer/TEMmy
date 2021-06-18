@@ -6,6 +6,6 @@ raw_data_dir: '\\OpR-Marc-Syn3\Data\RawData'
 notification_dir: 'D:\DROPBOX\Notification'
 core_deployment_dir: 'X:\Volumes'
 worker_threads: 1
-process_tem_output: true
-automatic_builds: true
+process_tem_output: false
+automatic_builds: false
 fatal_errors: []

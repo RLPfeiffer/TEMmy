@@ -483,7 +483,7 @@ fn send_build_chain(section:&str, is_rebuild: bool, sender: &Sender<CommandChain
     }
     else {
         println!("{}", section);
-        send_rc3_build_chain(section.to_string(), false, &sender);
+        send_rc3_build_chain(section.to_string(), is_rebuild, &sender);
     }
 }
 

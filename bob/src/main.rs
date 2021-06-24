@@ -185,6 +185,7 @@ fn send_rc3_build_chain(section: String, is_rebuild: bool, sender: &Sender<Comma
         format!(r#"{}\TEMXCopy\{}"#, config.dropbox_dir, section)
     };
     let mut commands = vec![
+        rito(format!("Building {0} automatically.", section)),
         vec![
             "RC3Import".to_string(),
             temp_volume_dir.clone(),
@@ -272,6 +273,7 @@ fn send_core_build_chain(section: String, is_rebuild: bool, sender: &Sender<Comm
             fs::create_dir_all(&volume_dir).unwrap();
 
             let mut commands = vec![
+                rito(format!("Building {} {} automatically.", volume, section_number)),
                 // Run TEMCoreBuildFast
                 vec![
                     "TEMCoreBuildFast".to_string(),
@@ -550,7 +552,11 @@ fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>
                     let command_string = tokens.next().unwrap();
                     let command:Vec<String> = command_string.split("~").map(|arg| arg.trim().to_string()).collect();
                     sender.send(CommandChain {
-                        commands: vec![command],
+                        commands: vec![
+                            rito(format!("starting raw command `{}`", command_string)),
+                            command,
+                            rito(format!("raw command `{}` finished", command_string)),
+                        ],
                         command_on_error: rito(format!("bob raw command '{}' failed", command_string))
                     }).unwrap();
                 },

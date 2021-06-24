@@ -373,6 +373,7 @@ fn send_core_deploy_chain(volume: String, sender: &Sender<CommandChain>) {
     sender.send(
         CommandChain {
             commands: vec![
+                rito(format!(r#"automatically deploying {0}. The viking URL will be http://storage1.connectomes.utah.edu/{0}/Mosaic.VikingXML"#, volume)),
                 robocopy_copy(
                     volume_dir.clone(),
                     format!(r#"{}\"#,deploy_dir.clone())),

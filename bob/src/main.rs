@@ -327,7 +327,7 @@ fn send_core_deploy_chain(volume: String, sender: &Sender<CommandChain>) {
     sender.send(
         CommandChain {
             commands: vec![
-                robocopy_move(
+                robocopy_copy(
                     volume_dir.clone(),
                     format!(r#"{}\"#,deploy_dir.clone())),
                 vec![

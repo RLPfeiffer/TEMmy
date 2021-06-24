@@ -458,11 +458,9 @@ fn spawn_cli_thread(sender: Sender<String>) -> JoinHandle<()> {
                     break
                 }
             }
+            rl.save_history("history.txt").unwrap();
         }
-        rl.save_history("history.txt").unwrap();
     })
-    // TODO raw command
-
 
 }
 

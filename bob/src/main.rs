@@ -318,6 +318,52 @@ fn send_core_build_chain(section: String, is_rebuild: bool, sender: &Sender<Comm
     
 }
 
+fn send_core_fixmosaic_stage(volume:String, sections: Vec<String>, sender: &Sender<CommandChain>) {
+    let config = config_from_yaml();
+
+    let mosaic_report_dest = format!(r#"{}\MosaicReports\{}\MosaicReport.html"#, config.dropbox_link_dir, volume.clone());
+    let build_target = format!(r#"{}\{}"#, config.build_target, volume.clone());
+
+    let mut commands = vec![
+        rito(format!("Fixing mosaic to stage positions for {} {:?} automatically.", volume, sections)),
+    ];
+
+    // Delete existing mosaics
+    for section in &sections {
+        let section_folder = format!("{:04}", section.parse::<i32>().unwrap()); // "420" -> "0420", "13345" -> "13345"
+        commands.push(vec![
+            "del".to_string(),
+            format!(r#"{}\TEM\{}\TEM\Grid_Cel128_Mes8_Mes8_Thr0.25_it10_sp4.mosaic"#, build_target, section_folder),
+        ]);
+    }
+
+    commands.append(&mut vec![
+        vec![
+            "TEMCoreBuildFixMosaic_Stage".to_string(),
+            build_target.clone(),
+            sections.join(","),
+        ],
+        // Copy the automatic build's mosaicreport files to DROPBOX and send a link.
+        // If the mosaicreport files aren't there, the chain will fail (as it should) because that's
+        // a secondary indicator of build failure
+        robocopy_copy(
+            format!(r#"{}\MosaicReport"#, build_target.clone()),
+            format!(r#"{}\MosaicReports\{}\MosaicReport\"#, config.dropbox_dir, volume.clone())),
+        vec![
+            "copy".to_string(),
+            format!(r#"{}\MosaicReport.html"#, build_target.clone()),
+            mosaic_report_dest.clone(),
+        ],
+        rito(format!("{0} mosaic fixed with stage positions automatically. Check {1}, and if all sections have been built properly, run `Deploy: {0}` if it looks good", volume, mosaic_report_dest)),
+    ]);
+
+    sender.send(
+        CommandChain {
+            commands: commands,
+            command_on_error: rito(format!("automatic fixmosaic_stage for {0} failed", volume))
+        }).unwrap();
+}
+
 fn send_core_deploy_chain(volume: String, sender: &Sender<CommandChain>) {
     let config = config_from_yaml();
 
@@ -510,6 +556,12 @@ fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>
                 Some("Rebuild") => {
                     let section = tokens.next().unwrap().split(" ").next().unwrap();
                     send_build_chain(section, true, &sender);
+                },
+                Some("CoreFixMosaicStage") => {
+                    let mut args = tokens.next().unwrap().split(" ");
+                    let volume = args.next().unwrap().to_string();
+                    let sections: Vec<String> = args.map(|s| s.to_string()).collect();
+                    send_core_fixmosaic_stage(volume, sections, &sender);
                 },
                 // Send snapshots to #tem-bot as images
                 Some("Snapshot") => {

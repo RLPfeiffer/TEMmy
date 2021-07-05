@@ -132,13 +132,13 @@ fn run_and_print_output(command: Vec<String>) -> Result<i32, Error> {
 
 // TODO allow parsing .cmd files into this (will need arguments tokenize properly and %1 %2 interpolation) (ignoring REM and other things)
 struct CommandChain {
+    label: String,
     commands: Vec<Vec<String>>,
-    command_on_error: Vec<String>,
 }
 
 fn run_chain_and_save_output(chain: CommandChain) -> Result<i32, Error> {
     let commands = chain.commands;
-    let command_on_error = chain.command_on_error;
+    run_and_print_output(rito(format!("Starting command chain: {}", chain.label)))?;
     for command in commands {
         let timestamp = make_timestamp();
         // make a folder for bob output files
@@ -165,17 +165,17 @@ fn run_chain_and_save_output(chain: CommandChain) -> Result<i32, Error> {
                 println!("Error code {} from {:?}", error_code, command);
                 run_and_print_output(rito(format!("Error code {} from {:?}", error_code, command)))?;
                 run_and_print_output(rito_file(output_file.clone()))?;
-                return run_and_print_output(command_on_error);
+                return run_and_print_output(rito(format!("Command chain failed: {}", chain.label)));
             },
             Err(err) => {
                 println!("Error {} from {:?}", err, command);
                 run_and_print_output(rito(format!("Error {} from {:?}", err, command)))?;
                 run_and_print_output(rito_file(output_file.clone()))?;
-                return run_and_print_output(command_on_error);
+                return run_and_print_output(rito(format!("Command chain failed: {}", chain.label)));
             },
         }
     }
-    Ok(0)
+    run_and_print_output(rito(format!("Command chain finished: {}", chain.label)))
 }
 
 fn run_on_interval_and_filter_output<F>(command: Vec<String>, process_line: F, seconds: u64, command_on_error: Vec<String>) -> Result<i32, Error>
@@ -209,7 +209,6 @@ fn send_rc3_build_chain(section: String, is_rebuild: bool, sender: &Sender<Comma
         format!(r#"{}\TEMXCopy\{}"#, config.dropbox_dir, section)
     };
     let mut commands = vec![
-        rito(format!("Building {0} automatically.", section)),
         vec![
             "RC3Import".to_string(),
             temp_volume_dir.clone(),
@@ -247,7 +246,7 @@ fn send_rc3_build_chain(section: String, is_rebuild: bool, sender: &Sender<Comma
     sender.send(
         CommandChain {
             commands: commands,
-            command_on_error: rito(format!("automatic copy and build for {} failed", section))
+            label: format!("automatic copy and build for RC3 {}", section)
         }).unwrap();
 }
 
@@ -277,7 +276,7 @@ fn send_rc3_merge_chain(section: String, sender: &Sender<CommandChain>) {
                     temp_volume_dir
                 ],
             ],
-            command_on_error: rito(format!("automatic merge for {} failed", section))
+            label: format!("automatic merge for {} into RC3", section)
         }).unwrap();
 }
 
@@ -297,7 +296,6 @@ fn send_core_build_chain(section: String, is_rebuild: bool, sender: &Sender<Comm
             fs::create_dir_all(&volume_dir).unwrap();
 
             let mut commands = vec![
-                rito(format!("Building {} {} automatically.", volume, section_number)),
                 // Run TEMCoreBuildFast
                 vec![
                     "TEMCoreBuildFast".to_string(),
@@ -332,7 +330,7 @@ fn send_core_build_chain(section: String, is_rebuild: bool, sender: &Sender<Comm
             sender.send(
                 CommandChain {
                     commands: commands,
-                    command_on_error: rito(format!("automatic core build for {0} failed", section))
+                    label: format!("automatic core build for {0}", section)
                 }).unwrap();
         },
         _ => {
@@ -348,9 +346,7 @@ fn send_core_fixmosaic_stage(volume:String, sections: Vec<String>, sender: &Send
     let mosaic_report_dest = format!(r#"{}\MosaicReports\{}\MosaicReport.html"#, config.dropbox_link_dir, volume.clone());
     let build_target = format!(r#"{}\{}"#, config.build_target, volume.clone());
 
-    let mut commands = vec![
-        rito(format!("Fixing mosaic to stage positions for {} {:?} automatically.", volume, sections)),
-    ];
+    let mut commands = vec![];
 
     // Delete existing mosaics
     for section in &sections {
@@ -384,7 +380,7 @@ fn send_core_fixmosaic_stage(volume:String, sections: Vec<String>, sender: &Send
     sender.send(
         CommandChain {
             commands: commands,
-            command_on_error: rito(format!("automatic fixmosaic_stage for {0} failed", volume))
+            label: format!("automatic fixmosaic_stage for {} {:?}", volume, sections)
         }).unwrap();
 }
 
@@ -397,7 +393,6 @@ fn send_core_deploy_chain(volume: String, sender: &Sender<CommandChain>) {
     sender.send(
         CommandChain {
             commands: vec![
-                rito(format!(r#"automatically deploying {0}. The viking URL will be http://storage1.connectomes.utah.edu/{0}/Mosaic.VikingXML"#, volume)),
                 robocopy_copy(
                     volume_dir.clone(),
                     format!(r#"{}\"#,deploy_dir.clone())),
@@ -412,7 +407,7 @@ fn send_core_deploy_chain(volume: String, sender: &Sender<CommandChain>) {
                 ],
                 rito(format!(r#"{0} might be ready! Check http://storage1.connectomes.utah.edu/{0}/Mosaic.VikingXML in Viking"#, volume))
             ],
-            command_on_error: rito(format!("automatic core deployment for {0} failed", volume))
+            label: format!("automatic core volume deployment for {0} to http://storage1.connectomes.utah.edu/{0}/Mosaic.VikingXML", volume)
         }).unwrap();
 }
 
@@ -598,7 +593,7 @@ fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>
                                 rito_image(snapshot_path),
                             ],
 
-                            command_on_error: rito(format!("snapshot -> slack failed for {}", snapshot_name))
+                            label: format!("snapshot -> slack for {}", snapshot_name)
                         }).unwrap();
                 },
                 // Merge automatically-built RC3 sections with the full volume
@@ -619,7 +614,7 @@ fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>
                     // TODO The file has to tokenize command arguments like~this~"even though it's weird"
                     sender.send(CommandChain {
                         commands: queue, 
-                        command_on_error: rito(format!("bob queue {} failed", queue_file))
+                        label: format!("bob queue file {}", queue_file)
                     }).unwrap();
                 },
                 // Add a raw shell command to the queue (i.e. RC3Align)
@@ -628,11 +623,9 @@ fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>
                     let command:Vec<String> = command_string.split("~").map(|arg| arg.trim().to_string()).collect();
                     sender.send(CommandChain {
                         commands: vec![
-                            rito(format!("starting raw command `{}`", command_string)),
                             command,
-                            rito(format!("raw command `{}` finished", command_string)),
                         ],
-                        command_on_error: rito(format!("bob raw command '{}' failed", command_string))
+                        label: format!("raw command '{}'", command_string),
                     }).unwrap();
                 },
                 // Deploy a core capture volume

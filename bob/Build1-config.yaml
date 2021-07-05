@@ -7,5 +7,7 @@ core_deployment_dir: 'X:\Volumes'
 worker_threads: 2
 process_tem_output: true
 automatic_builds: true
+junk_outputs:
+  - Jobs Queued
 fatal_errors:
   - need at most 63 handles

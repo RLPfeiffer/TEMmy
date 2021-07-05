@@ -7,4 +7,5 @@ core_deployment_dir: 'X:\Volumes'
 worker_threads: 1
 process_tem_output: false
 automatic_builds: false
+junk_outputs: []
 fatal_errors: []

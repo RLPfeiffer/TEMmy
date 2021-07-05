@@ -28,6 +28,7 @@ struct Config {
     worker_threads: i64,
     process_tem_output: bool,
     automatic_builds: bool,
+    junk_outputs: Vec<String>,
     fatal_errors: Vec<String>,
 }
 
@@ -42,6 +43,10 @@ fn run_and_filter_output<F>(command: Vec<String>, mut process_line: F) -> Result
     where F: FnMut(String) -> () {
 
     let config = config_from_yaml();
+    // Only compile regexes once per command
+    let junk_output_regexes: Vec<Regex> = config.junk_outputs.iter().map(|pattern| Regex::new(&pattern).unwrap()).collect();
+    let fatal_error_regexes: Vec<Regex> = config.fatal_errors.iter().map(|pattern| Regex::new(&pattern).unwrap()).collect();
+
     let mut args = vec![String::from("/C")];
     for arg in command {
         args.push(arg);
@@ -49,13 +54,32 @@ fn run_and_filter_output<F>(command: Vec<String>, mut process_line: F) -> Result
     let command = cmd("cmd.exe", args);
     let reader = command.stderr_to_stdout().reader()?;
     let lines = BufReader::new(&reader).lines();
+    let mut consecutive_junk_lines = 0;
+    let mut last_junk_pattern = "".to_string();
+
     for line in lines {
         match line {
             Ok(line) => {
+                // check if the line matches a set of known junk output patterns, i.e. Jobs Queued: [n]
+                let mut is_junk = false;
+                for junk_output_regex in &junk_output_regexes {
+                    if junk_output_regex.is_match(&line) {
+                        is_junk = true;
+                        last_junk_pattern = junk_output_regex.to_string();
+                        break;
+                    }
+                }
+                if is_junk {
+                    consecutive_junk_lines += 1;
+                    continue;
+                } else if consecutive_junk_lines > 0 {
+                    process_line(format!("[{} lines of junk output matching pattern  '{}']", consecutive_junk_lines, last_junk_pattern));
+                    consecutive_junk_lines = 0;
+                }
+
                 // check if the line matches a set of known error patterns, i.e. 64-thread python error
-                for fatal_error_regex in &config.fatal_errors {
-                    let re = Regex::new(&fatal_error_regex).unwrap();
-                    if re.is_match(&line) {
+                for fatal_error_regex in &fatal_error_regexes {
+                    if fatal_error_regex.is_match(&line) {
                         let message = format!("Fatal error `{}` from {:?}", line, command);
                         reader.kill().unwrap();
                         return Err(Error::new(ErrorKind::Other, message));

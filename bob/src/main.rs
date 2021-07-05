@@ -16,6 +16,7 @@ use threadpool::ThreadPool;
 use crate::RobocopyType::*;
 use regex::Regex;
 use serde::{Serialize, Deserialize};
+use whoami::{realname,devicename};
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 struct Config {
@@ -138,7 +139,8 @@ struct CommandChain {
 
 fn run_chain_and_save_output(chain: CommandChain) -> Result<i32, Error> {
     let commands = chain.commands;
-    run_and_print_output(rito(format!("Starting command chain: {}", chain.label)))?;
+    let label_with_info = format!("{} on {} via {}", chain.label, devicename(), realname());
+    run_and_print_output(rito(format!("Starting command chain: {}", label_with_info)))?;
     for command in commands {
         let timestamp = make_timestamp();
         // make a folder for bob output files
@@ -165,17 +167,17 @@ fn run_chain_and_save_output(chain: CommandChain) -> Result<i32, Error> {
                 println!("Error code {} from {:?}", error_code, command);
                 run_and_print_output(rito(format!("Error code {} from {:?}", error_code, command)))?;
                 run_and_print_output(rito_file(output_file.clone()))?;
-                return run_and_print_output(rito(format!("Command chain failed: {}", chain.label)));
+                return run_and_print_output(rito(format!("Command chain failed: {}", label_with_info)));
             },
             Err(err) => {
                 println!("Error {} from {:?}", err, command);
                 run_and_print_output(rito(format!("Error {} from {:?}", err, command)))?;
                 run_and_print_output(rito_file(output_file.clone()))?;
-                return run_and_print_output(rito(format!("Command chain failed: {}", chain.label)));
+                return run_and_print_output(rito(format!("Command chain failed: {}", label_with_info)));
             },
         }
     }
-    run_and_print_output(rito(format!("Command chain finished: {}", chain.label)))
+    run_and_print_output(rito(format!("Command chain finished: {}", label_with_info)))
 }
 
 fn run_on_interval_and_filter_output<F>(command: Vec<String>, process_line: F, seconds: u64, command_on_error: Vec<String>) -> Result<i32, Error>

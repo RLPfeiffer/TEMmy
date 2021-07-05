@@ -69,10 +69,6 @@ TakeFullScreenshot(File) {
     CaptureScreen(0,,File)
 }
 
-PrintScreen::
-    TakeFullScreenshot(A_Now . ".jpg")
-Return
-
 TakeScreenshots(Prefix) {
     ConfirmScreenPosition(Left, Top, "TOPLEFT", "Top left corner of the recording")
     ConfirmScreenPosition(Right, Bottom, "BOTTOMRIGHT", "Bottom right corner of the recording")

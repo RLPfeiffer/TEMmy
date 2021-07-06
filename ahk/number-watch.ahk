@@ -31,4 +31,5 @@ ReadNumber:
 ^c::
     SetTimer, ReadNumber, OFF
     MsgBox,Done recording data
+    Exit
     return

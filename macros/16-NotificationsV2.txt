@@ -4,7 +4,7 @@ MacroName NotificationsV2
 CallFunction NotificationsV2::SendMessage Test message
 
 Function SendMessage 0 1 Text
-PythonScript $MessageDirV2 $MessagePathV2 $Text
+PythonScript $V2MessageDir $V2MessagePath $Text
 #!Python3.9
 import serialem as sem
 import os

@@ -86,14 +86,14 @@ Function Capture 1 0 CookFirst
 
       echo Setting spot size for high-mag cook
 
-      SetSpotSize 2 #Commented for test of a lower power cook
+      #SetSpotSize 2 #Commented for test of a lower power cook
 
       ReportSpotSize
 
       PreCookMontage $PrecookMontageD 2 0 0
 
       echo Restoring spot size after cook
-      SetSpotSize $StartingSpotSize
+      #SetSpotSize $StartingSpotSize
 
       echo "Cooking done!"
       reportclock

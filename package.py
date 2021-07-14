@@ -23,7 +23,7 @@ if __name__ == "__main__":
         macro_package_tem1.write("MaxMacros\t40\n")
         macro_package_tem2.write("MaxMacros\t40\n")
         for macro in macros:
-            if macro.endswith(".txt"):
+            if macro.endswith(".txt") or macro.endswith(".py"):
                 with open('macros/{}'.format(macro), "r") as macro_file: 
                     macro_content = macro_file.read()
                     if "tem1" in macro.lower():

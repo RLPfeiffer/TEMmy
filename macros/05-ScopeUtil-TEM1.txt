@@ -1,28 +1,31 @@
 MacroName ScopeUtil
 
 # Globally set the variable $ScopeName
-ScopeName = TEM1
+ScopeName := TEM1
 
 # Globally set the variable $MessageDir
-MessageDir = Y:\DROPBOX\Notification\$ScopeName
+MessageDir := Y:\DROPBOX\Notification\$ScopeName
 
 # Globally set the variable $MessagePath
-MessagePath = $MessageDir\message.txt
+MessagePath := $MessageDir\message.txt
 
 # Globally set the variable $DropboxPath
-DropboxPath = Y:\DROPBOX
+DropboxPath := Y:\DROPBOX
 
 # Globally set the variable $CopyDir
-CopyPath = $DropboxPath\TEMXcopy
+CopyPath := $DropboxPath\TEMXcopy
 
 # Globally set the variable $DataPath
-DataPath = E:
+DataPath := E:
 
 # Globally set the variable PrecookMontageD
-PrecookMontageD = 0
+PrecookMontageD := 0
 
 # Globally set the variable SecondsPerTile
-SecondsPerTile = 15
+SecondsPerTile := 15
 
-# Globally set the variable MaxPercentChangeOverCapture
-MaxPercentChangeOverCapture = 0.20
+##################################
+# Change MaxPercentChangeOverCapture to adjust sensitivity of filament stability.  
+# Must be a value 0 to 1.0.
+#################################
+MaxPercentChangeOverCapture := 0.20

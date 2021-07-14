@@ -1,14 +1,5 @@
 MacroName WaitForStableFilament
 
-# Bring in the SecondsPerTile and MaxPercentChangeOverCapture settings for this TEM:
-Call ScopeUtil
-
-#The maximum scalar of beam intensity change we want over the capture timeframe
-
-#################################
-# Change MaxPercentChangeOverCapture to adjust sensitivity of filament stability.  
-# Must be a value 0 to 1.0.
-#################################
 
 
 MaxPercentChangeOverCapturePercentage = $MaxPercentChangeOverCapture * 100

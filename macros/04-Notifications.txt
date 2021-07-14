@@ -5,8 +5,6 @@ CallFunction Notifications::SendMessage Test message
 CallFunction Notifications::SendStart
 
 Function SendMessage 0 1 Text
-   Call ScopeUtil
-
    MakeDirectory $MessageDir
    # Make sure there is a message file to append to
    OldMessages = { "" }
@@ -27,7 +25,6 @@ EndFunction
 Function SendStart 0 0
    ReportNumTableItems
    NumNavItems = $reportedvalue1
-   Call ScopeUtil
    EstimatedCaptureHours = 0
    NumTiles = 0
    IF $NumNavItems < 1
@@ -51,6 +48,5 @@ Function SendStart 0 0
 EndFunction
 
 Function SendStop 0 0
-   Call ScopeUtil
    CallFunction Notifications::SendMessage Copied: $CaptureDir copied from $ScopeName to DROPBOX.
 EndFunction

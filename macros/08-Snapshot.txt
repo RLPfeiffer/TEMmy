@@ -9,7 +9,6 @@ CallFunction Snapshot::TakeSnapshot $reportedValue1 $label
 # Function for automated use: saves a snapshot of the current image to our DROPBOX.
 # If called with 1 for the first argument, will also send this image to slack in the #tem-bot channel
 Function TakeSnapshot 1 1 SendToSlack Name
-   Call ScopeUtil
    # Reports the current mag; also sets reportedValue2 to 1 if low mag mode, 0 if not
    ReportMag
    Filename @= TEMSnapshots\$Name x$reportedValue1 $ScopeName.jpg

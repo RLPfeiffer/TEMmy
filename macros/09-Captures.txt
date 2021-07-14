@@ -1,7 +1,6 @@
 MacroName Captures
 
 Function Capture 1 0 CookFirst
-   Call ScopeUtil
    echo
    If $CookFirst == 0
       echo This macro performs an image stabilization calibration,

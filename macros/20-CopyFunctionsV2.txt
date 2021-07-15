@@ -1,0 +1,17 @@
+MacroName CopyFunctionsV2
+
+# Test:
+# TODO
+
+# Set TargetDirName, CopyTarget and CopySource before calling this with no arguments.
+# Checks to make sure there is enough space, then copies the contents CopySource recursively to CopyTarget.
+# To copy a directory called C:/whatever to Z:/stuff/whatever you would have to set CopyTarget to Z:/stuff/ and TargetDirName to whatever
+Function CopyDir 0 0 Text
+PythonScript $CopySource $CopyTarget $TargetDirName
+#!Python3.9
+#include CopyFunctions - Python
+import serialem as sem
+(CopySource, CopyTarget, TargetDirName) = SEMargStrings
+CopyDir(CopySource, CopyTarget, TargetDirName)
+EndPythonScript
+EndFunction

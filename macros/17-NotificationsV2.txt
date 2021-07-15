@@ -4,45 +4,29 @@ MacroName NotificationsV2
 CallFunction NotificationsV2::SendMessage Test message
 
 Function SendMessage 0 1 Text
-PythonScript $V2MessageDir $V2MessagePath $Text
+PythonScript $Text
 #!Python3.9
+#include Notifications - Python
 import serialem as sem
-import os
-MessageDir, MessagePath, Text = SEMargStrings
-
-# Make sure there is a message file to append to
-os.makedirs(MessageDir, exist_ok=True)
-# Append to the file so multiple messages aren't overwritten
-with open(MessagePath, "a+") as MessageFile:
-   MessageFile.write("{}{}".format(Text, os.linesep))
+(Text) = SEMargStrings
+SendMessage(Text)
 EndPythonScript
 EndFunction
 
 Function SendStart 0 0
-PythonScript $SecondsPerTile $ScopeName
+PythonScript
 #!Python3.9
+#include Notifications - Python
 import serialem as sem
-EstimatedCaptureHours = 0
-NumTiles = 0
-SecondsPerTile, ScopeName = SEMargStrings
-if sem.ReportNumTableItems() < 1:
-   print("Nav table does not have items indicating total capture time.")
-else:
-   NumTiles = sem.ReportNumMontagePieces(1)
-      
-   if NumTiles == 1:
-      print("Montage claims to have only one image. Using 1 hour as timeframe")
-      EstimatedCaptureHours = 1
-   else:
-      EstimatedCaptureTime = NumTiles * SecondsPerTile
-      EstimatedCaptureHours = EstimatedCaptureTime / (60 * 60)
-   print("Estimating {} hours to complete".format(EstimatedCaptureHours)
-   sem.SetVariable("NumTiles", NumTiles)
-   sem.SetVariable("EstimatedCaptureHours", EstimatedCaptureHours)
+SendStart()
 EndPythonScript
-CallFunction NotificationsV2::SendMessage Started: Capturing $NumTiles images on $ScopeName. Estimating $EstimatedCaptureHours hours to complete
 EndFunction
 
 Function SendStop 0 0
-   CallFunction NotificationsV2::SendMessage Copied: $CaptureDir copied from $ScopeName to DROPBOX.
+PythonScript
+#!Python3.9
+#include Notifications - Python
+import serialem as sem
+SendStop()
+EndPythonScript
 EndFunction

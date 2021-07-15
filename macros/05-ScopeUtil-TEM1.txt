@@ -9,7 +9,7 @@ V2MessageDir := Y:/DROPBOX/Notification/$ScopeName
 
 # Globally set the variable $MessagePath
 MessagePath := $MessageDir\message.txt
-V2MessagePath := $MessageDir/message.txt
+V2MessagePath := $V2MessageDir/message.txt
 
 # Globally set the variable $DropboxPath
 DropboxPath := Y:\DROPBOX

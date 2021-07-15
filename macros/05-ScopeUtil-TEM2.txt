@@ -5,9 +5,11 @@ ScopeName := TEM2
 
 # Globally set the variable $MessageDir
 MessageDir := \\192.168.3.10\Dropbox\Notification\$ScopeName
+V2MessageDir := Y:/Notification/$ScopeName
 
 # Globally set the variable $MessagePath
 MessagePath := $MessageDir\message.txt
+V2MessagePath := $V2MessageDir/message.txt
 
 # Globally set the variable $DropboxPath
 DropboxPath := Y:

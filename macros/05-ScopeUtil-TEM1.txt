@@ -31,3 +31,5 @@ SecondsPerTile := 15
 # Must be a value 0 to 1.0.
 #################################
 MaxPercentChangeOverCapture := 0.20
+
+OpenNavigator

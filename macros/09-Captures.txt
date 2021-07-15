@@ -119,9 +119,16 @@ Function Capture 1 0 CookFirst
    CallFunction Snapshot::TakeSnapshot 1 overview$CaptureDir
 
    # Copy the capture to DROPBOX
-   CopySource = $DataPath\$CaptureDir
    CopyTarget = $CopyPath
    TargetDirName = $CaptureDir
-   CallFunction CopyFunctions::CopyDir
+   # Try first with a forward-slash to make CopyFunctionsV2 happy:
+   Try
+      CopySource = $DataPath/$CaptureDir
+      CallFunction CopyFunctions::CopyDir
+   # And in case that doesn't work, try with a backslash which should fall to the old way:
+   Catch
+      CopySource = $DataPath\$CaptureDir
+      CallFunction CopyFunctions::CopyDir
+   EndTry
    CallFunction Notifications::SendStop
 EndFunction

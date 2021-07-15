@@ -29,16 +29,17 @@ def LowMagCook(Minutes=None):
          sem.MoveStage(ShiftX, ShiftY)
          WaitForStageNotBusy()
          if sem.ReportClock() >= SecondsToCook:
-            print("END BURN WOBBLE")
-            sem.SetSpotSize(3)
-            sem.Record()
-            return
+            break
    
       sem.MoveStageTo(XStart, YStart)
       sem.ReportStageXYZ()
       sem.ReportClock()
 
       WobbleDist += 1
+
+   print("END BURN WOBBLE")
+   sem.SetSpotSize(3)
+   sem.Record()
 
 def WaitForStageNotBusy():
    while sem.ReportStageBusy() != 0:

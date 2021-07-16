@@ -8,7 +8,7 @@ PythonScript $Text
 #!Python3.9
 #include Notifications - Python
 import serialem as sem
-(Text) = SEMargStrings
+Text = SEMargStrings[0]
 SendMessage(Text)
 EndPythonScript
 EndFunction

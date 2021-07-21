@@ -14,7 +14,7 @@ IF $NumNavItems < 1
     echo
     echo Nav table does not have items indicating total capture time.  Using 1 hour as timeframe.    
 ELSE
-    ReportNumMontagePieces 1
+    ReportNumMontagePieces
     NumTiles = $reportedvalue1
 
     IF $NumTiles == 1

@@ -14,7 +14,7 @@ NumNavItems = sem.ReportNumTableItems()
 if NumNavItems < 1:
     print("Nav table does not have items indicating total capture time. Using 1 hour as timeframe.")
 else:
-    NumTiles = sem.ReportNumMontagePieces(1)
+    NumTiles = sem.ReportNumMontagePieces()
 
     if NumTiles == 1:
         print("SerialEM claiming only 1 image in montage item. Using 1 hour as timeframe.")

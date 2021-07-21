@@ -102,8 +102,12 @@ Function Capture 1 0 CookFirst
    #Move the stage to the area we've been told to use
 
    MoveToNavItem 2
-   Call WaitForStableFilament
-
+   Try
+      Call WaitForStableFilament - Python
+   Catch
+      Echo Error from WaitForStableFilament python. Trying regular version
+      Call WaitForStableFilament
+   EndTry
    ### Center on montage and capture ###
    MoveToNavItem 1
 

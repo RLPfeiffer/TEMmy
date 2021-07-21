@@ -1,7 +1,5 @@
 MacroName WaitForStableFilament
 
-
-
 MaxPercentChangeOverCapturePercentage = $MaxPercentChangeOverCapture * 100
 
 Echo

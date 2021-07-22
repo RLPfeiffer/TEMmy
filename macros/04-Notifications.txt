@@ -5,26 +5,21 @@ CallFunction Notifications::SendMessage Test message
 CallFunction Notifications::SendStart
 
 Function SendMessage 0 1 Text
-   Try
-      CallFunction NotificationsV2::SendMessage $Text
-   Catch
-      Echo NotificationsV2 failed with $Text
-      MakeDirectory $MessageDir
-      # Make sure there is a message file to append to
-      OldMessages = { "" }
-      OpenTextFile MessageFile T 0 $MessagePath
-      IF $reportedValue1 == 1
-         CloseTextFile MessageFile
-      ELSEIF $reportedValue1 == 0
-         OpenTextFile MessageFile W 0 $MessagePath
-         CloseTextFile MessageFile
-      ENDIF
-      # Append to the file so multiple messages aren't overwritten
-      OpenTextFile MessageFile A 0 $MessagePath
-      WriteLineToFile MessageFile $Text
-      FlushTextFile MessageFile
+   MakeDirectory $MessageDir
+   # Make sure there is a message file to append to
+   OldMessages = { "" }
+   OpenTextFile MessageFile T 0 $MessagePath
+   IF $reportedValue1 == 1
       CloseTextFile MessageFile
-   EndTry
+   ELSEIF $reportedValue1 == 0
+      OpenTextFile MessageFile W 0 $MessagePath
+      CloseTextFile MessageFile
+   ENDIF
+   # Append to the file so multiple messages aren't overwritten
+   OpenTextFile MessageFile A 0 $MessagePath
+   WriteLineToFile MessageFile $Text
+   FlushTextFile MessageFile
+   CloseTextFile MessageFile
 EndFunction
 
 Function SendStart 0 0

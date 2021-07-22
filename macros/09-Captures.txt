@@ -130,14 +130,8 @@ EndPythonScript
    # Copy the capture to DROPBOX
    CopyTarget = $CopyPath
    TargetDirName = $CaptureDir
-   # Try first with a forward-slash to make CopyFunctionsV2 happy:
-   Try
-      CopySource = $DataPath/$CaptureDir
-      CallFunction CopyFunctions::CopyDir
-   # And in case that doesn't work, try with a backslash which should fall to the old way:
-   Catch
-      CopySource = $DataPath\$CaptureDir
-      CallFunction CopyFunctions::CopyDir
-   EndTry
+   
+   CopySource = $DataPath\$CaptureDir
+   CallFunction CopyFunctions::CopyDir
    CallFunction Notifications::SendStop
 EndFunction

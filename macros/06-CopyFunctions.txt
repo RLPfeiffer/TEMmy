@@ -16,17 +16,12 @@ OKBox $CheckSpaceSucceeded
 # Checks to make sure there is enough space, then copies the contents CopySource recursively to CopyTarget.
 # To copy a directory called C:/whatever to Z:/stuff/whatever you would have to set CopyTarget to Z:/stuff/ and TargetDirName to whatever
 Function CopyDir 0 0
-   Try
-      CallFunction CopyFunctionsV2::CopyDir
-   Catch
-      CallFunction Notifications::SendMessage CopyFunctionsV2 failed on $ScopeName. Using old version
-      CallFunction CopyFunctions::CheckSpaceForCopyDir
-      If $CheckSpaceSucceeded == 1
-         CallFunction CopyFunctions::CopyDirWithoutCheckingSpace
-      Else
-         CallFunction Notifications::SendMessage Failed to auto-copy $CopySource from $ScopeName
-      Endif
-   EndTry
+   CallFunction CopyFunctions::CheckSpaceForCopyDir
+   If $CheckSpaceSucceeded == 1
+      CallFunction CopyFunctions::CopyDirWithoutCheckingSpace
+   Else
+      CallFunction Notifications::SendMessage Failed to auto-copy $CopySource from $ScopeName
+   Endif
 EndFunction
 
 # INTERNAL, called by CopyDir

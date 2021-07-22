@@ -1,6 +1,8 @@
 #!Python3.9
 #MacroName Captures - Python
 #include WaitForStableFilament - Python
+#include CopyFunctions - Python
+#include Notifications - Python
 import serialem as sem
 import sys
 
@@ -49,20 +51,17 @@ def Capture(CookFirst):
 
     # Prompt the user to create capture notes
     sem.RunExternalTool("1")
-    ### FOCUS ###
 
+    ### FOCUS ###
     if NumNavItems < 3:
         sem.MoveToNavItem(1)
     else:
         sem.MoveToNavItem(3)
 
     sem.Delay(3)
-
     sem.Focus()
 
     ### CALIBRATE IMAGE SHIFT ###
-
-
     try:
         sem.CalibrateImageShift()
     except:
@@ -92,8 +91,8 @@ def Capture(CookFirst):
 
     ###  BEAM STABILITY CHECK ####
     # Move the stage to the area we've been told to use
-
     sem.MoveToNavItem(2)
+
     try:
         WaitForStableFilament()
     except:
@@ -103,26 +102,35 @@ def Capture(CookFirst):
     ### Center on montage and capture ###
     sem.MoveToNavItem(1)
 
-    sem.CallFunction("Notifications::SendStart")
+    try:
+        SendStart()
+    except:
+        sem.CallFunction("Notifications::SendMessage", "Failed to send start notification from Python")
+        sem.CallFunction("Notifications::SendStart")
+
     try:
         sem.Montage()
     except:
-        sem.CallFunction("Notifications::SendMessage", f"Montage failed with error {sys.exc_info()[0]} on {sem.GetVariable('ScopeName')}")
+        Message = f"Montage failed with error {sys.exc_info()[0]} on {sem.GetVariable('ScopeName')}"
+        try:
+            SendMessage(Message)
+        except:
+            sem.CallFunction("Notifications::SendMessage", "Failed to send montage error message from Python")
+            sem.CallFunction("Notifications::SendMessage", Message)
         return
 
     # Send the overview to Slack
     sem.CallFunction("Snapshot::TakeSnapshot", f"overview{CaptureDir}", 1)
 
     # Copy the capture to DROPBOX
-    sem.SetVariable("CopyTarget", sem.GetVariable("CopyPath"))
-    sem.SetVariable("TargetDirName", CaptureDir)
-    # Try first with a forward-slash to make CopyFunctionsV2 happy:
+    # Try python CopyFunctions first:
     try:
-        sem.SetVariable("CopySource", f"{sem.GetVariable('DataPath')}/{CaptureDir}")
-        sem.CallFunction("CopyFunctions::CopyDir")
-    # And in case that doesn't work, try with a backslash which should fall to the old way:
+        sem.SetVariable("CopySource", )
+        CopyDir(f"{sem.GetVariable('DataPath')}/{CaptureDir}", sem.GetVariable("CopyPath"), CaptureDir)
     except:
-        sem.CallFunction("Notifications::SendMessage", f"CopyDir failed with error {sys.exc_info()[0]}. Trying again with backslash")
+        sem.CallFunction("Notifications::SendMessage", f"Python CopyDir failed with error {sys.exc_info()[0]}. Trying again with old version")
+        sem.SetVariable("CopyTarget", sem.GetVariable("CopyPath"))
+        sem.SetVariable("TargetDirName", CaptureDir)
         sem.SetVariable("CopySource", f"{sem.GetVariable('DataPath')}\\{CaptureDir}")
         sem.CallFunction("CopyFunctions::CopyDir")
 

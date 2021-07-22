@@ -3,11 +3,11 @@
 import serialem as sem
 
 def WaitForStableFilament():
-    MaxPercentChangeOverCapture = sem.GetVariable("MaxPercentChangeOverCapture")
+    MaxPercentChangeOverCapture = float(sem.GetVariable("MaxPercentChangeOverCapture"))
     MaxPercentChangeOverCapturePercentage = MaxPercentChangeOverCapture * 100
 
     print("Checking for stable filament")
-    print(f"Beam intensity must change less than {MaxPercentChangeOverCapturePercentage}% over capture to be considered stable")
+    print(f"Beam intensity must change less than {MaxPercentChangeOverCapturePercentage} percent over capture to be considered stable")
 
     EstimatedCaptureTime = 60 * 60
 
@@ -49,16 +49,16 @@ def WaitForStableFilament():
         # warm 
         # PercentChangeOverTimeInterval = ABS $PercentChangeOverTimeInterval 
         ReadablePercentChangeOverTimeInterval = PercentChangeOverTimeInterval * 100.0
-        print(f"Measured {ReadablePercentChangeOverTimeInterval}% change in counts over {TimeInterval} seconds")
+        print(f"Measured {ReadablePercentChangeOverTimeInterval} percent change in counts over {TimeInterval} seconds")
 
         NumIntervalsOverCapture = EstimatedCaptureTime / TimeInterval
         # print("Estimating {} intervals".format(NumIntervalsOverCapture)) 
         PercentChangeOverCapture = abs(PercentChangeOverTimeInterval * NumIntervalsOverCapture)
         ReadablePercentChangeOverCapture = PercentChangeOverCapture * 100
 
-        print(f"Estimating {ReadablePercentChangeOverCapture}% change in image counts over entire capture.")
+        print(f"Estimating {ReadablePercentChangeOverCapture} percent change in image counts over entire capture.")
         if PercentChangeOverCapture < MaxPercentChangeOverCapture:
-            print(f"Estimated change is below tolerance of {MaxPercentChangeOverCapturePercentage}%. Filament is stable!")
+            print(f"Estimated change is below tolerance of {MaxPercentChangeOverCapturePercentage} percent. Filament is stable!")
             sem.ReportClock()
             break
 

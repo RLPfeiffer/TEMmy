@@ -48,7 +48,7 @@ def Capture(CookFirst):
     CaptureDir = sem.GetVariable("CaptureDir")
 
     # Prompt the user to create capture notes
-    sem.RunExternalTool(1)
+    sem.RunExternalTool("1")
     ### FOCUS ###
 
     if NumNavItems < 3:
@@ -115,15 +115,15 @@ def Capture(CookFirst):
 
     # Copy the capture to DROPBOX
     sem.SetVariable("CopyTarget", sem.GetVariable("CopyPath"))
-    sem.SetVariable("TargetDirName", CaptureDir))
+    sem.SetVariable("TargetDirName", CaptureDir)
     # Try first with a forward-slash to make CopyFunctionsV2 happy:
     try:
-        sem.SetVariable("CopySource", f"{sem.GetVariable("DataPath")}/{CaptureDir}")
+        sem.SetVariable("CopySource", f"{sem.GetVariable('DataPath')}/{CaptureDir}")
         sem.CallFunction("CopyFunctions::CopyDir")
     # And in case that doesn't work, try with a backslash which should fall to the old way:
     except:
         sem.CallFunction("Notifications::SendMessage", f"CopyDir failed with error {sys.exc_info()[0]}. Trying again with backslash")
-        sem.SetVariable("CopySource", f"{sem.GetVariable("DataPath")}\\{CaptureDir}")
+        sem.SetVariable("CopySource", f"{sem.GetVariable('DataPath')}\\{CaptureDir}")
         sem.CallFunction("CopyFunctions::CopyDir")
 
     sem.CallFunction("Notifications::SendStop")

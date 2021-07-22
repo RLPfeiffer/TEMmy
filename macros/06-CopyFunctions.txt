@@ -20,6 +20,7 @@ Function CopyDir 0 0
    Try
       CallFunction CopyFunctionsV2::CopyDir
    Catch
+      Notifications::SendMessage CopyFunctionsV2 failed on $ScopeName. Using old version
       CallFunction CopyFunctions::CheckSpaceForCopyDir
       If $CheckSpaceSucceeded == 1
          CallFunction CopyFunctions::CopyDirWithoutCheckingSpace

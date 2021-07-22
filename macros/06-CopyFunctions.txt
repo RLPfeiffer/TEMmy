@@ -1,6 +1,5 @@
 MacroName CopyFunctions
 
-
 # These values need to be updated before testing
 CopySource = G:\old\
 CopyTarget = Y:\TEMXCopy\
@@ -20,7 +19,7 @@ Function CopyDir 0 0
    Try
       CallFunction CopyFunctionsV2::CopyDir
    Catch
-      Notifications::SendMessage CopyFunctionsV2 failed on $ScopeName. Using old version
+      CallFunction Notifications::SendMessage CopyFunctionsV2 failed on $ScopeName. Using old version
       CallFunction CopyFunctions::CheckSpaceForCopyDir
       If $CheckSpaceSucceeded == 1
          CallFunction CopyFunctions::CopyDirWithoutCheckingSpace
@@ -78,4 +77,4 @@ Function CopyDirWithoutCheckingSpace 0 0
    If $ReportedValue1 != 0
       CallFunction Notifications::SendMessage Automatically copying $CopySource from $ScopeName failed!
    EndIf
-EndFunction 
+EndFunction

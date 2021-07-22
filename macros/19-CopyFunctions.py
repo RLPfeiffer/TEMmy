@@ -36,9 +36,8 @@ def CheckSpaceForCopyDir(CopySource, CopyTarget, TargetDirName):
 def CopyDirWithoutCheckingSpace(CopySource, CopyTarget, TargetDirName):
    try:
       shutil.copytree(path.join(CopySource, TargetDirName), path.join(CopyTarget, TargetDirName))
-   except Exception as e:
-      SendMessage("Error {} while attempting to copy {} from {} to {}".format(e, TargetDirName, sem.GetVariable("ScopeName"), CopyTarget))
-
+   except:
+      SendMessage(f"Error {sys.exc_info()[0]} while attempting to copy {TargetDirName} from {sem.GetVariable("ScopeName")} to {CopyTarget}")
 
 # The argument values need to be updated to match the SerialEM computer's current network mappings and a folder in the data drive before testing
 # Test the functions without side effects:

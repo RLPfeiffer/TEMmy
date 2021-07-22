@@ -2,66 +2,67 @@
 #MacroName WaitForStableFilament - Python
 import serialem as sem
 
-MaxPercentChangeOverCapture = sem.GetVariable("MaxPercentChangeOverCapture")
-MaxPercentChangeOverCapturePercentage = MaxPercentChangeOverCapture * 100
+def WaitForStableFilament():
+    MaxPercentChangeOverCapture = sem.GetVariable("MaxPercentChangeOverCapture")
+    MaxPercentChangeOverCapturePercentage = MaxPercentChangeOverCapture * 100
 
-print("Checking for stable filament")
-print(f"Beam intensity must change less than {MaxPercentChangeOverCapturePercentage}% over capture to be considered stable")
+    print("Checking for stable filament")
+    print(f"Beam intensity must change less than {MaxPercentChangeOverCapturePercentage}% over capture to be considered stable")
 
-EstimatedCaptureTime = 60 * 60
+    EstimatedCaptureTime = 60 * 60
 
-NumNavItems = sem.ReportNumTableItems()
-if NumNavItems < 1:
-    print("Nav table does not have items indicating total capture time. Using 1 hour as timeframe.")
-else:
-    NumTiles = sem.ReportNumMontagePieces()
-
-    if NumTiles == 1:
-        print("SerialEM claiming only 1 image in montage item. Using 1 hour as timeframe.")
+    NumNavItems = sem.ReportNumTableItems()
+    if NumNavItems < 1:
+        print("Nav table does not have items indicating total capture time. Using 1 hour as timeframe.")
     else:
-        EstimatedCaptureTime = NumTiles * sem.GetVariable("SecondsPerTile")
-        EstimatedCaptureHours = EstimatedCaptureTime / (60 * 60)
-        print(f"Capturing {NumTiles} images. Estimating {EstimatedCaptureHours} hours to complete")
+        NumTiles = sem.ReportNumMontagePieces()
 
-sem.ResetClock()
+        if NumTiles == 1:
+            print("SerialEM claiming only 1 image in montage item. Using 1 hour as timeframe.")
+        else:
+            EstimatedCaptureTime = NumTiles * sem.GetVariable("SecondsPerTile")
+            EstimatedCaptureHours = EstimatedCaptureTime / (60 * 60)
+            print(f"Capturing {NumTiles} images. Estimating {EstimatedCaptureHours} hours to complete")
 
-sem.Record()
-LastMeanCounts = sem.ReportMeanCounts()
-LastCaptureTimeStamp = sem.ReportClock()
+    sem.ResetClock()
 
-# Make the first check short in case the beam is stable.  If it isn't we'll see the greatest 
-# change in the beginning so we should still see the warmup change.
-
-# The beam has higher counts cold, and lower counts warm
-sem.Delay(60, "sec")
-
-for iLoop in range(22):
     sem.Record()
-    MeanCounts = sem.ReportMeanCounts()
-    CaptureTimeStamp = sem.ReportClock()
+    LastMeanCounts = sem.ReportMeanCounts()
+    LastCaptureTimeStamp = sem.ReportClock()
 
-    TimeInterval = CaptureTimeStamp - LastCaptureTimeStamp
-    PercentChangeOverTimeInterval = 1.0 - (MeanCounts / LastMeanCounts) 
-    
-    # If the beam is warm, the tolerance is low, and the capture is long then normal fluctuations can prevent
-    # the test from passing. So we only look for counts dropping. If the counts increase we consider the filament
-    # warm 
-    # PercentChangeOverTimeInterval = ABS $PercentChangeOverTimeInterval 
-    ReadablePercentChangeOverTimeInterval = PercentChangeOverTimeInterval * 100.0
-    print(f"Measured {ReadablePercentChangeOverTimeInterval}% change in counts over {TimeInterval} seconds")
+    # Make the first check short in case the beam is stable.  If it isn't we'll see the greatest 
+    # change in the beginning so we should still see the warmup change.
 
-    NumIntervalsOverCapture = EstimatedCaptureTime / TimeInterval
-    # print("Estimating {} intervals".format(NumIntervalsOverCapture)) 
-    PercentChangeOverCapture = abs(PercentChangeOverTimeInterval * NumIntervalsOverCapture)
-    ReadablePercentChangeOverCapture = PercentChangeOverCapture * 100
+    # The beam has higher counts cold, and lower counts warm
+    sem.Delay(60, "sec")
 
-    print(f"Estimating {ReadablePercentChangeOverCapture}% change in image counts over entire capture.")
-    if PercentChangeOverCapture < MaxPercentChangeOverCapture:
-        print(f"Estimated change is below tolerance of {MaxPercentChangeOverCapturePercentage}%. Filament is stable!")
-        sem.ReportClock()
-        break
+    for iLoop in range(22):
+        sem.Record()
+        MeanCounts = sem.ReportMeanCounts()
+        CaptureTimeStamp = sem.ReportClock()
 
-    LastMeanCounts = MeanCounts
-    LastCaptureTimeStamp = CaptureTimeStamp
+        TimeInterval = CaptureTimeStamp - LastCaptureTimeStamp
+        PercentChangeOverTimeInterval = 1.0 - (MeanCounts / LastMeanCounts) 
+        
+        # If the beam is warm, the tolerance is low, and the capture is long then normal fluctuations can prevent
+        # the test from passing. So we only look for counts dropping. If the counts increase we consider the filament
+        # warm 
+        # PercentChangeOverTimeInterval = ABS $PercentChangeOverTimeInterval 
+        ReadablePercentChangeOverTimeInterval = PercentChangeOverTimeInterval * 100.0
+        print(f"Measured {ReadablePercentChangeOverTimeInterval}% change in counts over {TimeInterval} seconds")
 
-    sem.Delay(120, "sec")
+        NumIntervalsOverCapture = EstimatedCaptureTime / TimeInterval
+        # print("Estimating {} intervals".format(NumIntervalsOverCapture)) 
+        PercentChangeOverCapture = abs(PercentChangeOverTimeInterval * NumIntervalsOverCapture)
+        ReadablePercentChangeOverCapture = PercentChangeOverCapture * 100
+
+        print(f"Estimating {ReadablePercentChangeOverCapture}% change in image counts over entire capture.")
+        if PercentChangeOverCapture < MaxPercentChangeOverCapture:
+            print(f"Estimated change is below tolerance of {MaxPercentChangeOverCapturePercentage}%. Filament is stable!")
+            sem.ReportClock()
+            break
+
+        LastMeanCounts = MeanCounts
+        LastCaptureTimeStamp = CaptureTimeStamp
+
+        sem.Delay(120, "sec")

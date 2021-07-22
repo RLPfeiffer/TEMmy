@@ -103,7 +103,12 @@ Function Capture 1 0 CookFirst
 
    MoveToNavItem 2
    Try
-      Call WaitForStableFilament - Python
+PythonScript
+#!Python3.9
+#include WaitForStableFilament - Python
+import serialem as sem
+WaitForStableFilament()
+EndPythonScript
    Catch
       Echo Error from WaitForStableFilament python. Trying regular version
       Call WaitForStableFilament

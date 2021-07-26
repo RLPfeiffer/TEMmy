@@ -3,6 +3,7 @@
 #include WaitForStableFilament - Python
 #include CopyFunctions - Python
 #include Notifications - Python
+#include Snapshot - Python
 import serialem as sem
 import sys
 
@@ -120,12 +121,11 @@ def Capture(CookFirst):
         return
 
     # Send the overview to Slack
-    sem.CallFunction("Snapshot::TakeSnapshot", f"overview{CaptureDir}", 1)
+    TakeSnapshot(True, f"overview{CaptureDir}")
 
     # Copy the capture to DROPBOX
     # Try python CopyFunctions first:
     try:
-        sem.SetVariable("CopySource", )
         CopyDir(f"{sem.GetVariable('DataPath')}/{CaptureDir}", sem.GetVariable("CopyPath"), CaptureDir)
     except:
         sem.CallFunction("Notifications::SendMessage", f"Python CopyDir failed with error {sys.exc_info()[0]}. Trying again with old version")

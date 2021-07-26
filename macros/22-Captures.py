@@ -81,7 +81,7 @@ def Capture(CookFirst):
         # Don't set spot size for high mag cook, because the beam will move on TEM1
         # sem.SetSpotSize(2)
 
-        sem.PreCookMontage(sem.GetVariable("PrecookMontageD"), 2, 0, 0)
+        sem.PreCookMontage(int(sem.GetVariable("PrecookMontageD")), 2, 0, 0)
 
         # print("Restoring spot size after cook")
         # sem.SetSpotSize(StartingSpotSize)

@@ -20,7 +20,7 @@ def WaitForStableFilament():
         if NumTiles == 1:
             print("SerialEM claiming only 1 image in montage item. Using 1 hour as timeframe.")
         else:
-            EstimatedCaptureTime = NumTiles * sem.GetVariable("SecondsPerTile")
+            EstimatedCaptureTime = NumTiles * float(sem.GetVariable("SecondsPerTile"))
             EstimatedCaptureHours = EstimatedCaptureTime / (60 * 60)
             print(f"Capturing {NumTiles} images. Estimating {EstimatedCaptureHours} hours to complete")
 

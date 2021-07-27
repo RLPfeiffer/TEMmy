@@ -106,7 +106,7 @@ def Capture(CookFirst):
     try:
         SendStart()
     except:
-        sem.CallFunction("Notifications::SendMessage", "Failed to send start notification from Python")
+        sem.CallFunction("Notifications::SendMessage", f"Failed to send start notification from Python because of {sys.exc_info()[0]}")
         sem.CallFunction("Notifications::SendStart")
 
     try:

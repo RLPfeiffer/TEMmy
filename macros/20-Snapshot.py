@@ -24,7 +24,7 @@ def TakeSnapshot(SendToSlack, Name):
       sem.SnapshotToFile(0, 0, "0", "JPG", "CUR", FilenameInDropbox)
    except:
       try:
-         sem.SaveToOtherFile("B", "JPG", "Cur", FilenameInDropbox)
+         sem.SaveToOtherFile("B", "JPG", "CUR", FilenameInDropbox)
       except:
          SendMessage(f"SnapshotToFile and SaveToOtherFile both failed for snapshot {Filename}")
          return

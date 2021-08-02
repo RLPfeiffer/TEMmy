@@ -1,8 +1,3 @@
-#!Python3.9
-#MacroName 7 Minute Low Mag Cook All Points
-#include Timed Low Mag Cook - Python
-import serialem as sem
-
 NumNavItems = int(sem.ReportNumTableItems())
 if NumNavItems == 0:
    LowMagCook(7)

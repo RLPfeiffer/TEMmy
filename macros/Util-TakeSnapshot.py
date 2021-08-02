@@ -1,8 +1,3 @@
-#!Python3.9
-#MacroName Snapshot - Python
-#include Notifications - Python
-import serialem as sem
-
 # Function for automated use: saves a snapshot of the current image to our DROPBOX.
 # If called with True for the first argument, will also send this image to slack in the #tem-bot channel
 def TakeSnapshot(SendToSlack, Name):

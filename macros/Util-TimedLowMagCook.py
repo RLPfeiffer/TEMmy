@@ -1,7 +1,3 @@
-#!Python3.9
-#MacroName Timed Low Mag Cook - Python
-import serialem as sem
-
 def LowMagCook(Minutes=None, RecordAfter=True):
    if Minutes == None:
       Minutes = sem.EnterDefaultedNumber(7, 2, "Number of minutes to cook?")

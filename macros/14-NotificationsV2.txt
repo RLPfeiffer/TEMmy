@@ -1,5 +1,3 @@
-MacroName NotificationsV2
-
 # Test:
 CallFunction NotificationsV2::SendMessage Test message
 

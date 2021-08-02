@@ -1,5 +1,3 @@
-MacroName ScopeUtil
-
 # Globally set the variable $ScopeName
 ScopeName := TEM2
 

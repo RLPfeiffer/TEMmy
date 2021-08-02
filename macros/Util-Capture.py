@@ -1,10 +1,3 @@
-#!Python3.9
-#MacroName Captures - Python
-#include WaitForStableFilament - Python
-#include CopyFunctions - Python
-#include Notifications - Python
-#include Snapshot - Python
-import serialem as sem
 import sys
 
 def Capture(CookFirst):

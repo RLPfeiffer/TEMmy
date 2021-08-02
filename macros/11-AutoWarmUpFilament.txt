@@ -1,5 +1,3 @@
-MacroName AutoWarmUpFilament
-
 MinutesBeforeMidnight = 24 * 60
 
 WarmUpHour = 9

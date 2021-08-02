@@ -1,5 +1,3 @@
-MacroName StringTools
-
 # Test:
 CallFunction StringTools::Tokenize A string with multiple tokens!
 OKBox $Tokens

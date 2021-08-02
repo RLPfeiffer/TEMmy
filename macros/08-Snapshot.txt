@@ -1,5 +1,3 @@
-MacroName Snapshot
-
 # When called directly, this macro prompts for a section # and label, and asks yes/no whether to send to Slack.
 EnterString label "section # and label"
 YesNoBox "send snapshot to Slack?"

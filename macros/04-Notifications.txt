@@ -1,5 +1,3 @@
-MacroName Notifications
-
 # Test:
 CallFunction Notifications::SendMessage Test message
 CallFunction Notifications::SendStart

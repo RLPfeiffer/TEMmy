@@ -1,4 +1,3 @@
-MacroName HighMagCook
 LongName Cook, Calibrate, and Capture Montage
 
 CallFunction Captures::Capture 1

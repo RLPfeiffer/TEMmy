@@ -1,4 +1,3 @@
-MacroName BeamBlank
 ScreenUp 
 SetBeamBlank 1
 OKBox Screen is UP and Beam is BLANKED.

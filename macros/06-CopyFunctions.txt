@@ -1,5 +1,3 @@
-MacroName CopyFunctions
-
 # These values need to be updated before testing
 CopySource = G:\old\
 CopyTarget = Y:\TEMXCopy\

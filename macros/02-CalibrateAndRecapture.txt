@@ -1,4 +1,3 @@
-MacroName CalibrateAndRecapture
 LongName Calibrate and Recapture Montage
 
 CallFunction Captures::Capture 0

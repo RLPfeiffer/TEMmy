@@ -1,2 +1,1 @@
-MacroName TurnOffFilament
 SetColumnOrGunValve 0

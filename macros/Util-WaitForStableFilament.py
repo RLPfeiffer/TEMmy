@@ -1,7 +1,3 @@
-#!Python3.9
-#MacroName WaitForStableFilament - Python
-import serialem as sem
-
 def WaitForStableFilament():
     MaxPercentChangeOverCapture = float(sem.GetVariable("MaxPercentChangeOverCapture"))
     MaxPercentChangeOverCapturePercentage = MaxPercentChangeOverCapture * 100

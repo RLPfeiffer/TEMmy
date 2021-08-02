@@ -1,5 +1,3 @@
-MacroName Captures
-
 Function Capture 1 0 CookFirst
    echo
    If $CookFirst == 0

@@ -1,7 +1,3 @@
-#!Python3.9
-#MacroName CopyFunctions - Python
-#include Notifications - Python
-import serialem as sem
 import shutil
 import os
 from os import path

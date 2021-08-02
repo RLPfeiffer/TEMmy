@@ -1,6 +1,3 @@
-#!Python3.9
-#MacroName Notifications - Python
-import serialem as sem
 import os
 
 def SendMessage(Text):

@@ -7,4 +7,5 @@ coach/temmy/
 PyreLogs/
 *.zip
 tem*package*.txt
+tem*python*.py
 bob-config.yaml

@@ -2,7 +2,7 @@
 #MacroName Timed Low Mag Cook - Python
 import serialem as sem
 
-def LowMagCook(Minutes=None):
+def LowMagCook(Minutes=None, RecordAfter=True):
    if Minutes == None:
       Minutes = sem.EnterDefaultedNumber(7, 2, "Number of minutes to cook?")
 
@@ -38,8 +38,9 @@ def LowMagCook(Minutes=None):
       WobbleDist += 1
 
    print("END BURN WOBBLE")
-   sem.SetSpotSize(3)
-   sem.Record()
+   if RecordAfter:
+      sem.SetSpotSize(3)
+      sem.Record()
 
 def WaitForStageNotBusy():
    while sem.ReportStageBusy() != 0:

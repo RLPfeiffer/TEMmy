@@ -1,6 +1,6 @@
 import sys
 
-def Capture(CookFirst):
+def Capture(CookFirst:bool) -> None:
     if not CookFirst:
         print("This macro performs an image stabilization calibration,")
     else:

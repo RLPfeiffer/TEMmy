@@ -1,6 +1,6 @@
 import os
 
-def SendMessage(Text):
+def SendMessage(Text:str) -> None:
    MessageDir = sem.GetVariable("V2MessageDir")
    MessagePath = sem.GetVariable("V2MessagePath")
    # Make sure there is a message file to append to
@@ -9,7 +9,7 @@ def SendMessage(Text):
    with open(MessagePath, "a+") as MessageFile:
       MessageFile.write("{}{}".format(Text, os.linesep))
 
-def SendStart():
+def SendStart() -> None:
    EstimatedCaptureHours = 0
    NumTiles = 0
    SecondsPerTile = sem.GetVariable("SecondsPerTile")
@@ -30,5 +30,5 @@ def SendStart():
 
       SendMessage("Started: Capturing {} images on {}. Estimating {} hours to complete".format(NumTiles, ScopeName, EstimatedCaptureHours))
 
-def SendStop():
-   SendMessage("Copied: {} copied from {} to DROPBOX.".format(sem.GetVariable(CaptureDir), sem.GetVariable(ScopeName)))
+def SendStop() -> None:
+   SendMessage("Copied: {} copied from {} to DROPBOX.".format(sem.GetVariable('CaptureDir'), sem.GetVariable('ScopeName')))

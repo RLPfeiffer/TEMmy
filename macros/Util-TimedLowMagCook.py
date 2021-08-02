@@ -1,8 +1,10 @@
-def LowMagCook(Minutes=None, RecordAfter=True):
-   if Minutes == None:
-      Minutes = sem.EnterDefaultedNumber(7, 2, "Number of minutes to cook?")
-
-   SecondsToCook = Minutes * 60
+from typing import Optional
+def LowMagCook(Minutes:Optional[float]=None, RecordAfter:bool=True) -> None:
+   SecondsToCook:float = 60
+   if Minutes is None:
+      SecondsToCook *= EnterDefaultedFloat(7, "Number of minutes to cook?")
+   else:
+      SecondsToCook *= Minutes 
 
    MinWobbleDist = 10
    MaxWobbleDist = 20
@@ -38,6 +40,6 @@ def LowMagCook(Minutes=None, RecordAfter=True):
       sem.SetSpotSize(3)
       sem.Record()
 
-def WaitForStageNotBusy():
+def WaitForStageNotBusy() -> None:
    while sem.ReportStageBusy() != 0:
       sem.Delay(500, "msec")

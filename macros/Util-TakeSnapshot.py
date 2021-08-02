@@ -1,6 +1,6 @@
 # Function for automated use: saves a snapshot of the current image to our DROPBOX.
 # If called with True for the first argument, will also send this image to slack in the #tem-bot channel
-def TakeSnapshot(SendToSlack, Name):
+def TakeSnapshot(SendToSlack:bool, Name:str) -> None:
    # Reports the current mag; also sets reportedValue2 to 1 if low mag mode, 0 if not
    (CurrentMag, LowMag) = sem.ReportMag()
    Filename = f"TEMSnapshots/{Name} x{int(CurrentMag)} {sem.GetVariable('ScopeName')}.jpg"

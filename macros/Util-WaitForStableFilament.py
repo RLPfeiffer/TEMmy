@@ -1,4 +1,4 @@
-def WaitForStableFilament():
+def WaitForStableFilament() -> None:
     MaxPercentChangeOverCapture = float(sem.GetVariable("MaxPercentChangeOverCapture"))
     MaxPercentChangeOverCapturePercentage = MaxPercentChangeOverCapture * 100
 

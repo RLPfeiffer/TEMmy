@@ -15,7 +15,7 @@ if __name__ == "__main__":
 
     # Package TEM macros
     def write_macro(macro, content, file, all_python_file):
-        num, name, *_ = macro.split('-')
+        num, name, *scope_name = macro.split('-')
         is_python = name.endswith(".py")
         name = name.replace('.py', '')
         name = name.replace('.txt', '')
@@ -61,7 +61,7 @@ if __name__ == "__main__":
                     if "tem1" in macro.lower():
                         write_macro(macro, macro_content, macro_package_tem1, tem1_all_python_file)
                     elif "tem2" in macro.lower():
-                        write_macro(macro, macro_content, macro_package_tem2, tem2_all_python_filename)
+                        write_macro(macro, macro_content, macro_package_tem2, tem2_all_python_file)
                     else:
                         write_macro(macro, macro_content, macro_package_tem1, tem1_all_python_file)
                         write_macro(macro, macro_content, macro_package_tem2, tem2_all_python_file)

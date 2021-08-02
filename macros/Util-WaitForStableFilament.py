@@ -1,5 +1,4 @@
 def WaitForStableFilament() -> None:
-    MaxPercentChangeOverCapture = float(sem.GetVariable("MaxPercentChangeOverCapture"))
     MaxPercentChangeOverCapturePercentage = MaxPercentChangeOverCapture * 100
 
     print("Checking for stable filament")
@@ -16,7 +15,7 @@ def WaitForStableFilament() -> None:
         if NumTiles == 1:
             print("SerialEM claiming only 1 image in montage item. Using 1 hour as timeframe.")
         else:
-            EstimatedCaptureTime = NumTiles * float(sem.GetVariable("SecondsPerTile"))
+            EstimatedCaptureTime = NumTiles * SecondsPerTile
             EstimatedCaptureHours = EstimatedCaptureTime / (60 * 60)
             print(f"Capturing {NumTiles} images. Estimating {EstimatedCaptureHours} hours to complete")
 

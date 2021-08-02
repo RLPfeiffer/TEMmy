@@ -3,8 +3,8 @@
 def TakeSnapshot(SendToSlack:bool, Name:str) -> None:
    # Reports the current mag; also sets reportedValue2 to 1 if low mag mode, 0 if not
    (CurrentMag, LowMag) = sem.ReportMag()
-   Filename = f"TEMSnapshots/{Name} x{int(CurrentMag)} {sem.GetVariable('ScopeName')}.jpg"
-   FilenameInDropbox = f"{sem.GetVariable('DropboxPath')}/{Filename}"
+   Filename = f"TEMSnapshots/{Name} x{int(CurrentMag)} {ScopeName}.jpg"
+   FilenameInDropbox = f"{DropboxPath}/{Filename}"
    # Takes a snapshot of the image display in the current active buffer and saves it to the file with the given name and closes the file.
    #  #S sets the amount of image scaling relative to the display with a value of 1 or greater, or 0 or less to take the whole image at 1:1 zoom.
    #  #T sets the scaling of text labels and line thicknesses with a value of 1 or more, or 0 or less to use the same scaling as for the image.

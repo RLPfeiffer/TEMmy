@@ -7,7 +7,7 @@ def CopyDir(CopySource:str, CopyTarget:str, TargetDirName:str) -> bool:
    if CheckSpaceForCopyDir(CopySource, CopyTarget, TargetDirName):
       return CopyDirWithoutCheckingSpace(CopySource, CopyTarget, TargetDirName)
    else:
-      SendMessage(f"Not enough space to auto-copy {TargetDirName} from {sem.GetVariable('ScopeName')} to {CopyTarget}")
+      SendMessage(f"Not enough space to auto-copy {TargetDirName} from {ScopeName} to {CopyTarget}")
       return False
 
 # INTERNAL, called by CheckSpaceForCopyDir
@@ -35,7 +35,7 @@ def CopyDirWithoutCheckingSpace(CopySource:str, CopyTarget:str, TargetDirName:st
       shutil.copytree(path.join(CopySource, TargetDirName), path.join(CopyTarget, TargetDirName))
       return True
    except:
-      SendMessage(f"Error {sys.exc_info()[0]} while attempting to copy {TargetDirName} from {sem.GetVariable('ScopeName')} to {CopyTarget}")
+      SendMessage(f"Error {sys.exc_info()[0]} while attempting to copy {TargetDirName} from {ScopeName} to {CopyTarget}")
       return False
 
 # The argument values need to be updated to match the SerialEM computer's current network mappings and a folder in the data drive before testing

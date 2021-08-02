@@ -40,8 +40,7 @@ def Capture(CookFirst:bool) -> None:
     print(sem.NavItemFileToOpen(1))
 
     # Prompt the user for the directory the capture will be placed
-    sem.EnterString("CaptureDir", "Directory of the capture, relative to your data drive?")
-    CaptureDir = sem.GetVariable("CaptureDir")
+    CaptureDir = EnterString("Directory of the capture, relative to your data drive?")
 
     # Prompt the user to create capture notes
     sem.RunExternalTool("1")
@@ -75,7 +74,7 @@ def Capture(CookFirst:bool) -> None:
         # Don't set spot size for high mag cook, because the beam will move on TEM1
         # sem.SetSpotSize(2)
 
-        sem.PreCookMontage(int(sem.GetVariable("PrecookMontageD")), 2, 0, 0)
+        sem.PreCookMontage(PrecookMontageD, 2, 0, 0)
 
         # print("Restoring spot size after cook")
         # sem.SetSpotSize(StartingSpotSize)
@@ -105,7 +104,7 @@ def Capture(CookFirst:bool) -> None:
     try:
         sem.Montage()
     except:
-        Message = f"Montage failed with error {sys.exc_info()[0]} on {sem.GetVariable('ScopeName')}"
+        Message = f"Montage failed with error {sys.exc_info()[0]} on {ScopeName}"
         try:
             SendMessage(Message)
         except:
@@ -119,12 +118,12 @@ def Capture(CookFirst:bool) -> None:
     # Copy the capture to DROPBOX
     # Try python CopyFunctions first:
     try:
-        CopyDir(f"{sem.GetVariable('DataPath')}/{CaptureDir}", sem.GetVariable("CopyPath"), CaptureDir)
+        CopyDir(f"{DataPath}/{CaptureDir}", CopyPath, CaptureDir)
+        SendStop(CaptureDir)
     except:
         sem.CallFunction("Notifications::SendMessage", f"Python CopyDir failed with error {sys.exc_info()[0]}. Trying again with old version")
-        sem.SetVariable("CopyTarget", sem.GetVariable("CopyPath"))
+        sem.SetVariable("CopyTarget", CopyPath)
         sem.SetVariable("TargetDirName", CaptureDir)
-        sem.SetVariable("CopySource", f"{sem.GetVariable('DataPath')}\\{CaptureDir}")
+        sem.SetVariable("CopySource", f"{DataPath}\{CaptureDir}")
         sem.CallFunction("CopyFunctions::CopyDir")
-
-    sem.CallFunction("Notifications::SendStop")
+        sem.CallFunction("Notifications::SendStop")

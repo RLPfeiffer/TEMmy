@@ -1,0 +1,4 @@
+-lib kiss
+-cp src
+--main delete_bad_files.Main
+--interp

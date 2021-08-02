@@ -1,0 +1,21 @@
+(doFor sec (range 1 959)
+    (let [secFolder (joinPath "TEM" (.lpad (Std.string sec) "0" 4) "TEM")
+            badFile (joinPath secFolder "Grid_Cel128_Mes8_Mes8_Thr0.1_it10_sp4.mosaic")
+            backupFolder (joinPath "backup" secFolder)
+            backupFile (joinPath backupFolder "Grid_Cel128_Mes8_Mes8_Thr0.1_it10_sp4.mosaic")
+            realBadFile (joinPath "W:/Volumes/RC3" badFile)]
+        (when (FileSystem.exists realBadFile)
+            "$realBadFile -> $backupFile"
+            (FileSystem.createDirectory backupFolder)
+            (File.copy realBadFile backupFile)
+            (FileSystem.deleteFile realBadFile))))
+
+/*(walkDirectory "W:/Volumes/RC3" "TEM"
+    ->file 
+        {
+            (when (= (Path.withoutDirectory file) "")
+                (File.copy (joinPath "W:/Volumes/RC3" ~file) (joinPath "backup" file))
+                (FileSystem.deleteFile (joinPath "W:/Volumes/RC3" file)))
+        }
+    ->folder (FileSystem.createDirectory (joinPath "backup" folder)))
+    */

@@ -85,7 +85,7 @@ def WriteNotesFiles(Block:str, Notes:SampleNotes) -> None:
     makedirs(BlockFolder, exist_ok=True)
     # Write notes to a JSON file
     with open(join(BlockFolder, f"{Block}.json"), "w") as json:
-        json.write("{\n")
+        json.write("{" + newline)
         for idx, key in enumerate(SampleInfoKeys):
             jsonValue = Notes[idx]
             if isinstance(Notes[idx], str):
@@ -96,10 +96,10 @@ def WriteNotesFiles(Block:str, Notes:SampleNotes) -> None:
             json.write(f'  "{key}": {jsonValue}')
             if idx != len(SampleInfoKeys) - 1:
                 json.write(",")
-            json.write("\n")
+            json.write(newline)
         json.write("}")
 
     # Write notes to a TXT file
     with open(join(BlockFolder, f"{Block}.txt"), "w") as txt:
         for idx, key in enumerate(SampleInfoKeys):
-            txt.write(f"{key}: {Notes[idx]}\n")
+            txt.write(f"{key}: {Notes[idx]}{newline}")

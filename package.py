@@ -19,7 +19,8 @@ if __name__ == "__main__":
         is_python = name.endswith(".py")
         # Don't allow backslashes in SerialEM python, because they cause a pipe error:
         if is_python:
-            assert '\\"' not in content, f"Backslash-quote detected in {macro}--This won't work on SerialEM"
+            assert '\\"' not in content, f"Backslash-quote detected in {macro}--This won't work on SerialEM, so use a single-quoted string and remove the escape sequence instead"
+            assert '\\n' not in content, f"Backslash-newline detected in {macro}--This won't work on SerialEM, so use the global var newline instead"
 
         name = name.replace('.py', '')
         name = name.replace('.txt', '')

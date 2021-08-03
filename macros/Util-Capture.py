@@ -45,10 +45,14 @@ def Capture(CookFirst:bool) -> None:
     print(sem.NavItemFileToOpen(1))
 
     # Prompt the user for the directory the capture will be placed
-    CaptureDir = EnterString("Directory of the capture, relative to your data drive?")
-
+    # TODO get this from the label of the navigator point, when multiple captures are implemented
+    Block, Notes = CurrentSampleNotes.popitem(last=False)
+    CurrentSampleNotes[Block] = Notes
+    CurrentSampleNotes.move_to_end(Block, last=False)
+    CaptureDir = join(DataPath, Block)
     # Prompt the user to create capture notes
-    sem.RunExternalTool("1")
+    NotesThread = Thread(target=PromptForProcessNotes)
+    NotesThread.start()
 
     ### FOCUS ###
     if NumNavItems < 3:

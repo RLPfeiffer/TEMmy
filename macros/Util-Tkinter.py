@@ -20,4 +20,3 @@ def EnterInt(prompt:str, default:Optional[int]=None, **kwargs:int) -> int:
 # Can provide minvalue, maxvalue via kwargs
 def EnterFloat(prompt:str, default:Optional[float]=None, **kwargs:float) -> float:
     return simpledialog.askfloat("SerialEM", prompt, parent=root, initialvalue=default, **kwargs)
-

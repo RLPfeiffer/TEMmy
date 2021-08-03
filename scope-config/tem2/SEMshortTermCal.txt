@@ -1,0 +1,2 @@
+SerialEMShortTermCal
+NavAutosave VALUEDGATANCUSTOMER C:\ProgramData\SerialEM\AUTOSAVE07141305.nav

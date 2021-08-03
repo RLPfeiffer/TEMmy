@@ -1,0 +1,722 @@
+MaxMacros	40
+Macro	0
+MacroName Timed Low Mag Cook With Wobble
+
+MinWobbleDist = 10
+MaxWobbleDist = 20
+WobbleDist = 20
+
+ReportStageXYZ
+XStart = $reportedvalue1
+YStart = $reportedvalue2
+
+IsVariableDefined SecondsToCook
+If $reportedValue1 == 0
+   EnterDefaultedNumber 7 2 Number of minutes to cook?
+   SecondsToCook := $reportedvalue1 * 60
+Endif
+
+echo BEGIN BURN WOBBLE
+
+ScreenDown
+SetSpotSize 1
+ResetClock
+Loop 200000 iLoop
+   If $WobbleDist > $MaxWobbleDist
+      WobbleDist = $MinWobbleDist
+   EndIf
+
+   # Arrays of stage position deltas:
+   ShiftXList = {$WobbleDist (0 - $WobbleDist) (0 - $WobbleDist) $WobbleDist 0 0 0 0}
+   ShiftYList = {0 0 0 0 $WobbleDist (0 - $WobbleDist) (0 - $WobbleDist) $WobbleDist}
+
+   Loop 8 iShift
+      ShiftX = $ShiftXList[$iShift]
+      ShiftY = $ShiftYList[$iShift]
+      MoveStage $ShiftX $ShiftY
+      CallFunction WaitForStageNotBusy
+      ReportClock
+      If $reportedValue1 >= $SecondsToCook
+         echo END BURN WOBBLE
+         SetSpotSize 4
+         #Echo Cook done. no recording because something is weird
+         Record
+         Return
+      Endif
+   EndLoop
+   
+   MoveStageTo $XStart $YStart
+   ReportStageXYZ
+   reportclock
+
+   WobbleDist = $WobbleDist  + 1
+EndLoop
+
+Function WaitForStageNotBusy
+   Loop 20000 iStageWait
+      ReportStageBusy
+      StageIsBusy = $reportedvalue1
+      if $StageIsBusy == 0
+         break
+      endif
+      Delay 500 msec
+   EndLoop
+EndFunction
+EndMacro
+Macro	1
+MacroName HighMagCook
+LongName Cook, Calibrate, and Capture Montage
+
+echo
+echo This macro performs a high mag cook, image stabilization calibration,
+echo verifies the beam current is stable, focuses the scope and captures
+echo a montage.  
+echo 
+echo The Navigator table should contain the following entries for this macro:
+echo     Item1: The 2D region of interest to be captured
+echo     Item2: A point surrounded by at least 10um of empty formvar
+echo                  used for the current stability check
+echo     Item3: An optional point to focus upon.  The point should contain
+echo                  sufficient texture for autofocus to succeed.  If not specified 
+echo                  the center of the capture region will be used instead. 
+echo
+
+ReportNumTableItems
+NumNavItems = $reportedvalue1
+
+IF $NumNavItems < 1
+    echo
+    echo ERROR: Nav table does not have items described in help text above.
+    echo Exiting
+    return
+ELSEIF $NumNavItems < 2
+    echo
+    echo ERROR: Nav table does not have a point in empty forvar for filament stability check.
+    echo Exiting
+    return
+ENDIF
+
+#Prompt the user to create capture notes
+RunExternalTool 1
+
+### FOCUS ###
+
+
+MoveToNavItem 1
+
+Delay 3
+
+Focus
+
+### CALIBRATE IMAGE SHIFT ###
+
+
+CalibrateImageShift
+
+ScreenDown
+
+ReportAlpha
+ReportBeamShift
+ReportBeamTilt
+
+#### COOKING ####
+
+echo "Cooking Begins!"
+ReportMag
+StartingMag = $reportedvalue2
+
+IF $reportedvalue2 == 1
+    echo Attempting HighMagCook in Low Mag mode, aborting. 
+    echo Go to high magnification mode before using this macro.
+    Return
+ENDIF
+
+ReportSpotSize
+StartingSpotSize = $reportedvalue1
+
+echo Setting spot size for high-mag cook
+
+SetSpotSize 2 #Commented for test of a lower power cook
+
+ReportSpotSize
+
+Call ScopeUtil
+PreCookMontage $PrecookMontageD 2 0 0
+
+echo Restoring spot size after cook
+SetSpotSize $StartingSpotSize
+
+echo "Cooking done!"
+reportclock
+
+###  BEAM STABILITY CHECK ####
+#Move the stage to the area we've been told to use
+
+# The last nav item should be the formvar point
+MoveToNavItem $NumNavItems
+CallMacro 4 #Uncomment this line to verify the filament is warmed up
+
+MoveToNavItem 1
+
+CallFunction Notifications::SendStart
+Montage
+#CallFunction Notifications::SendOverview
+
+# Copy the capture to DROPBOX
+#CopySource = $DataPath\$CaptureDir
+#CopyTarget = $CopyPath
+#TargetDirName = $CaptureDir
+#CallFunction CopyFunctions::CopyDir
+#CallFunction Notifications::SendStop
+EndMacro
+Macro	2
+MacroName CalibrateAndRecapture
+LongName Calibrate and Recapture Montage
+
+
+
+echo
+echo This macro performs an image stabilization calibration,
+echo verifies the beam current is stable, focuses the scope and captures
+echo a montage.  
+echo 
+echo The Navigator table should contain the following entries for this macro:
+echo     Item1: The 2D region of interest to be captured
+echo     Item2: A point surrounded by at least 10um of empty formvar
+echo                  used for the current stability check
+echo     Item3: An optional point to focus upon.  The point should contain
+echo                  sufficient texture for autofocus to succeed.  If not specified 
+echo                  the center of the capture region will be used instead. 
+echo
+
+ReportNumTableItems
+NumNavItems = $reportedvalue1
+
+IF $NumNavItems < 1
+    echo
+    echo ERROR: Nav table does not have items described in help text above.
+    echo Exiting
+    return
+ELSEIF $NumNavItems < 2
+    echo
+    echo ERROR: Nav table does not have a point in empty forvar for filament stability check.
+    echo Exiting
+    return
+ENDIF
+
+#Prompt the user to create capture notes
+RunExternalTool 1
+
+ReportMag
+StartingMag = $reportedvalue2
+
+IF $reportedvalue2 == 1
+    echo Attempting Capture in Low Mag mode, aborting. 
+    echo Go to high magnification mode before using this macro.
+    Return
+ENDIF
+
+### FOCUS ###
+
+MoveToNavItem 1
+
+Delay 3
+
+Focus
+
+### CALIBRATE IMAGE SHIFT ###
+
+CalibrateImageShift
+
+ScreenDown
+
+ReportAlpha
+ReportBeamShift
+ReportBeamTilt
+
+
+
+
+###  BEAM STABILITY CHECK ####
+#Move the stage to the area we've been told to use
+
+# The last nav item should be the formvar point
+MoveToNavItem $NumNavItems
+CallMacro 4 #Uncomment this line to verify the filament is warmed up
+
+### Center on montage and capture ###
+MoveToNavItem 1
+
+CallFunction Notifications::SendStart
+Montage
+#CallFunction Notifications::SendOverview
+
+# Copy the capture to DROPBOX
+#Call ScopeUtil
+#CopySource = $DataPath\$CaptureDir
+#CopyTarget = $CopyPath
+#TargetDirName = $CaptureDir
+#CallFunction CopyFunctions::CopyDir
+
+#CallFunction Notifications::SendStop
+EndMacro
+Macro	3
+MacroName WaitForStableFilament
+
+SecondsPerTile = 15
+#The maximum scalar of beam intensity change we want over the capture timeframe
+
+#################################
+# Change MaxPercentChangeOverCapture to adjust sensitivity of filament stability.  
+# Must be a value 0 to 1.0.
+MaxPercentChangeOverCapture = 0.15
+#################################
+
+
+MaxPercentChangeOverCapturePercentage = $MaxPercentChangeOverCapture * 100
+
+Echo
+Echo Checking for stable filament
+Echo Beam intensity must change less than $MaxPercentChangeOverCapturePercentage% over capture to be considered stable
+
+EstimatedCaptureTime = 60 * 60
+
+ReportNumTableItems
+NumNavItems = $reportedvalue1
+IF $NumNavItems < 1
+    echo
+    echo Nav table does not have items indicating total capture time.  Using 1 hour as timeframe.    
+ELSE
+    ReportNumMontagePieces 1
+    NumTiles = $reportedvalue1
+
+    IF $NumTiles == 1
+        echo SerialEM claiming only 1 image in montage item.   Using 1 hour as timeframe.
+    ELSE    
+        EstimatedCaptureTime = $NumTiles * $SecondsPerTile
+        EstimatedCaptureHours =  $EstimatedCaptureTime / (60 * 60)
+        echo Capturing $NumTiles images.  Estimating $EstimatedCaptureHours hours to complete
+    ENDIF
+ENDIF
+
+resetclock
+Record
+ReportMeanCounts
+LastMeanCounts = $reportedvalue1
+reportclock
+LastCaptureTimeStamp = $reportedvalue1
+
+#Make the first check short in case the beam is stable.  If it isn't we'll see the greatest 
+#change in the beginning so we should still see the warmup change.
+
+#The beam has higher counts cold, and lower counts warm
+Delay 60 sec
+
+Loop 22 iLoop
+    Record
+    ReportMeanCounts
+    MeanCounts = $reportedvalue1
+    reportclock
+    CaptureTimeStamp = $reportedvalue1
+
+    TimeInterval = $CaptureTimeStamp - $LastCaptureTimeStamp
+    PercentChangeOverTimeInterval = 1.0 - ($MeanCounts / $LastMeanCounts) 
+    
+    #If the beam is warm, the tolerance is low, and the capture is long then normal fluctuations can prevent
+    #the test from passing.  So we only look for counts dropping.  If the counts increase we consider the filament
+    #warm 
+    #PercentChangeOverTimeInterval = ABS $PercentChangeOverTimeInterval 
+    ReadablePercentChangeOverTimeInterval = $PercentChangeOverTimeInterval * 100.0
+    echo Measured $ReadablePercentChangeOverTimeInterval% change in counts over $TimeInterval seconds
+
+    NumIntervalsOverCapture = $EstimatedCaptureTime / $TimeInterval
+    #echo Estimating $NumIntervalsOverCapture intervals
+    PercentChangeOverCapture = $PercentChangeOverTimeInterval * $NumIntervalsOverCapture
+    PercentChangeOverCapture = ABS $PercentChangeOverCapture 
+    ReadablePercentChangeOverCapture = $PercentChangeOverCapture * 100
+
+    echo Estimating $ReadablePercentChangeOverCapture% change in image counts over entire capture.
+     IF $PercentChangeOverCapture < $MaxPercentChangeOverCapture 
+        Echo Estimated change is below tolerance of $MaxPercentChangeOverCapturePercentage%. Filament is stable!
+        Echo
+        reportclock
+        Return
+     Endif
+
+     LastMeanCounts = $MeanCounts
+     LastCaptureTimeStamp = $CaptureTimeStamp
+
+     Delay 120 sec
+EndLoop
+EndMacro
+Macro	4
+MacroName Notifications
+
+# Test:
+CallFunction Notifications::SendMessage Test message
+CallFunction Notifications::SendStart
+
+Function SendMessage 0 1 Text
+   Call ScopeUtil
+
+   MakeDirectory $MessageDir
+   # Make sure there is a message file to append to
+   OldMessages = { "" }
+   OpenTextFile MessageFile T 0 $MessagePath
+   IF $reportedValue1 == 1
+      CloseTextFile MessageFile      
+   ELSEIF $reportedValue1 == 0
+      OpenTextFile MessageFile W 0 $MessagePath
+      CloseTextFile MessageFile
+   ENDIF
+   # Append to the file so multiple messages aren't overwritten
+   OpenTextFile MessageFile A 0 $MessagePath
+   WriteLineToFile MessageFile $Text
+   FlushTextFile MessageFile
+   CloseTextFile MessageFile
+EndFunction
+
+Function SendStart 0 0
+   ReportNumTableItems
+   NumNavItems = $reportedvalue1
+   Call ScopeUtil
+   EstimatedCaptureHours = 0
+   NumTiles = 0
+   IF $NumNavItems < 1
+      echo
+      echo Nav table does not have items indicating total capture time.
+      NumTiles = 0
+   ELSE
+      ReportNumMontagePieces 1
+      NumTiles = $reportedvalue1
+      
+      IF $NumTiles == 1
+         echo "Montage claims to have only one image. Using 1 hour as timeframe"
+         EstimatedCaptureHours = 1
+      ELSE    
+         EstimatedCaptureTime = $NumTiles * $SecondsPerTile
+         EstimatedCaptureHours =  $EstimatedCaptureTime / (60 * 60)
+      ENDIF
+   ENDIF
+   echo .  Estimating $EstimatedCaptureHours hours to complete
+   CallFunction Notifications::SendMessage Started: Capturing $NumTiles images on $ScopeName. Estimating $EstimatedCaptureHours hours to complete
+EndFunction
+
+Function SendStop 0 0
+   Call ScopeUtil
+   CallFunction Notifications::SendMessage Copied: $CaptureDir copied from $ScopeName to DROPBOX.
+EndFunction
+
+Function SendOverview 0 0
+   Call ScopeUtil
+   MakeDirectory $MessageDir
+   CallFunction Images::SaveOverviewJpg $MessageDir\overview$CaptureDir.jpg
+   CallFunction Notifications::SendMessage Overview: $CaptureDir
+EndFunction
+EndMacro
+Macro	5
+MacroName HighMagCookExp4
+LongName James Experiment 4
+
+ScreenDown
+
+echo "James Experiment 3"
+echo "Cooking Begins!"
+ReportMag
+StartingMag = $reportedvalue2
+
+IF $reportedvalue2 == 1
+    echo Attempting HighMagCook in Low Mag mode, aborting. 
+    echo Go to high magnification mode before using this macro.
+    Return
+ENDIF
+
+ReportSpotSize
+StartingSpotSize = $reportedvalue1
+
+echo Starting spot size $StartingSpotSize
+
+SetSpotSize 2
+
+#Move the stage to the center of the NavItem
+MoveToNavItem 1
+
+PreCookMontage 4
+
+SetSpotSize $StartingSpotSize
+
+MoveToNavItem 1
+echo "Cooking done!"
+reportclock
+
+echo "Taking focus image to raise screen and close shutters"
+Focus
+
+CalibrateImageShift
+Eucentricity
+
+#CallMacro 4 #Uncomment this line to verify the filament is warmed up
+
+Montage
+EndMacro
+Macro	6
+MacroName ReportBeamIntensity
+
+
+Loop 20 iLoop
+   ReportScreenCurrent
+   ReportFilamentCurrent
+   Delay 15
+EndLoop
+EndMacro
+Macro	7
+xmove = 20
+ymove = 0
+nloop = 15
+wait = 1
+SetProperty JeolReadStageForWait 0
+SuppressReports 1
+Loop 2
+echo moving $xmove $ymove
+Loop 2 ind1
+   Loop $nloop ind2
+  #    echo ==========  $ind1 $ind2
+      ResetClock
+      ReportStageXYZ
+      MoveStage $xmove $ymove
+      ReportClock
+      #ReportStageBusy
+      ReportStageXYZ firstX firstY
+      delay $wait
+      ReportStageXYZ
+      if  diffabs $repVal1 $firstX < 0.5 and diffabs $repVal2 $firstY < 0.5
+         echo SUCCEEDED
+      Else
+         echo FAILED
+      Endif
+   EndLoop
+   xmove = 0 - $xmove
+   ymove = 0 - $ymove
+EndLoop
+temp = $xmove
+xmove = $ymove
+ymove = $temp
+EndLoop 
+EndMacro
+Macro	8
+MacroName TurnOnFilament
+LongName Turn on filament and beam blank
+
+SetBeamBlank 1
+SetColumnOrGunValve 1
+EndMacro
+Macro	9
+MacroName ScopeUtil
+
+# Globally set the variable $ScopeName
+ScopeName = TEM2
+
+# Globally set the variable $MessageDir
+MessageDir = \\192.168.3.10\Dropbox\Notification\$ScopeName
+
+# Globally set the variable $MessagePath
+MessagePath = $MessageDir\message.txt
+
+# Globally set the variable $DropboxPath
+DropboxPath = Y:
+
+# Globally set the variable $CopyDir
+CopyPath = $DropboxPath\TEMXcopy
+
+# Globally set the variable $DataPath
+DataPath = G:
+
+# Globally set the variable PrecookMontageD
+PrecookMontageD = 0
+EndMacro
+Macro	10
+MacroName CopyFunctions
+
+
+# These values only work for testing as of 11/6/2020
+CopySource = G:\RC3\0516
+CopyTarget = Y:\TEMXCopy\
+TargetDirName = 0516
+# Test the functions without side effects:
+#CallFunction CopyFunctions::CheckSpaceForCopyDir
+#OKBox $CheckSpaceSucceeded
+
+# Test with major side effects:
+CallFunction CopyFunctions::CopyDir
+
+# Set TargetDirName, CopyTarget and CopySource before calling this with no arguments.
+# Checks to make sure there is enough space, then copies the contents CopySource recursively to CopyTarget.
+# To copy a directory called C:/whatever to Z:/stuff/whatever you would have to set CopyTarget to Z:/stuff/ and TargetDirName to whatever
+Function CopyDir 0 0
+   CallFunction CopyFunctions::CheckSpaceForCopyDir
+   If $CheckSpaceSucceeded == 1
+      CallFunction CopyFunctions::CopyDirWithoutCheckingSpace
+   Else
+      OKBox There is not enough space to copy the specified directory.
+   Endif
+EndFunction
+
+# INTERNAL, called by CopyDir
+# Sets CheckSpaceSucceeded to 1 if there is enough space to copy the given directory.
+Function CheckSpaceForCopyDir 0 0
+   CheckSpaceSucceeded = 0
+
+   # Check the size and units of CopySource
+   RunInShell dir /-c $CopySource > output.txt
+   ReadStringsFromFile output output.txt
+   output = $output[$#output-1]
+   CallFunction StringTools::Tokenize $output
+   SourceSize = $Tokens[3]
+   SourceUnits = $Tokens[4]
+   
+   # Check the remaining space and units of CopyTarget
+   RunInShell dir  /-c $CopyTarget > output.txt
+   ReadStringsFromFile output output.txt
+   output = $output[$#output]
+   CallFunction StringTools::Tokenize $output
+   TargetSpace = $Tokens[3]
+   TargetUnits = $Tokens[4]
+
+
+   # dir should always output both sizes in bytes, but we sanity check it just to be safe. 
+   # If they are ever not the same, conversion will have to be implemented
+   String1 = $SourceUnits
+   String2 = $TargetUnits
+   CallFunction StringTools::StringEquals
+   If $ReportedValue1 == 1
+      If $SourceSize < $TargetSpace
+         CheckSpaceSucceeded = 1
+      Endif
+   Else
+      OKBox For some reason, CheckSpace units were $SourceUnits and $TargetUnits
+   Endif
+EndFunction
+
+# INTERNAL helper function that copies a directory to CopyTarget without checking for space first.
+Function CopyDirWithoutCheckingSpace 0 0
+   RunInShell xcopy $CopySource $CopyTarget\$TargetDirName\ /S
+   If $ReportedValue1 != 0
+      OKBox Automatically copying $CopySource failed! Check the open shell
+   EndIf
+EndFunction 
+EndMacro
+Macro	11
+MacroName StringTools
+
+# Test:
+CallFunction StringTools::Tokenize A string with multiple tokens!
+OKBox $Tokens
+String1 = Same
+String2 = Same
+CallFunction StringTools::StringEquals
+OKBox $ReportedValue1
+String2 = Different
+CallFunction StringTools::StringEquals
+OKBox $ReportedValue1
+CallFunction StringTools::FolderOf G:\test\test.idoc
+OKBox $Folder
+
+# Sets variable Tokens to an array of tokens split by spaces in the given InputString
+Function Tokenize 0 1 InputString
+   OpenTextFile outputfile O 0 output.txt
+   WriteLineToFile outputfile $InputString
+   CloseTextFile outputfile
+   ReadTextFile Tokens output.txt
+EndFunction
+
+# Sets $Folder to the folder of the given file
+Function FolderOf 0 1 File
+   RunInShell folder $File > output.txt
+   ReadTextFile Folder output.txt
+   Folder = $Folder[1]
+EndFunction
+
+# Set String1 and String2 to the strings you want to compare before calling this function without arguments
+# Sets ReportedValue1 to 1 if the strings are the same
+Function StringEquals 0 0
+   RunInShell if "$String1" == "$String2" (exit 1) else (exit 0)
+EndFunction
+EndMacro
+Macro	12
+MacroName DoTheThing
+
+NavItemFileToOpen 0
+CallFunction StringTools::FolderOf $reportedValue1
+CaptureDir = $Folder
+EndMacro
+Macro	14
+MacroName Images
+
+# Test on TEM2
+CallFunction Images::SaveOverviewJpg C:\Users\VALUEDGATANCUSTOMER\Desktop\overview.jpg
+
+Function SaveOverviewJpg 0 1 Filename
+   SaveToOtherFile B JPG -1 $Filename
+EndFunction
+EndMacro
+Macro	19
+MacroName BlankBeam
+ScreenUp
+SetBeamBlank 1
+OKBox Screen is UP and beam is BLANKED.
+ScreenDown 
+SetBeamBlank 0
+OkBox Screen is Down and beam is ON the sample.
+EndMacro
+Macro	34
+MakeDateTimeDir
+EndMacro
+Macro	38
+ReportMag
+Echo $ReportedValue1
+SnapshotToFile 1 1 0 JPG -1 Z:\RC3 Center Points\RC3.jpg
+EndMacro
+Macro	39
+MacroName AutoWarmUpFilament
+
+MinutesBeforeMidnight = 24 * 60
+
+WarmUpHour = 8
+WarmUpMinute  = 30
+
+MinutesAfterMidnight = $WarmUpHour * 60 + $WarmUpMinute
+
+MinutesBeforeTurnOff = 120
+
+
+ReportColumnOrGunValve
+SetColumnOrGunValve 0
+ReportColumnOrGunValve
+CallFunction Notifications::SendMessage Turned filament off after capture.
+
+Echo waiting
+CallFunction Notifications::SendMessage Filament will automatically be turned on at $WarmUpHour : $WarmUpMinute
+WaitForMidnight $MinutesBeforeMidnight $MinutesAfterMidnight
+Echo Done waiting
+Call TurnOnFilament
+CallFunction Notifications::SendMessage Filament automatically turned on. As a failsafe, it will turn off again in $MinutesBeforeTurnOff minutes. 
+Delay $MinutesBeforeTurnOff min
+SetColumnOrGunValve 0
+ReportColumnOrGunValve
+CallFunction Notifications::SendMessage Filament turned off.
+EndMacro
+Macro	40
+ReportDefocus
+EndMacro
+Macro	41
+ChangeFocus 5
+EndMacro
+Macro	42
+ReportColumnOrGunValve 0
+EndMacro
+Macro	43
+SecondsToCook :=
+EndMacro
+Macro	44
+Echo $CaptureDir
+EndMacro

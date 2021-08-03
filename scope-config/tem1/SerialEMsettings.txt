@@ -1,0 +1,555 @@
+SerialEMSettings
+SystemPath	C:\ProgramData\SerialEM
+ScriptPackagePath	Y:\DROPBOX\nat\tem1package-2021-06-15-19-04-46.txt
+CameraControlSet  1  0
+AcquisitionMode	0
+Processing	2
+DarkReferenceEveryTime	0
+AverageDarkReference	0
+TimesToAverageDarkRef	4
+RemoveXrays	0
+Binning	1
+ShutteringMode	0
+Top	1429
+Left	1429
+Right	2667
+Bottom	2667
+ExposureTime	0.100000
+DriftSettling	0.000000
+LineSync	0
+DynamicFocus	0
+CorrectDrift	0
+K2ReadMode	0
+SumK2Frames	0
+DoseFracMode	0
+FrameTime	0.160000
+AlignFrames	0
+SaveFrames	0
+UseFrameAlign	1
+FAParamSetInd	0
+FilterType	0
+ChannelIndex 0 -1 -1 -1 -1 -1 -1 -1
+BoostMag 0 0
+EndControlSet
+CameraControlSet  2  0
+AcquisitionMode	0
+Processing	2
+DarkReferenceEveryTime	0
+AverageDarkReference	0
+TimesToAverageDarkRef	4
+RemoveXrays	0
+Binning	1
+ShutteringMode	0
+Top	0
+Left	0
+Right	4096
+Bottom	4096
+ExposureTime	0.100000
+DriftSettling	0.000000
+LineSync	0
+DynamicFocus	0
+CorrectDrift	0
+K2ReadMode	0
+SumK2Frames	0
+DoseFracMode	0
+FrameTime	0.040000
+AlignFrames	0
+SaveFrames	0
+UseFrameAlign	1
+FAParamSetInd	0
+FilterType	0
+ChannelIndex 0 -1 -1 -1 -1 -1 -1 -1
+BoostMag 0 0
+EndControlSet
+CameraControlSet  3  0
+AcquisitionMode	0
+Processing	2
+DarkReferenceEveryTime	0
+AverageDarkReference	0
+TimesToAverageDarkRef	10
+RemoveXrays	0
+Binning	1
+ShutteringMode	0
+Top	0
+Left	0
+Right	4096
+Bottom	4096
+ExposureTime	0.300000
+DriftSettling	0.000000
+LineSync	0
+DynamicFocus	0
+CorrectDrift	1
+K2ReadMode	0
+SumK2Frames	0
+DoseFracMode	0
+FrameTime	0.120000
+AlignFrames	0
+SaveFrames	0
+UseFrameAlign	1
+FAParamSetInd	0
+FilterType	0
+ChannelIndex 0 -1 -1 -1 -1 -1 -1 -1
+BoostMag 0 0
+EndControlSet
+CameraControlSet  4  0
+AcquisitionMode	0
+Processing	2
+DarkReferenceEveryTime	0
+AverageDarkReference	0
+TimesToAverageDarkRef	4
+RemoveXrays	0
+Binning	8
+ShutteringMode	0
+Top	0
+Left	0
+Right	4096
+Bottom	4096
+ExposureTime	0.010000
+DriftSettling	0.000000
+LineSync	0
+DynamicFocus	0
+CorrectDrift	0
+K2ReadMode	0
+SumK2Frames	0
+DoseFracMode	0
+FrameTime	0.040000
+AlignFrames	0
+SaveFrames	0
+UseFrameAlign	1
+FAParamSetInd	0
+FilterType	0
+ChannelIndex 0 -1 -1 -1 -1 -1 -1 -1
+BoostMag 0 0
+EndControlSet
+CameraControlSet  5  0
+AcquisitionMode	1
+Processing	2
+DarkReferenceEveryTime	0
+AverageDarkReference	0
+TimesToAverageDarkRef	4
+RemoveXrays	0
+Binning	4
+ShutteringMode	0
+Top	0
+Left	0
+Right	4096
+Bottom	4096
+ExposureTime	0.020000
+DriftSettling	0.000000
+LineSync	0
+DynamicFocus	0
+CorrectDrift	0
+K2ReadMode	0
+SumK2Frames	0
+DoseFracMode	0
+FrameTime	0.040000
+AlignFrames	0
+SaveFrames	0
+UseFrameAlign	1
+FAParamSetInd	0
+FilterType	0
+ChannelIndex 0 -1 -1 -1 -1 -1 -1 -1
+BoostMag 0 0
+EndControlSet
+CameraControlSet  6  0
+AcquisitionMode	0
+Processing	2
+DarkReferenceEveryTime	0
+AverageDarkReference	0
+TimesToAverageDarkRef	10
+RemoveXrays	0
+Binning	2
+ShutteringMode	0
+Top	0
+Left	0
+Right	4096
+Bottom	4096
+ExposureTime	1.000000
+DriftSettling	0.000000
+LineSync	0
+DynamicFocus	0
+CorrectDrift	0
+K2ReadMode	0
+SumK2Frames	0
+DoseFracMode	0
+FrameTime	0.040000
+AlignFrames	0
+SaveFrames	0
+UseFrameAlign	1
+FAParamSetInd	0
+FilterType	0
+ChannelIndex 0 -1 -1 -1 -1 -1 -1 -1
+BoostMag 0 0
+EndControlSet
+FrameNameData 384 0 -1 -1 3
+DirForFalconFrames NotSetByUser
+PercentDisplayTruncationLo	0.100000
+PercentDisplayTruncationHi	0.100000
+ProtectRecordImages	0
+MontageUseContinuous 0 0.100000
+MontageNoDriftCorr 1 0
+MontageFilterOptions 0 0 0 0
+TIFFcompression	1
+FileOptionsPctTruncLo	0.200000
+FileOptionsPctTruncHi	0.200000
+SingleFileOptions 2 1 0.200000 0.500000
+AutofocusEucenAbsParams 0.000000 0.000000 -20.000000 20.000000 0 1
+AreaFractionForScaling	0.750000
+FFTTruncDiameter	0.004000
+FFTBackgroundGray	32
+UseViewForSearch	0
+UseRecordForMontage	0
+SettingsFixedForIACal	0
+OneK2FramePerFile	0
+SkipK2FrameRotFlip	0
+SaveK2FramesAsTiff	0
+SaveRawPacked	0
+SaveTimes100	0
+SaveUnnormedFrames	0
+Use4BitMRCMode	0
+SaveSuperResReduced	0
+TakeK3SuperResBinned	0
+UseK3CDS	0
+NameFramesAsMRCS	0
+SaveFrameStackMdoc	0
+AntialiasBinning	1
+NumFrameAliLogLines	2
+BuffersToRollOnAcquire	13
+BufferToReadInto	15
+FifthCopyToBuf	14
+AutoZoom	1
+Antialias	0
+FixedZoomSteps	1
+DrawScaleBar	0
+DrawCrosshairs	1
+MontageCorrectDrift	1
+MontageAdjustFocus	0
+MontageFocusAfterStage	1
+MontageShowOverview	1
+MontageAlignPieces	1
+MontageVerySloppy	1
+MontageMinimumCounts	5
+MontageUseMontMap	0
+MontageUseViewInLD	0
+MontageUseSearchInLD	0
+MontageUseHQparams	1
+MontageFocusInBlocks	0
+MontageRepeatFocus	0
+MontageDriftLimit	2.000000
+MontageRealign	0
+MontageISRealign	1
+MontageMaxRealignIS	10.000000
+MontageUseAnchor	1
+MontageAnchorMagInd	25
+MontageSkipCorrelations	1
+MontageSkipReblanks	0
+MontageFocusBlockSize	3
+MontageRealignInterval	16
+MontageMinOverlapFactor	0.120000
+MontageMinMicronsOverlap	0.500000
+MontageHQdelayTime	0.000000
+MontageMaxAlignFrac	0.600000
+SelectedCameraParameterSet	3
+TargetDefocus	-0.500000
+AutofocusOffset	0.000000
+RefocusThreshold	8.000000
+AbortThreshold	1.000000
+AutofocusBeamTilt	2.150000
+BeamTiltDirection	0
+MinDDDfocusBinning	1
+DriftProtection	1
+FocusVerbose	0
+TiltIncrement	5.000000
+CosineTilting	0
+ShiftToTiltAxis	0
+ApplyISoffset	0
+UsePiezoForLDAxis	0
+AdjustFocusForProbe	0
+NormalizeAllOnMagChange	0
+NormAutofocusViaView	0
+SkipBlankingInLowDose	0
+TrimBordersInAutoalign	1
+DisableAutoTrim	0
+MoveStageOnBigMouseShift	1
+BacklashMouseAndISR	0
+MouseStageThreshold	0.000000
+MouseStageAbsoluteThreshold	2.000000
+TiltDelay	4.000000
+MacroLimitRuns	0
+MacroLimitScaleMax	0
+MacroLimitTiltUp	1
+MacroLimitTiltDown	1
+MacroLimitMontError	0
+MacroLimitIS	0
+MacroRunLimit	30
+MacroScaleMaxLimit	200
+MacroTiltUpLimit	60.000000
+MacroTiltDownLimit	-60.000000
+MacroMontErrorLimit	7.000000
+MacroISLimit	4.000000
+ScriptIndentSize	3
+RestoreMacroEditors	1
+CircleOnLiveFFT	0
+SideBySideFFT	0
+AutoSingleFFT	1
+PhasePlateShift	0.000000
+ImageReductionFac	4.000000
+FixedRingDefocus	0.000000
+UserMaxCtfFitRes	0.000000
+MinCtfFitResIfPhase	0.000000
+AutosaveSettings	0
+AutosaveNavNew	1
+SkipFileDlg	1
+AutosaveLog	1
+AutosaveXYZ	1
+StageMoveToolImage	0
+LoadMapsUnbinned	1
+WriteNavAsXML	0
+TryRealignScaling	1
+PlusMinusRIScaling	0
+PointLabelDrawThresh	15
+MultiShotEnable	0
+RotAlignDoSearch	1
+RotAlignRange	20.000000
+GridGroupSize	5.000000
+DivideGridIntoGroups	0
+RIuseCurrentLDparams	0
+SkipMontFitDlgs	0
+CameraDivide16BitBy2	0
+ExtraDivideBy2	0
+AcquireFloatImages	0
+InterpolateDarkRefs	0
+NoNormOfDSDoseFrac	0
+ComPathIsFramePath	0
+IgnoreHigherGainRefs	0
+UseOlderBinned2Ref	0
+DMgainRefAskPolicy	0
+GainRefCalibrateDose	1
+LowDoseBlankWhenDown	0
+LowDoseNormalizeBeam	0
+LowDoseViewDefocus	0.000000
+LowDoseSearchDefocus	0.000000
+LowDoseTieFocusTrial	0
+LowDoseRotateAxis	0
+LowDoseAxisAngle	0
+WalkUpTargetAngle	55.000000
+WalkUpMaxInterval	8.000000
+WalkUpMinInterval	3.000000
+WalkSTEMfocusInterval	19.000000
+ResetRealignUseTrialInLowDose	0
+FineEucenUseTrialInLowDose	0
+WalkupUseViewInLowDose	0
+ComplexTasksVerbose	1
+UsersAstigTilt	-1.000000
+MenuZemlinTilt	6.000000
+UsersComaTilt	-1.000000
+CtfExposure	-1.000000
+CtfDriftSettling	0.000000
+CtfBinning	0
+CtfUseFullField	1
+CtfDoFullArray	0
+ComaIterationThresh	1.000000
+ComaVsISextent	3.000000
+MinCtfBasedDefocus	-0.900000
+TiltSeriesLastStartingTilt	5.000000
+TiltSeriesTrackLowMag	0
+TiltSeriesTrackAfterFocus	1
+TiltSeriesBeamControl	1
+TiltSeriesMeanCounts	5000
+TiltSeriesCosinePower	3
+TiltSeriesTaperCounts	0
+TiltSeriesHighCounts	4000
+TiltSeriesTaperAngle	50.000000
+TiltSeriesLimitIntensity	0
+TiltSeriesRefineEucentricity	1
+TiltSeriesWalkLeaveAnchor	1
+TiltSeriesWalkAnchorTilt	40.000000
+TiltSeriesLeftAnchorBuffer	15
+TiltSeriesImageShiftLimit	5.000000
+TiltSeriesFocusCheckInterval	4.000000
+TiltSeriesRepeatRecord	1
+TiltSeriesConfirmLDRepeat	1
+TiltSeriesMaxRecordLoss	0.100000
+TiltSeriesStopOnBigShift	0
+TiltSeriesMaxAlignShift	30.000000
+TiltSeriesRepeatAutofocus	1
+TiltSeriesMaxFocusDiff	0.250000
+TiltSeriesAlwaysFocusAtHigh	1
+TiltSeriesAlwaysFocusAngle	0.000000
+TiltSeriesSkipAutofocus	0
+TiltSeriesCheckAutofocus	1
+TSLimitFocusChange	0
+TSFocusChangeLimit	20.000000
+TiltSeriesMinFocusAccuracy	0.250000
+TiltSeriesRefineZLP	0
+TiltSeriesZLPInterval	15
+TiltSeriesCenterBeam	0
+TiltSeriesCloseValvesAtEnd	0
+TiltSeriesAlignTrackOnly	0
+TiltSeriesPreviewBeforeNewRef	0
+TiltSeriesMaxRefDisagreement	0.100000
+TiltSeriesMaxPredictErrorXY	0.050000
+TiltSeriesMaxPredictErrorZ	0.200000
+TiltSeriesMaxPredictErrorZSN	0.200000
+TiltSeriesMaxPredictErrorZSM	1.000000
+TiltSeriesCenBeamPeriodically	0
+TiltSeriesCenBeamInterval	60
+TiltSeriesCenBeamAbove	0
+TiltSeriesCenBeamAngle	50.000000
+TiltSeriesStackRecords	0
+TSWaitForDrift	0
+TSOnlyWaitAboveBelow	0
+TSWaitAboveAngle	45.000000
+TSWaitBelowAngle	30.000000
+TSWaitAtReversals	0
+TSWaitDosymIgnore	0
+TSDoEarlyReturn	0
+TSNumEarlyFrames	1
+TiltSeriesStackBinSize	512
+TiltSeriesExtraSetExposure	0
+TiltSeriesExtraSetSpot	0
+TiltSeriesExtraSpotSize	1
+TiltSeriesExtraDeltaIntensity	1.000000
+TiltSeriesExtraDrift	0.000000
+TiltSeriesExtraSetBinning	0
+TiltSeriesExtraBinIndex	0
+TiltSeriesDoVariations	0
+TiltSeriesChangeRecExposure	0
+TiltSeriesChangeAllExposures	0
+TiltSeriesChangeSettling	0
+TiltSeriesExposureStep	1.200000
+ExposureSeriesFixNumFrames	0
+TiltSeriesTiltFailPolicy	1
+TiltSeriesLDDimRecordPolicy	1
+TiltSeriesTermNotAskOnDim	0
+TiltSeriesLDRecordLossPolicy	1
+TiltSeriesAutoTerminatePolicy	1
+TSSeparateExtraRec	0
+TiltSeriesAutoSavePolicy	1
+TSCallPlugins	0
+TSFixedNumFrames	0
+TSSkipBeamShiftOnAlign	0
+TSAllowContinuous	0
+EmailAfterTiltSeries	0
+ReorderDoseSymFile	1
+FilterSlitWidth	20.000000
+FilterEnergyLoss	0.000000
+FilterZeroLoss	1
+FilterChangeMagWithScreen	0
+FilterMatchPixel	0
+FilterMatchIntensity	0
+FilterDoMagShifts	0
+STEMmatchPixel	1
+ScreenSwitchSTEM	0
+InvertSTEMimages	0
+BlankBeamInSTEM	0
+RetractToUnblankSTEM	0
+KeepPixelTime	0
+RightBorderFrac	0.000000
+BottomBorderFrac	0.000000
+MainFFTsplitFrac	0.462213
+AutoBacklashNewMap 1 5.000000
+MultiShotParams 0.200000 0.500000 6 1 0 0 0 2.000000 0 0 1 0 1.500000 1.000000 1.000000 1.000000 1.000000 2 2 0 0 0 0 3 0.250000 -999.000000 -999.000000 -999.000000
+HoleFinderParams 2.000000 1.000000 0 -100000000.000000 -100000000.000000 -100000000.000000 -100000000.000000 1 0 0
+HoleFiltSigmas 1.500000 2.000000 3.000000 -3.000000
+HoleEdgeThresholds 2.400000 3.600000 4.800000
+HoleCombinerParams 0 0
+DriftWaitParams 1 1.000000 0 10.000000 60.000000 1 0 0.200000 4 0
+NavigatorAcquireParams 1 0 0 1 0 2 2 0 0 0 1 0 2 0 0 0 0 1 0 11 1
+CookerParams 6 1 0.707347 2000 0 10.000000 1 0 60.000000 -999 -999
+VppConditionParams 0 0 0.000000 -999 1 100 50 0 0 0 0 -999 -999 -999
+VppCondNavText VPPC
+SnapshotParams 1 2.000000 1 0.000000 0 1 80 0 -999 -999
+AutocenterParams 0 29 1 0.567514 1 0.012000 1 1 0 1.000000 0.000000 0.000000 -999
+AutocenterParams 0 32 1 0.567514 1 0.125750 0 1 0 1.000000 0.000000 0.000000 -999
+RangeFinderParams 0 0 0 0 0 50.000000 60.000000 2.000000 0 -999 -999
+RangeFinderParams 1 0 0 0 0 50.000000 60.000000 2.000000 0 -999 -999
+ImportOverlayChannels 121
+ProcessOverlayChannels AAA
+CtffindParams 0 1 0 0 2.500000 0 1 30 120
+ToolDialogStates2 3 1 3 3 0 2 1 3 0 2 0 0 0 0 0 0
+MacroButtonNumbers 0 8 12
+RemoteControlParams 1 0.050000 0.500000 1 6 0 6
+WindowPlacement	1
+-1 -1 -1 -1 1497 46 3840 1965
+LogPlacement 1 2 -1 -1 0 2061 144 635 1274 1681
+NavigatorPlacement 1 1 -1 -1 -1 -1 309 724 1322 1782
+MeterPlacement 0 1 -1 -1 -1 -1 234 996 392 1080
+DosePlacement 0 1 -1 -1 -1 -1 57 996 215 1080
+StatePlacement 0 3 -1 -1 -1 -1 49 89 362 359
+ReadDlgPlacement 0 1 -1 -1 -1 -1 1215 435 1440 559
+SnapshotPlacement 0 1 -1 -1 -1 -1 2390 376 2809 838
+MacroToolPlacement 0 1 -1 -1 -1 -1 1472 817 1574 1080
+OneLinePlacement 0 1 -1 -1 -1 -1 2204 1777 2887 2062
+OneEditerPlacement 0 0 1 -1 -1 -1 -1 969 210 2924 1939
+OneEditerPlacement 1 0 1 -1 -1 -1 -1 57 31 1310 1200
+OneEditerPlacement 2 0 1 -1 -1 -1 -1 969 210 1600 942
+OneEditerPlacement 3 0 1 -1 -1 -1 -1 969 210 1600 942
+OneEditerPlacement 4 0 1 -1 -1 -1 -1 493 171 1811 2016
+OneEditerPlacement 5 0 1 -1 -1 -1 -1 969 210 2787 1971
+OneEditerPlacement 6 0 1 -1 -1 -1 -1 969 210 1600 942
+OneEditerPlacement 7 0 1 -1 -1 -1 -1 969 210 1600 942
+OneEditerPlacement 8 0 1 -1 -1 -1 -1 89 178 1334 1844
+OneEditerPlacement 9 0 1 -1 -1 -1 -1 182 114 1427 1780
+OneEditerPlacement 10 0 1 -1 -1 -1 -1 969 210 1600 942
+OneEditerPlacement 11 0 1 -1 -1 -1 -1 969 210 1600 942
+OneEditerPlacement 12 0 1 -1 -1 -1 -1 969 210 1600 942
+OneEditerPlacement 13 0 1 -1 -1 -1 -1 969 210 1600 942
+OneEditerPlacement 14 0 1 -1 -1 -1 -1 969 210 2924 1939
+OneEditerPlacement 15 0 1 -1 -1 -1 -1 969 210 1600 942
+OneEditerPlacement 16 0 1 -1 -1 -1 -1 969 210 1600 942
+OneEditerPlacement 17 0 1 -1 -1 -1 -1 969 210 1600 942
+OneEditerPlacement 18 0 1 -1 -1 -1 -1 969 210 1600 942
+OneEditerPlacement 19 0 1 -1 -1 -1 -1 969 210 1600 942
+OneEditerPlacement 34 0 1 -1 -1 -1 -1 969 210 2591 1815
+OneEditerPlacement 35 0 1 -1 -1 -1 -1 1015 521 2366 1756
+OneEditerPlacement 39 0 1 -1 -1 -1 -1 969 210 1600 942
+MacroToolbarButtons 10 0
+LowDoseParameters 0 0 0 0.000000 0.000000 0 0 0.000000 0.000000 0 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0 0 0.000000 0.000000
+LowDoseParameters 1 0 0 0.000000 0.000000 0 0 0.000000 0.000000 0 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0 0 0.000000 0.000000
+LowDoseParameters 2 0 0 0.000000 0.000000 0 0 0.000000 0.000000 0 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0 0 0.000000 0.000000
+LowDoseParameters 3 0 0 0.000000 0.000000 0 0 0.000000 0.000000 0 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0 0 0.000000 0.000000
+LowDoseParameters 4 0 0 0.000000 0.000000 0 0 0.000000 0.000000 0 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0 0 0.000000 0.000000
+LowDoseParameters 0 0 0 0.000000 0.000000 1 0 0.000000 0.000000 0 0.000000 0.000000 -999.000000 -999.000000 0.000000 0.000000 1 0 0.000000 0.000000
+LowDoseParameters 1 0 0 0.000000 0.000000 1 0 0.000000 0.000000 0 0.000000 0.000000 -999.000000 -999.000000 0.000000 0.000000 1 0 0.000000 0.000000
+LowDoseParameters 2 0 0 0.000000 0.000000 1 0 0.000000 0.000000 0 0.000000 0.000000 -999.000000 -999.000000 0.000000 0.000000 1 0 0.000000 0.000000
+LowDoseParameters 3 0 0 0.000000 0.000000 1 0 0.000000 0.000000 0 0.000000 0.000000 -999.000000 -999.000000 0.000000 0.000000 1 0 0.000000 0.000000
+LowDoseParameters 4 0 0 0.000000 0.000000 1 0 0.000000 0.000000 0 0.000000 0.000000 -999.000000 -999.000000 0.000000 0.000000 1 0 0.000000 0.000000
+LowDoseParameters 0 0 0 0.000000 0.000000 2 0 0.000000 0.000000 0 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 1 0 0.000000 0.000000
+LowDoseParameters 1 0 0 0.000000 0.000000 2 0 0.000000 0.000000 0 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 1 0 0.000000 0.000000
+LowDoseParameters 2 0 0 0.000000 0.000000 2 0 0.000000 0.000000 0 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 1 0 0.000000 0.000000
+LowDoseParameters 3 0 0 0.000000 0.000000 2 0 0.000000 0.000000 0 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 1 0 0.000000 0.000000
+LowDoseParameters 4 0 0 0.000000 0.000000 2 0 0.000000 0.000000 0 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 1 0 0.000000 0.000000
+LowDoseViewShift 0.000000 0.000000
+LDSearchShift 0.000000 0.000000
+TiltSeriesLowMagIndex 28 0 0
+TiltSeriesExtraExposure	0.5
+TiltSeriesBidirParams	0 0.000000 1 0 0
+TiltSeriesDoseSymParams	0 1 0 30.000000 1 1 0 45.000000 0 10 1.000000 0
+TiltSeriesBDAnchorMags 29 0 0 0 0 0
+TiltSeriesRunMacro	0 0 4
+TSTermOnHighExposure	0 3.000000
+TiltSeriesBidirDimPolicy	1 55 5
+CloseValvesDuringMessageBox 1 1.000000
+EmailAddress	james.r.anderson@utah.edu
+TSSetupPanelStates 1 0 0 0 0 0 0
+NonGIFMatchPixelIntensity 0 0
+GainReferenceTarget 0 1 17500 10 0 8 0 0
+ImageXrayCriteria 0 200.000000 15.000000 1
+ImageXrayCriteria 1 200.000000 15.000000 1
+ImageXrayCriteria 2 200.000000 15.000000 1
+ImageXrayCriteria 3 200.000000 15.000000 1
+ImageXrayCriteria 4 200.000000 15.000000 1
+ImageXrayCriteria 5 200.000000 15.000000 1
+GridMapLimits 0.000000 0.000000 0.000000 0.000000
+DErefNumRepeats 10 10 10 10 10 10 10 10 10 10
+DErefExposures 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000
+DElastRefParams 0 0 0 0
+FrameAlignParams1 0 0 4 7 0.060000 0.000000 0.000000 0.000000 0 0.142857 0.000000 0 5 0 2 0 15 20
+FrameAlignParams2 0 0 0.000000 4 0.100000 0 0 0 0 1 20 1 0 1 1000
+FrameAliSetName 0 4K default set
+FrameAlignParams1 1 0 6 7 0.050000 0.000000 0.000000 0.000000 0 0.142857 0.000000 0 5 0 2 0 15 20
+FrameAlignParams2 1 0 0.000000 4 0.100000 0 0 0 0 1 20 2 0 1 1000
+FrameAliSetName 1 8K default set
+FrameAliGlobals 0 0 0 0 0
+FalconAliUseGPU 0 0

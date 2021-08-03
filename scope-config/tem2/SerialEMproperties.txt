@@ -1,0 +1,410 @@
+SerialEMProperties
+#==================================================================================
+#
+# Users need to make sure that the Bright Zoom function is turned off before
+# doing any tomography.
+#
+#	May 28, 2019 -- Setup (used UT Dallas as template)	 	-- J. Brink 
+#	May 29, 2019 -- Added second shutter option
+#			Added bad rows from DM camera config window	-- J. Brink
+#	May 30, 2019 --	Added file mode 6 and turned on Moran
+#			montage time stamps option
+#			Removed second shutter option			-- J. Brink
+#	May 31, 2019 --	Added file and montage file options		-- J. Brink
+#
+#===================================================================================
+#
+GainReferencePath			C:\ProgramData\SerialEM
+MRCHeaderTitle				Moran Eye Center JEM-1400/HC w. OneView-1095
+LogBookPathName				C:\ProgramData\SerialEM\TiltSeriesLogBook.txt
+DigitalMicrographReferencePath		C:\ProgramData\Gatan\Reference Images
+
+#GridLinesPerMM				2000	# New Pella grid cat. no. 673
+GridLinesPerMM				2160	# Standard Pt/Ir on carbon replica, Pella grid cat. no. 603
+
+StartupMessage				Please turn off bright zoom\nLast update properties file: May 29, 2019\nTEM2
+StartAsAdministrator			0
+ExitOnBadScopeStartup			1
+WarnIfKVNotAt				80
+Ignoreshorttermcals			0
+
+TotalMemoryLimitMB			12600
+FFTCircleRadii				0.5 0.25
+
+GainNormalizeInSerialEM			0
+ReferenceMemoryLimitMB			160
+DarkRefAgeLimit				3600000
+GainRefInactivityLimit			1800000
+DefaultCameraDivide16BitBy2     	0
+
+ActiveCameraList			0	# 0 = 1095	180 degr. rotated, flip along Y
+
+CameraProperties			0
+Name    				OneView
+DMGainReferenceName			OneView-50807210007 Gain Ref. x1.m0.dm4
+CameraSizeX     			4096
+CameraSizeY     			4096
+OneViewType				1
+#CanTakeFrames				3
+MakesUnsignedImages			1
+XMustBeMultipleOf       		4
+YMustBeMultipleOf      			4
+Binnings        			1 2 4 8
+BasicCorrections			49
+#DarkXRayAbsoluteCriterion		20
+#DarkXRaySDCriterion			15
+#DarkXRayRequireBothCriteria		1
+MaximumXRayDiameter     		6
+BuiltInSettling 			0.0
+MinimumDriftSettling    		0.0
+ExtraBeamTime   			0.1
+StartupDelay    			0.78
+ShutterDeadTime 			0.000
+OnlyOneShutter				1
+BeamBlankShutter			0
+Retractable     			1
+GIF     				0
+Order 					0
+FilmToCameraMagnification       	1.362
+PixelSizeInMicrons      		15
+CountsPerElectron			115.93 # 80 kV!!
+BadRows					0 4095
+CheckStableTemperature			1
+ExtraRotation   			0.
+DMRotationAndFlip			6
+SetRestoreDMRotFlip			1
+InsertionDelay				10
+RetractionDelay				10
+TaskTargetSize				1024
+UseContinuousMode			1 1 1 1
+SpecialRelativeRotation			7 16 88.56	# using Midas & xfalign
+SpecialRelativeRotation			16 24 -90.1	# using Midas & xfalign
+
+#==============================================================
+#
+# MagIndex  DeltaRotation (999 not measured)  SolvedRotation (999 not measured)   Pixel size (nm, 0 not measured)
+#
+RotationAndPixel  7   999  -179.7  211.2   # 50
+RotationAndPixel 16   999   -90.9  21.08   # 500
+RotationAndPixel 24   999   178.9  20.69   # 500
+RotationAndPixel 25    0.34  999   17.54   # 600
+RotationAndPixel 26   -0.06  999   13.28   # 800
+RotationAndPixel 27    0.44  999   10.72   # 1000
+RotationAndPixel 28   -0.17  999   8.956   # 1200
+RotationAndPixel 29   -0.03  999   7.158   # 1500
+RotationAndPixel 30    1.40  999   5.415   # 2000
+RotationAndPixel 31   -0.01  999   4.256   # 2500
+RotationAndPixel 32    0.06  999   3.593   # 3000
+RotationAndPixel 33    0.08  999   2.672   # 4000
+RotationAndPixel 34    0.25 -179.0 2.143   # 5000
+RotationAndPixel 35    0.05  999   1.807   # 6000
+RotationAndPixel 36    0.03  999   1.367   # 8000
+RotationAndPixel 37   -0.53  999     1.1   # 10000
+RotationAndPixel 38    0.59  999  0.9276   # 12000
+RotationAndPixel 39   -0.11  999  0.7329   # 15000
+RotationAndPixel 40   -0.03  999  0.5535   # 20000
+RotationAndPixel 41   -0.11  999  0.4502   # 25000
+RotationAndPixel 42    0.10  999  0.3645   # 30000
+RotationAndPixel 43   -0.05  999   0.274   # 40000
+RotationAndPixel 44   -0.11  999  0.2188   # 50000
+EndCameraProperties
+
+#MinimumBlankingTime			0.162
+
+DefaultActAfterExposures		0
+StartCameraInDebugMode			0
+
+InnerXRayBorderDistance			1.2
+OuterXRayBorderDistance 		2.1
+XRayCriterionIterations			4
+XRayCriterionIncrease			1.0
+
+MagnificationTable 57
+1       10     0
+2       15     0
+3       20     0
+4       25     0
+5       30     0
+6       40     0
+7       50     0 # <------ begin gap #1
+8       60     0
+9       80     0
+10     100     0
+11     150     0
+12     200     0
+13     250     0
+14     300     0
+15     400     0
+16     500     0 # <------ end gap 1, begin gap #2
+17     600     0
+18     800     0
+19    1000     0 # <== LOWMAG
+20     200     0 # <== MAG
+21     250     0
+22     300     0
+23     400     0
+24     500     0 # <------ end gap # 2
+25     600     0
+26     800     0
+27    1000     0
+28    1200     0
+29    1500     0
+30    2000     0
+31    2500     0
+32    3000     0
+33    4000     0
+34    5000     0
+35    6000     0
+36    8000     0
+37   10000     0
+38   12000     0
+39   15000     0
+40   20000     0
+41   25000     0
+42   30000     0
+43   40000     0
+44   50000     0
+45   60000     0
+46   80000     0
+47  100000     0
+48  120000     0
+49  150000     0
+50  200000     0
+51  250000     0
+52  300000     0
+53  500000     0
+54  600000     0
+55  800000     0
+56 1000000     0
+57 1200000     0
+
+OtherShiftBoundaries			20 30
+
+CameraLengthTable 30
+1       15
+2       20
+3       25
+4       30
+5       40
+6       50
+7       60
+8       80
+9      100
+10     120
+11     150
+12     200
+13     250
+14     300
+15     350
+16     400
+17     500
+18     600
+19     800
+20    1000
+21    1200
+22    1500
+23    2000
+24    2500
+25    3000
+26    4000
+27    5000
+28    6000
+29    8000
+30     337
+
+LowestMModeMagIndex			20
+
+JeolUpdateSleep 			200
+JeolUpdateByEvent			1
+JeolHasNoAlpha				1
+
+InitializeJEOLDelay			5000
+JEOLObjectiveLensToMicrons		.0047
+JEOLBeamShiftToMicrons			.0035
+JEOLLowMagBeamShiftToMicrons		.12
+JEOLReportsSmallScreen 			0
+JEOLReportsLargeScreen 			-1
+JeolForceMDSmode			-1
+JeolControlsBeamValve			0
+JeolUseProjectorForIS			0
+NumberOfSpotSizes 			5
+
+######## MORAN SPECIALIZED SETTINGS ########
+
+MontageAutosaveLog  			1
+StageMontageMaxError			0.4
+MontageInitialPieces			4 4
+LimitMontageToUsable			1
+FitMontageWithFullFrames		1
+StageMoveDelay				0
+DistortionStageDelay			2000
+MontageISRealignInterval		1
+MontageUseTrialInISRealign		1
+UseTrialBinningForShiftCal      1
+
+ExternalTool Record Capture Notes
+ToolCommand 1 C:\Program Files (x86)\SerialEMNotes\SerialEMNotes.exe
+#ToolArguments 1 %imagefile%
+#################################					
+
+DebugOutput                		SM
+#
+# Set to 1 to obtain general debugging output in the Log Window.  Set to a list of key letters (e.g., JTC)
+# to obtain additional output corresponding to the particular key letters.  Key letters are:
+#
+# A to autosave log on debug output (save file must already be defined) 
+# B for beam blanking
+# C for focus calibration derivation
+# D for  Direct Electron camera
+# E for eagle camera
+# F for Refine ZLP
+# G for verbose GIF and magnification lookups (during JEOL updates)
+# H for Hitachi
+# I (upper case i) for intensity changes in state changes/autocentering
+# J for complete listing of JEOL calls
+# K for socket interface
+# L for more verbose low dose
+# M for Moran montaging time stamps
+# P reserved for general plugins
+# R for camera retraction
+# S for stage and montaging information
+# T for Tietz setup/reset time, camera coords, auotoalign time
+# V for vacuum gauge status output
+# W for Winkler's bug/autoloader
+# X for EMSIS and DECTRIS cameras
+# a for alignment correlation coefficients; GPU frame alignment choices/memory usage
+# b for beam shift
+# c for calibration and scale matrix derivation
+# d for reason why no electron dose
+# e for JEOL event reports
+# f for STEM autofocus
+# g for GIF and STEM state setting/tracking
+# h for navHelper
+# i for image shift-related items
+# j for JEOL camera
+# k for keystrokes
+# l (lower case L) for low dose
+# m to output all SEMMessageBox messages to log
+# n for Navigator map transform and other items
+# p for AlignWithScaling and FindBeamCenter output
+# r for gain and dark references
+# s for STEM in general
+# t for exposure time changes in tasks and for continuous mode timing
+# u for update items when polling JEOL, or time of scope update for all scopes
+# y for reports when background saving starts and ends
+# % list script commands other than Set that allow arithmetic when program starts
+
+MinTaskExposure				0.002
+
+MessageBoxWhenClipIS			1
+
+StageCalibrationBacklash		40.
+StageRelaxation				0.05
+#StageMoveDelay				2000
+MontageOverlapFraction			0.13
+MontageAutodocOptions			3
+
+MicronsPerUnitImageShift		.2
+LowMagMicronsPerUnitIS			1.5
+
+GlobalExtraRotation			180
+StageCycleLengthX			61
+StageCycleLengthY			61
+UseTrialSizeForShiftCal			0
+
+ImageShiftDelays 			7
+0.1 0.1
+0.3 0.4
+0.8 0.9
+1.6 1.7
+3. 3.
+3.5 3.5
+4. 3.7
+ISdelayScaleFactor				0.1
+
+FileOptionsMode				6	# unsigned 16-bit integers
+FileOptionsExtraFlags			17
+FileOptionsMaxSections			360
+FileOptionsPixelsTruncatedLo		40
+FileOptionsPixelsTruncatedHi		40
+FileOptionsUnsignedOption		0
+FileOptionsFileType			1	# TIFF images
+FileOptionsSaveMdocFile			0
+
+DeltaZtoDefocusFactor			2.0
+
+ScreenCurrentFactor			0.05941
+SmallScreenFactor			1.356
+LensNormalizationDelay			3000
+IntensityToC2Factor			1.1775
+TiltAxisOffset 				0.0               # SET TO YOUR AXIS OFFSET
+FloatingCurrentMeterSmoothed		0
+CurrentMeterLogBase			0.02
+CurrentMeterSmootherThreshold1		0.007
+CurrentMeterSmootherThreshold2		0.0035
+WatchGauge				P4 1.48e-5 4.25e-5
+CheckAutofocusChange			5.
+MaxCalibrationImageShift		5.
+MaxLMCalibrationImageShift		15.
+StageLimits				0. 0. 0. 0.     # SET LIMITS IF NEEDED FOR Setup Full Montage
+
+ResetRealignMaxIterations		2
+ResetRealignIterationCriterion		0.5
+ResetRealignHigherMagCriterion		0.5	# was 1.7 until compustage got flaky
+
+WalkUpMaxInterval			8.
+WalkUpMinInterval			3.
+WalkUpShiftLimit			5.0     # SET TO 2.0 for 300 KV, 3.0 for 200 KV
+WalkUpLowDoseISLimit			5.0     # SET TO 1.3 for 300 KV, 2.0 for 200 KV
+WalkUpMinField				6.0
+
+EucentricityBacklashZ			-3.
+EucentricityCoarseInitialAngle		-5.
+EucentricityCoarseInitialIncrement	0.6
+EucentricityResetISThreshold		0.1
+EucentricityCoarseMaxTilt		10.
+EucentricityCoarseMaxIncrement		8.
+EucentricityCoarseTargetShift		2.
+EucentricityCoarseMaxIncrementChange	3.
+EucentricityFineIterationLimit		3
+EucentricityMaxFineIS			3.      # SET TO 2.0 for 300 KV, 3.0 for 200 KV
+EucentricityCoarseMinField		11.0
+EucentricityFineMinField		8.
+EucentricityFineAlignMinField		8.
+
+ResetRealignMinField			8.
+ReverseTiltMinField			8.
+
+
+TiltBacklash				2.
+
+TSDefaultStartAngle			60.
+TSMaxUsableAngleDiff			10.
+TSBadShotCrit				0.2
+TSBadLowMagCrit				0.1
+TSMaxTiltError				0.3
+TSLowMagFieldFrac			0.3
+TSStageMovedTolerance			0.1
+TSUserFocusChangeTol			0.1
+TSFitDropErrorRatio			1.3
+TSFitDropBackoffRatio			1.1
+TSMaxImageFailures			3
+TSMaxPositionFailures			3
+TSMaxDisturbValidChange			0
+TSMaxDropAsShiftDisturbed		2
+TSMaxDropAsFocusDisturbed		3
+TSMinFitXAfterDrop			5
+TSMinFitYAfterDrop			5
+TSMinFitZAfterDrop			4
+
+BeamCalMinField 			8.
+BeamCalExtraRangeNeeded 		50.
+BeamCalChangeDelay 			1000
+BeamCalMinExposure 			0.1
+BeamCalMaxExposure 			3.
+BeamCalMinCounts 			200
+BeamCalMaxCounts 			25000
+BeamCalInitialIncrement 		0.0005
+BeamCalSpacingFactor 			1.2
+PathToPython 3.9 C:\Python39
+PythonModulePath C:\Program Files\SerialEM\PythonModules

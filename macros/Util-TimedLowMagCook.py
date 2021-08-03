@@ -2,7 +2,7 @@ from typing import Optional
 def LowMagCook(Minutes:Optional[float]=None, RecordAfter:bool=True) -> None:
    SecondsToCook:float = 60
    if Minutes is None:
-      SecondsToCook *= EnterDefaultedFloat(7, "Number of minutes to cook?")
+      SecondsToCook *= EnterFloat("Number of minutes to cook?", 7)
    else:
       SecondsToCook *= Minutes 
 

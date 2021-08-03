@@ -69,9 +69,19 @@ def PromptForProcessNotes() -> None:
         CurrentSampleNotes[Block] = NewNotes
         WriteNotesFiles(Block, NewNotes)
 
+def GetCaptureDir(Block:str) -> str:
+    assert CurrentSampleNotes is not None
+    Notes = CurrentSampleNotes[Block]
+    Investigator = Notes[SampleInfoKeys.index("Investigator")]
+    Experiment = Notes[SampleInfoKeys.index("Experiment")]
+    Dir = f"{Investigator}_{Experiment}_{Block}"
+    if Investigator != MainInvestigator:
+        Dir = f"core_{Dir}"
+    return join(DataPath, Dir)
+
 def WriteNotesFiles(Block:str, Notes:SampleNotes) -> None:
     # Make a data output folder for the block
-    BlockFolder = join(DataPath, Block)
+    BlockFolder = GetCaptureDir(Block)
     makedirs(BlockFolder, exist_ok=True)
     # Write notes to a JSON file
     with open(join(BlockFolder, f"{Block}.json"), "w") as json:

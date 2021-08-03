@@ -51,7 +51,7 @@ def Capture(CookFirst:bool) -> None:
     Block, Notes = CurrentSampleNotes.popitem(last=False)
     CurrentSampleNotes[Block] = Notes
     CurrentSampleNotes.move_to_end(Block, last=False)
-    CaptureDir = join(DataPath, Block)
+    CaptureDir = GetCaptureDir(Block)
 
     ### FOCUS ###
     if NumNavItems < 3:

@@ -17,6 +17,10 @@ if __name__ == "__main__":
     def write_macro(macro, content, file, all_python_file):
         num, name, *scope_name = macro.split('-')
         is_python = name.endswith(".py")
+        # Don't allow backslashes in SerialEM python, because they cause a pipe error:
+        if is_python:
+            assert '\\"' not in content, f"Backslash-quote detected in {macro}--This won't work on SerialEM"
+
         name = name.replace('.py', '')
         name = name.replace('.txt', '')
         try:

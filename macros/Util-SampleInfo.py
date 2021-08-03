@@ -2,6 +2,7 @@ from os.path import join
 from os import makedirs
 from typing import Tuple
 from collections import OrderedDict
+from typing import Optional
 
 SampleNotes = Tuple[int, str, str, str, int, str, str, str, bool, bool, bool, str, str, str]
 CurrentSampleNotes:Optional[OrderedDict[str, SampleNotes]] = None
@@ -58,17 +59,15 @@ def PromptForSampleInfo() -> None:
 
 def PromptForProcessNotes() -> None:
     global CurrentSampleNotes
-    if CurrentSampleNotes is None:
-        raise Exception("No sample notes have been entered!")
-    else:
-        for Block, Notes in CurrentSampleNotes.items():
-            Version, Microscope, Block, Grid, Rod, Investigator, Experiment, CapturedBy, CameraGainReference, CameraQuadrantReference, NewFilament, _, _, _ = Notes
-            ProcedureChanges = EnterString(f"{Block}: Any changes from normal procedure?")
-            Observations = EnterString(f"{Block}: Any observations regarding the capture process or data quality?")
-            OtherNotes = EnterString(f"{Block}: Other notes?")
-            NewNotes = (Version, Microscope, Block, Grid, Rod, Investigator, Experiment, CapturedBy, CameraGainReference, CameraQuadrantReference, NewFilament, ProcedureChanges, Observations, OtherNotes)
-            CurrentSampleNotes[Block] = NewNotes
-            WriteNotesFiles(Block, NewNotes)
+    assert CurrentSampleNotes is not None, "No sample notes have been entered!"
+    for Block, Notes in CurrentSampleNotes.items():
+        Version, Microscope, Block, Grid, Rod, Investigator, Experiment, CapturedBy, CameraGainReference, CameraQuadrantReference, NewFilament, _, _, _ = Notes
+        ProcedureChanges = EnterString(f"{Block}: Any changes from normal procedure?")
+        Observations = EnterString(f"{Block}: Any observations regarding the capture process or data quality?")
+        OtherNotes = EnterString(f"{Block}: Other notes?")
+        NewNotes = (Version, Microscope, Block, Grid, Rod, Investigator, Experiment, CapturedBy, CameraGainReference, CameraQuadrantReference, NewFilament, ProcedureChanges, Observations, OtherNotes)
+        CurrentSampleNotes[Block] = NewNotes
+        WriteNotesFiles(Block, NewNotes)
 
 def WriteNotesFiles(Block:str, Notes:SampleNotes) -> None:
     # Make a data output folder for the block
@@ -80,11 +79,11 @@ def WriteNotesFiles(Block:str, Notes:SampleNotes) -> None:
         for idx, key in enumerate(SampleInfoKeys):
             jsonValue = Notes[idx]
             if isinstance(Notes[idx], str):
-                jsonValue = f"\"{Notes[idx]}\""
+                jsonValue = f'"{Notes[idx]}"'
             elif isinstance(Notes[idx], bool):
                 jsonValue = str(Notes[idx]).lower()
 
-            json.write(f"  \"{key}\": {jsonValue}")
+            json.write(f'  "{key}": {jsonValue}')
             if idx != len(SampleInfoKeys) - 1:
                 json.write(",")
             json.write("\n")

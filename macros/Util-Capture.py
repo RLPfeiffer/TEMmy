@@ -1,6 +1,11 @@
 import sys
+from os.path import join
 
 def Capture(CookFirst:bool) -> None:
+    global CurrentSampleNotes
+    assert CurrentSampleNotes is not None, "No sample notes have been entered!"
+    assert len(CurrentSampleNotes) == 1, "Capture macro does not yet support multiple section captures"
+
     if not CookFirst:
         print("This macro performs an image stabilization calibration,")
     else:

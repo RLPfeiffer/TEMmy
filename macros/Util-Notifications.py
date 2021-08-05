@@ -5,7 +5,7 @@ def SendMessage(Text:str) -> None:
    os.makedirs(MessageDir, exist_ok=True)
    # Append to the file so multiple messages aren't overwritten
    with open(MessagePath, "a+") as MessageFile:
-      MessageFile.write(f"{Text}{os.linesep}")
+      MessageFile.write(f"{Text}{newline}")
 
 def SendStart() -> None:
    EstimatedCaptureHours:float = 0

@@ -121,7 +121,7 @@ def Capture(CookFirst:bool) -> None:
         return
 
     # Send the overview to Slack
-    TakeSnapshot(True, f"overview{CaptureDir}")
+    TakeSnapshot(True, f"overview{CaptureDir}", Overview=True)
 
     # Copy the capture to DROPBOX
     # Try python CopyFunctions first:

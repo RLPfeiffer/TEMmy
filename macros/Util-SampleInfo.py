@@ -1,13 +1,27 @@
 from os.path import join
 from os import makedirs
 from typing import Tuple
+from typing import cast
 from collections import OrderedDict
 from typing import Optional
+from typing import List
+import json
 
 SampleNotes = Tuple[int, str, str, str, int, str, str, str, bool, bool, bool, str, str, str]
-CurrentSampleNotes:Optional[OrderedDict[str, SampleNotes]] = None
 
-SampleInfoKeys = [
+SampleNotesFile = "C:/Users/VALUEDGATANCUSTOMER/CurrentSampleNotes.json"
+def CurrentSampleNotes() -> Optional[OrderedDict[str, SampleNotes]]:
+    if os.path.exists(SampleNotesFile):
+        with open(SampleNotesFile, "r") as f:
+            return cast(OrderedDict[str, SampleNotes], json.load(f, object_pairs_hook=OrderedDict))
+    else:
+        return None
+
+def WriteSampleNotes(notes:OrderedDict[str, SampleNotes]) -> None:
+    with open(SampleNotesFile, "w") as f:
+        json.dump(notes, f)
+
+SampleInfoKeys:List[str] = [
     "Version",
     "Microscope",
     "Block",
@@ -50,28 +64,31 @@ def PromptForSampleInfo() -> None:
     Observations = ""
     OtherNotes = ""
 
-    global CurrentSampleNotes
-    CurrentSampleNotes = OrderedDict()
+    CurrentNotes = OrderedDict()
     for Block in Blocks:
         Notes = (Version, Microscope, Block, Grid, Rod, Investigator, Experiment, CapturedBy, CameraGainReference, CameraQuadrantReference, NewFilament, ProcedureChanges, Observations, OtherNotes)
-        CurrentSampleNotes[Block] = Notes
+        CurrentNotes[Block] = Notes
+    WriteSampleNotes(CurrentNotes)
+    for Block in Blocks:
         WriteNotesFiles(Block, Notes)
 
 def PromptForProcessNotes() -> None:
-    global CurrentSampleNotes
-    assert CurrentSampleNotes is not None, "No sample notes have been entered!"
-    for Block, Notes in CurrentSampleNotes.items():
+    CurrentNotes = CurrentSampleNotes()
+    assert CurrentNotes is not None, "No sample notes have been entered!"
+    for Block, Notes in CurrentNotes.items():
         Version, Microscope, Block, Grid, Rod, Investigator, Experiment, CapturedBy, CameraGainReference, CameraQuadrantReference, NewFilament, _, _, _ = Notes
         ProcedureChanges = EnterString(f"{Block}: Any changes from normal procedure?")
         Observations = EnterString(f"{Block}: Any observations regarding the capture process or data quality?")
         OtherNotes = EnterString(f"{Block}: Other notes?")
         NewNotes = (Version, Microscope, Block, Grid, Rod, Investigator, Experiment, CapturedBy, CameraGainReference, CameraQuadrantReference, NewFilament, ProcedureChanges, Observations, OtherNotes)
-        CurrentSampleNotes[Block] = NewNotes
+        CurrentNotes[Block] = NewNotes
         WriteNotesFiles(Block, NewNotes)
+    WriteSampleNotes(CurrentNotes)
 
 def GetCaptureDir(Block:str) -> str:
-    assert CurrentSampleNotes is not None
-    Notes = CurrentSampleNotes[Block]
+    CurrentNotes = CurrentSampleNotes()
+    assert CurrentNotes is not None
+    Notes = CurrentNotes[Block]
     Investigator = Notes[SampleInfoKeys.index("Investigator")]
     Experiment = Notes[SampleInfoKeys.index("Experiment")]
     Dir = f"{Investigator}_{Experiment}_{Block}"

@@ -2,12 +2,14 @@ import sys
 from os.path import join
 
 def Capture(CookFirst:bool) -> None:
-    global CurrentSampleNotes
-    assert CurrentSampleNotes is not None, "No sample notes have been entered!"
-    assert len(CurrentSampleNotes) == 1, "Capture macro does not yet support multiple section captures"
+    CurrentNotes = CurrentSampleNotes()
+    assert CurrentNotes is not None, "No sample notes have been entered!"
+    assert len(CurrentNotes) == 1, "Capture macro does not yet support multiple section captures"
 
     # Prompt the user to create capture notes
     PromptForProcessNotes()
+    CurrentNotes = CurrentSampleNotes()
+    assert CurrentNotes is not None, "No sample notes have been entered!"
 
     if not CookFirst:
         print("This macro performs an image stabilization calibration,")
@@ -48,9 +50,10 @@ def Capture(CookFirst:bool) -> None:
     print(sem.NavItemFileToOpen(1))
 
     # TODO get Block from the label of the navigator point instead of disturbing CurrentSampleNotes, when multiple captures are implemented
-    Block, Notes = CurrentSampleNotes.popitem(last=False)
-    CurrentSampleNotes[Block] = Notes
-    CurrentSampleNotes.move_to_end(Block, last=False)
+    Block, Notes = CurrentNotes.popitem(last=False)
+    CurrentNotes[Block] = Notes
+    CurrentNotes.move_to_end(Block, last=False)
+    WriteSampleNotes(CurrentNotes)
     CaptureDir = GetCaptureDir(Block)
 
     ### FOCUS ###

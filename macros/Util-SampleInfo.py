@@ -35,13 +35,13 @@ def PromptForSampleInfo() -> None:
     Blocks = []
     MoreBlocks = True
     while MoreBlocks:
-        Blocks.append(EnterString("Block # / Section #"))
+        Blocks.append(EnterString("Block # / Section #", forbidden_chars="_"))
         MoreBlocks = YesNoBox("Any more blocks or sections on this grid?")
 
     Grid = EnterString("Grid #")
     Rod = EnterInt("Rod #", minvalue=1, maxvalue=NumRods)
-    Investigator = EnterString("Investigator", MainInvestigator)
-    Experiment = EnterString("Experiment Series", MainExperiment)
+    Investigator = EnterString("Investigator", MainInvestigator, forbidden_chars="_")
+    Experiment = EnterString("Experiment Series", MainExperiment, forbidden_chars="_")
     CapturedBy = EnterString("Captured By", MainOperator)
     CameraGainReference = YesNoBox("Did you, or are you going to, run Gain reference?")
     CameraQuadrantReference = False

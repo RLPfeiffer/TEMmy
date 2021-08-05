@@ -1,3 +1,4 @@
+MacroName Captures
 Function Capture 1 0 CookFirst
    echo
    If $CookFirst == 0
@@ -100,17 +101,9 @@ Function Capture 1 0 CookFirst
    #Move the stage to the area we've been told to use
 
    MoveToNavItem 2
-   Try
-PythonScript
-#!Python3.9
-#include WaitForStableFilament - Python
-import serialem as sem
-WaitForStableFilament()
-EndPythonScript
-   Catch
-      Echo Error from WaitForStableFilament python. Trying regular version
+
       Call WaitForStableFilament
-   EndTry
+
    ### Center on montage and capture ###
    MoveToNavItem 1
 

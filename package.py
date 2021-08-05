@@ -7,11 +7,13 @@ import subprocess
 if __name__ == "__main__":
     from datetime import datetime
     import os
+    from os.path import join
     import shutil
 
     # Get a timestamp for reuse:
     timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
+    os.makedirs("script_packages", exist_ok=True)
 
     # Package TEM macros
     def write_macro(macro, content, file, all_python_file):
@@ -50,11 +52,12 @@ if __name__ == "__main__":
 
     macros = sorted(os.listdir('macros'))
 
-    tem1_package_name = f"tem1package-{timestamp}.txt"
-    tem2_package_name = f"tem2package-{timestamp}.txt"
-    tem1_all_python_filename = f"tem1-python-{timestamp}.py"
-    tem2_all_python_filename = f"tem2-python-{timestamp}.py"
+    tem1_package_name = f"script_packages/tem1package-{timestamp}.txt"
+    tem2_package_name = f"script_packages/tem2package-{timestamp}.txt"
+    tem1_all_python_filename = f"script_packages/tem1-python-{timestamp}.py"
+    tem2_all_python_filename = f"script_packages/tem2-python-{timestamp}.py"
     with open(tem1_package_name, "w") as macro_package_tem1, open(tem2_package_name, "w") as macro_package_tem2, open(tem1_all_python_filename, "w") as tem1_all_python_file, open(tem2_all_python_filename, "w") as tem2_all_python_file:
+
         macro_package_tem1.write("MaxMacros\t40\n")
         macro_package_tem2.write("MaxMacros\t40\n")
         tem1_all_python_file.write("import serialem as sem # type: ignore\n")
@@ -78,5 +81,6 @@ if __name__ == "__main__":
     subprocess.run(["mypy", "--config-file", "mypy.ini", tem1_all_python_filename])
     subprocess.run(["mypy", "--config-file", "mypy.ini", tem2_all_python_filename])
 
+    os.makedirs("Y:/DROPBOX/nat/script_packages", exist_ok=True)
     shutil.copyfile(tem1_package_name, f"Y:/DROPBOX/nat/{tem1_package_name}")
     shutil.copyfile(tem2_package_name, f"Y:/DROPBOX/nat/{tem2_package_name}")

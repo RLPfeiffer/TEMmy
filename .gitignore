@@ -6,6 +6,5 @@ coach/temmy/
 *.svg
 PyreLogs/
 *.zip
-tem*package*.txt
-tem*python*.py
+script_packages/
 bob-config.yaml

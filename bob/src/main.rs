@@ -9,36 +9,16 @@ use std::thread;
 use std::thread::JoinHandle;
 use std::sync::mpsc::{channel, Sender, Receiver};
 use std::time::SystemTime;
-use std::fs;
 use std::convert::TryInto;
 use humantime::format_rfc3339;
 use threadpool::ThreadPool;
 use crate::RobocopyType::*;
 use regex::Regex;
-use serde::{Serialize, Deserialize};
 use whoami::{realname,devicename};
+use std::fs;
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
-struct Config {
-    dropbox_dir: String,
-    dropbox_link_dir: String,
-    build_target: String,
-    raw_data_dir: String,
-    notification_dir: String,
-    core_deployment_dir: String,
-    worker_threads: i64,
-    process_tem_output: bool,
-    automatic_builds: bool,
-    junk_outputs: Vec<String>,
-    fatal_errors: Vec<String>,
-}
-
-fn config_from_yaml() -> Config {
-    let yaml_str = fs::read_to_string("bob-config.yaml").expect("bob requires a bob-config.yaml file");
-    serde_yaml::from_str(&yaml_str).unwrap()
-    // TODO have a list of volumes in the yaml file and let them define
-    // import/build/merge/align script chains
-}
+mod config;
+use config::config_from_yaml;
 
 fn run_and_filter_output<F>(command: Vec<String>, mut process_line: F) -> Result<i32, Error> 
     where F: FnMut(String) -> () {

@@ -3,19 +3,21 @@ use std::thread::JoinHandle;
 use std::sync::mpsc::{channel, Sender, Receiver};
 use std::convert::TryInto;
 use threadpool::ThreadPool;
-use crate::RobocopyType::*;
 use std::fs;
 use std::io::prelude::*;
 use std::io::BufReader;
 
 mod config;
-use config::config_from_yaml;
+use config::*;
 
 mod run;
 use run::*;
 
 mod rito;
 use rito::*;
+
+mod robocopy;
+use robocopy::*;
 
 fn send_rc3_build_chain(section: String, is_rebuild: bool, sender: &Sender<CommandChain>) {
     let config = config_from_yaml();
@@ -256,55 +258,10 @@ fn spawn_tem_message_reader_thread(tem_name: &'static str, sender: Sender<String
     )
 }
 
-
-
-enum RobocopyType {
-    Move,
-    Copy,
-}
-
-fn robocopy<'a>(typ: RobocopyType, source: String, dest: String) -> Vec<String> {
-    let mut command = vec![
-        "robocopy".to_string(),
-        source,
-        dest,
-        "/MT:32".to_string(),
-        "/LOG:RC3Robocopy.log".to_string(),
-        "/nfl".to_string(),
-        "/nc".to_string(),
-        "/ns".to_string(),
-        "/np".to_string(),
-        "/E".to_string(),
-        "/TEE".to_string(),
-        "/R:3".to_string(),
-        "/W:1".to_string(),
-        "/REG".to_string(),
-        "/DCOPY:DAT".to_string(),
-        "/XO".to_string(),
-    ];
-    match typ {
-        Move => {
-            command.push("/MOVE".to_string());
-        },
-        Copy => (),
-    }
-    command
-}
-
-fn robocopy_move<'a>(source: String, dest: String) -> Vec<String> {
-    robocopy(Move, source, dest)
-}
-
-fn robocopy_copy<'a>(source: String, dest: String) -> Vec<String> {
-    robocopy(Copy, source, dest)
-}
-
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
 
-// TODO cli thread should allow raw commands to be run
 // TODO cli thread could allow serialization/suspension of chains to restart bob????
-// TODO set up commandchain reading so that .cmd files are already valid (ignore rem, tokenize, etc)
 fn spawn_cli_thread(sender: Sender<String>) -> JoinHandle<()> {
     thread::spawn(move || {
         let mut rl = Editor::<()>::new();
@@ -453,16 +410,6 @@ fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>
     })
 }
 
-
-#[test]
-fn test_make_timestamp() {
-    // The timestamp needs to contain hour/min/sec to disambiguate from others
-    match make_timestamp() {
-        stamp if stamp.chars().count() >= 20 => println!("{}", stamp),
-        _ => panic!("timestamp too short")
-    };
-}
- 
 fn main() {
     let config = config_from_yaml();
 

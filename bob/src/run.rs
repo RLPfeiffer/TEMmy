@@ -16,6 +16,8 @@ use crate::rito::*;
 use std::time::SystemTime;
 use humantime::format_rfc3339;
 
+pub type Command = Vec<String>;
+
 pub fn run_and_filter_output<F>(command: Vec<String>, mut process_line: F) -> Result<i32, Error> 
     where F: FnMut(String) -> () {
 
@@ -109,7 +111,7 @@ pub fn run_and_print_output(command: Vec<String>) -> Result<i32, Error> {
 
 pub struct CommandChain {
     pub label: String,
-    pub commands: Vec<Vec<String>>,
+    pub commands: Vec<Command>,
 }
 
 pub fn run_chain_and_save_output(chain: CommandChain) -> Result<i32, Error> {
@@ -180,3 +182,13 @@ fn make_timestamp() -> String {
     let sys_time = SystemTime::now();
     format!("{}", format_rfc3339(sys_time)).replace(":", "-").replace(".", "-")
 }
+
+#[test]
+fn test_make_timestamp() {
+    // The timestamp needs to contain hour/min/sec to disambiguate from others
+    match make_timestamp() {
+        stamp if stamp.chars().count() >= 20 => println!("{}", stamp),
+        _ => panic!("timestamp too short")
+    };
+}
+ 

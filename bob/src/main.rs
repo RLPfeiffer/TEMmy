@@ -6,6 +6,7 @@ use threadpool::ThreadPool;
 use std::fs;
 use std::io::prelude::*;
 use std::io::BufReader;
+use std::collections::HashMap;
 
 mod config;
 use config::*;
@@ -19,7 +20,7 @@ use rito::*;
 mod robocopy;
 use robocopy::*;
 
-fn send_rc3_build_chain(section: String, is_rebuild: bool, sender: &Sender<CommandChain>) {
+fn rc3_build_chain(section: String, is_rebuild: bool) -> CommandChain {
     let config = config_from_yaml();
     let temp_volume_dir = format!(r#"{}\RC3{}"#, config.build_target, section);
     let mosaic_report_dest = format!(r#"{}\MosaicReports\{}\MosaicReport.html"#, config.dropbox_link_dir, section);
@@ -41,6 +42,7 @@ fn send_rc3_build_chain(section: String, is_rebuild: bool, sender: &Sender<Comma
         // Automatic build finished with code 0. 
 
         // TODO check that a tileset was generated.
+        // TODO sent the mosaicreport overview to slack
 
         // Copy the automatic build's mosaicreport files to DROPBOX and send a link.
         // If the mosaicreport files aren't there, the chain will fail (as it should) because that's
@@ -63,11 +65,10 @@ fn send_rc3_build_chain(section: String, is_rebuild: bool, sender: &Sender<Comma
         commands.push(rito(format!("{} copied to RawData", section)));
     }
 
-    sender.send(
-        CommandChain {
-            commands: commands,
-            label: format!("automatic copy and build for RC3 {}", section)
-        }).unwrap();
+    CommandChain {
+        commands: commands,
+        label: format!("automatic copy and build for RC3 {}", section)
+    }
 }
 
 // TODO not all merges will be RC3 merges forever
@@ -100,7 +101,7 @@ fn send_rc3_merge_chain(section: String, sender: &Sender<CommandChain>) {
         }).unwrap();
 }
 
-fn send_core_build_chain(section: String, is_rebuild: bool, sender: &Sender<CommandChain>) {
+fn core_build_chain(section: String, is_rebuild: bool) -> CommandChain {
     let config = config_from_yaml();
 
     let section_dir = format!(r#"{}\TEMXCopy\{}"#, config.dropbox_dir, section);
@@ -147,16 +148,20 @@ fn send_core_build_chain(section: String, is_rebuild: bool, sender: &Sender<Comm
                 ]);
             }
 
-            sender.send(
-                CommandChain {
-                    commands: commands,
-                    label: format!("automatic core build for {0}", section)
-                }).unwrap();
+            CommandChain {
+                commands: commands,
+                label: format!("automatic core build for {0}", section)
+            }
         },
         _ => {
             run_and_print_output(rito(format!("{0} should be named with pattern core_[volume]_[section] and was not built automatically", section))).unwrap();
+            // TODO this is an error, shouldn't be an empty chain
+            CommandChain {
+                commands: Vec::new(),
+                label: "do nothing".to_string()
+            }
         },
-    };
+    }
     
 }
 
@@ -295,7 +300,7 @@ fn spawn_cli_thread(sender: Sender<String>) -> JoinHandle<()> {
 
 }
 
-fn spawn_worker_thread(receiver: Receiver<CommandChain>) -> JoinHandle<()> {
+fn spawn_worker_threadpool(receiver: Receiver<CommandChain>) -> JoinHandle<()> {
     let config = config_from_yaml();
     let pool = ThreadPool::new(config.worker_threads.try_into().unwrap());
     thread::spawn(move || {
@@ -308,26 +313,65 @@ fn spawn_worker_thread(receiver: Receiver<CommandChain>) -> JoinHandle<()> {
     })
 }
 
-fn send_build_chain(section:&str, is_rebuild: bool, sender: &Sender<CommandChain>) {
+fn build_chain(section:&str, is_rebuild: bool) -> CommandChain {
     if section.starts_with("core") {
-        send_core_build_chain(section.to_string(), is_rebuild, &sender);
+        core_build_chain(section.to_string(), is_rebuild)
     }
     else {
         println!("{}", section);
-        send_rc3_build_chain(section.to_string(), is_rebuild, &sender);
+        rc3_build_chain(section.to_string(), is_rebuild)
     }
 }
 
+enum CommandBehavior {
+    Immediate(CommandChain),
+    Queue(CommandChain),
+    NoOp,
+}
+use crate::CommandBehavior::*;
+
 fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>) -> JoinHandle<()> {
-    let config = config_from_yaml();
+ 
+    // TODO make commands return result<CommandBehavior>
+    let mut commands:HashMap<String, fn(Vec<String>) -> Option<CommandBehavior>> = HashMap::new();
+    commands.insert("Copied".to_string(), |args|
+        match args.as_slice() {
+            [capture_dir] => {
+                let config = config_from_yaml();
+                Some(if config.automatic_builds {
+                        Queue(build_chain(capture_dir, false))
+                    } else { NoOp })
+            },
+            _ => None
+        }
+    );
+    
     thread::spawn(move || {
         loop {
-            let next_command = receiver.recv().unwrap();
-            println!("saving the Message output: {}", next_command);
-            let mut tokens = next_command.split(": ");
-            let tem_name = tokens.next().unwrap();
-            run_and_print_output(vec![format!(r#"@echo {} >> {}\{}\processedMessage.txt"#, config.notification_dir, next_command, tem_name)]).unwrap();
-            match tokens.next() {
+            let next_command_full = receiver.recv().unwrap();
+            println!("saving the Message output: {}", next_command_full);
+            let mut command_parts = next_command_full.split(": ");
+            let tem_name = command_parts.next().unwrap();
+            let command_name = command_parts.next().unwrap();
+            let command_args = command_parts.next().unwrap().split(" ").map(|s| s.to_string()).collect::<Vec<String>>();
+            let config = config_from_yaml();
+            run_and_print_output(vec![format!(r#"@echo {} >> {}\{}\processedMessage.txt"#, config.notification_dir, next_command_full, tem_name)]).unwrap();
+
+            let command_behavior = commands.get(command_name).unwrap();
+
+            match command_behavior(command_args) {
+                // TODO won't be matching Some, will be matchking Ok()
+                Some(Immediate(chain)) => {
+                    run_chain_and_save_output(chain).unwrap();
+                },
+                Some(Queue(chain)) => {
+                    sender.send(chain).unwrap();
+                },
+                Some(NoOp) => {},
+                None => { run_and_print_output(rito(format!("bad bob command: {}", next_command_full))).unwrap(); }
+            };
+
+            /*match tokens.next() {
                 Some("Copied") => {
                     if config.automatic_builds {
                         let section = tokens.next().unwrap().split(" ").next().unwrap();
@@ -405,7 +449,7 @@ fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>
                 },
                 // This case should never be used
                 None => ()
-            }
+            }*/
         }
     })
 }
@@ -420,7 +464,7 @@ fn main() {
     let (chain_sender, chain_receiver) = channel();
 
     spawn_command_thread(command_receiver, chain_sender);
-    spawn_worker_thread(chain_receiver);    
+    spawn_worker_threadpool(chain_receiver);    
 
     if config.process_tem_output {
         // Two threads simply monitor the notification text files from the TEMs,

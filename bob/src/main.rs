@@ -26,88 +26,8 @@ use errors::*;
 mod core_builds;
 use core_builds::*;
 
-fn rc3_build_chain(section: String, is_rebuild: bool) -> Option<CommandChain> {
-    let config = config_from_yaml();
-    let temp_volume_dir = format!(r#"{}\RC3{}"#, config.build_target, section);
-    let mosaic_report_dest = format!(r#"{}\MosaicReports\{}\MosaicReport.html"#, config.dropbox_link_dir, section);
-    let source = if is_rebuild {
-        format!(r#"{}\RC3\{}"#, config.raw_data_dir, section)
-    } else {
-        format!(r#"{}\TEMXCopy\{}"#, config.dropbox_dir, section)
-    };
-    let mut commands = vec![
-        vec![
-            "RC3Import".to_string(),
-            temp_volume_dir.clone(),
-            source,
-        ],
-        vec![
-            "RC3Build".to_string(),
-            temp_volume_dir.clone()
-        ],
-        // Automatic build finished with code 0. 
-
-        // TODO check that a tileset was generated.
-        // TODO sent the mosaicreport overview to slack
-
-        // Copy the automatic build's mosaicreport files to DROPBOX and send a link.
-        // If the mosaicreport files aren't there, the chain will fail (as it should) because that's
-        // a secondary indicator of build failure
-        robocopy_copy(
-            format!(r#"{}\MosaicReport"#, temp_volume_dir.clone()),
-            format!(r#"{}\MosaicReports\{}\MosaicReport\"#, config.dropbox_dir, section)),
-        vec![
-            "copy".to_string(),
-            format!(r#"{}\MosaicReport.html"#, temp_volume_dir),
-            mosaic_report_dest.clone(),
-        ],
-        rito(format!("{0} built automatically. Check {1} and run `Merge: {0}` if it looks good", section, mosaic_report_dest)),
-    ];
-
-    if !is_rebuild {
-        commands.push(robocopy_move(
-                format!(r#"{}\TEMXCopy\{}"#, config.dropbox_dir, section),
-                format!(r#"{}\RC3\{}\"#, config.raw_data_dir, section)));
-        commands.push(rito(format!("{} copied to RawData", section)));
-    }
-
-    Some(CommandChain {
-        commands: commands,
-        label: format!("automatic copy and build for RC3 {}", section)
-    })
-}
-
-// TODO not all merges will be RC3 merges forever
-fn send_rc3_merge_chain(section: String, sender: &Sender<CommandChain>) {
-    let config = config_from_yaml();
-
-    let temp_volume_dir = format!(r#"{}\RC3{}"#, config.build_target, section);
-
-    sender.send(
-        CommandChain {
-            commands: vec![
-                vec![    
-                    "copy-section-links".to_string(),
-                    r#"W:\Volumes\RC3\TEM\VolumeData.xml"#.to_string(), // TODO this is RC3 hard-coded
-                    format!(r#"{}\TEM\VolumeData.xml"#, temp_volume_dir),
-                    "bob-output".to_string()
-                ],
-                robocopy_move(
-                    format!(r#"{}\TEM"#, temp_volume_dir),
-                    r#"W:\Volumes\RC3\TEM\"#.to_string()),
-                // Delete the temp volume
-                vec![
-                    "rmdir".to_string(),
-                    "/S".to_string(),
-                    "/Q".to_string(),
-                    temp_volume_dir
-                ],
-            ],
-            label: format!("automatic merge for {} into RC3", section)
-        }).unwrap();
-}
-
-
+mod rc3_builds;
+use rc3_builds::*;
 
 // Source: https://stackoverflow.com/a/35820003
 use std::{
@@ -247,6 +167,59 @@ fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>
             _ => None
         }
     });
+    // Merge automatically-built RC3 sections with the full volume
+    // TODO not all merges will be RC3 forever
+    commands.insert("Merge".to_string(), |args| {
+        match args.as_slice() {
+            [section] => Some(Queue(rc3_merge_chain(section.clone()))),
+            _ => None
+        }
+    });
+    // Send snapshots to #tem-bot as images
+    commands.insert("Snapshot".to_string(), |args| {
+        match args.as_slice() {
+            [snapshot_name] => {
+                let config = config_from_yaml();
+                let snapshot_path = format!(r#"{}\{}"#, config.dropbox_dir, snapshot_name);
+                run_warn(rito_image(snapshot_path), Print);
+                Some(NoOp)
+            },
+            _ => None
+        }
+    });
+    // queue commands from a text file and save their outputs:
+    commands.insert("Queue".to_string(), |args| {
+        match args.as_slice() {
+            [queue_file] => {
+                println!("called as queue");
+                let queue = lines_from_file(queue_file);
+                // TODO tokenize queue files by passing the lines through a filter that just prints each arg on a line
+                // TODO The file has to tokenize command arguments like~this~"even though it's weird"
+                let queue: Vec<Vec<String>> = queue.iter().map(|line| line.split("~").map(|token| token.trim().to_string()).collect()).collect();
+                Some(Queue(CommandChain {
+                    commands: queue, 
+                    label: format!("bob queue file {}", queue_file)
+                }))
+            },
+            _ => None
+        }
+    });
+
+    // Add a raw shell command to the queue (i.e. RC3Align)
+    commands.insert("Raw".to_string(), |args| {
+        match args.as_slice() {
+            [command_string] => {
+                let command:Vec<String> = command_string.split("~").map(|arg| arg.trim().to_string()).collect();
+                Some(Queue(CommandChain {
+                    commands: vec![
+                        command,
+                    ],
+                    label: format!("raw command '{}'", command_string),
+                }))
+            },
+            _ => None
+        }
+    });
 
     thread::spawn(move || {
         loop {
@@ -259,76 +232,22 @@ fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>
             let config = config_from_yaml();
             run_warn(vec![format!(r#"@echo {} >> {}\{}\processedMessage.txt"#, config.notification_dir, next_command_full, tem_name)], Print);
 
-            let command_behavior = commands.get(command_name).unwrap();
-
-            match command_behavior(command_args) {
-                // TODO won't be matching Some, will be matchking Ok()
-                Some(Immediate(chain)) => {
-                    run_chain_and_save_output(chain).unwrap();
-                },
-                Some(Queue(chain)) => {
-                    sender.send(chain).unwrap();
-                },
-                Some(NoOp) => {},
-                None => { run_warn(rito(format!("bad bob command: {}", next_command_full)), Print); }
-            };
-
-            /*match tokens.next() {
-                // Send snapshots to #tem-bot as images
-                Some("Snapshot") => {
-                    let snapshot_name = tokens.next().unwrap();
-                    let snapshot_path = format!(r#"{}\{}"#, config.dropbox_dir, snapshot_name);
-                    run_chain_and_save_output(
-                        CommandChain {
-                            commands: vec![
-                                rito_image(snapshot_path),
-                            ],
-
-                            label: format!("snapshot -> slack for {}", snapshot_name)
-                        }).unwrap();
-                },
-                // Merge automatically-built RC3 sections with the full volume
-                Some("Merge") => {
-                    let section = tokens.next().unwrap();
-                    send_rc3_merge_chain(section.to_string(), &sender);
-                },
-                // When run with the `queue` subcommand, queue commands from a text file and save their outputs:
-                Some("Queue") => {
-                    println!("called as queue");
-                    // TODO allow passing arguments to a queue
-                    // TODO convert cmd files to queue.txt files
-            
-                    let queue_file = tokens.next().unwrap().split(" ").next().unwrap();
-                    let queue = lines_from_file(queue_file);
-                    // TODO tokenize queue files by passing the lines through a filter that just prints each arg on a line
-                    let queue: Vec<Vec<String>> = queue.iter().map(|line| line.split("~").map(|token| token.trim().to_string()).collect()).collect();
-                    // TODO The file has to tokenize command arguments like~this~"even though it's weird"
-                    sender.send(CommandChain {
-                        commands: queue, 
-                        label: format!("bob queue file {}", queue_file)
-                    }).unwrap();
-                },
-                // Add a raw shell command to the queue (i.e. RC3Align)
-                Some("Raw") => {
-                    let command_string = tokens.next().unwrap();
-                    let command:Vec<String> = command_string.split("~").map(|arg| arg.trim().to_string()).collect();
-                    sender.send(CommandChain {
-                        commands: vec![
-                            command,
-                        ],
-                        label: format!("raw command '{}'", command_string),
-                    }).unwrap();
-                },
-                
-                // This case will be used even if there's no colon in the message
-                Some(other_label) => {
-                    println!("{}", other_label);
-                    run_and_print_output(rito(next_command)).unwrap();
-                },
-                // This case should never be used
-                None => ()
-            }*/
-        }
+            if let Some(command_behavior) = commands.get(command_name) {
+                match command_behavior(command_args) {
+                    // TODO won't be matching Some, will be matchking Ok()
+                    Some(Immediate(chain)) => {
+                        run_chain_and_save_output(chain).unwrap();
+                    },
+                    Some(Queue(chain)) => {
+                        sender.send(chain).unwrap();
+                    },
+                    Some(NoOp) => {},
+                    None => { run_warn(rito(format!("bad bob command: {}", next_command_full)), Print); }
+                };
+            } else {
+                run_warn(rito(format!("bad bob command: {}", next_command_full)), Print);
+            }
+       }
     })
 }
 

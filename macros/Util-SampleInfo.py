@@ -92,7 +92,8 @@ def GetCaptureDir(Block:str) -> str:
     Notes = CurrentNotes[Block]
     Investigator = Notes[SampleInfoKeys.index("Investigator")]
     Experiment = Notes[SampleInfoKeys.index("Experiment")]
-    Dir = f"{Investigator}_{Experiment}_{Block}"
+    BlockPadded = Block.zfill(4)
+    Dir = f"{Investigator}_{Experiment}_{BlockPadded}"
     if Investigator != MainInvestigator:
         Dir = f"core_{Dir}"
     return join(DataPath, Dir)

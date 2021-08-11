@@ -86,6 +86,7 @@ def PromptForProcessNotes() -> None:
     WriteSampleNotes(CurrentNotes)
 
 def GetCaptureDir(Block:str) -> str:
+    ''' Return the FULL path of the directory where the capture's data is being put '''
     CurrentNotes = CurrentSampleNotes()
     assert CurrentNotes is not None
     Notes = CurrentNotes[Block]

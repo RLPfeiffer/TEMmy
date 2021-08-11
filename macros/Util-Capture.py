@@ -1,5 +1,5 @@
 import sys
-from os.path import join
+from os.path import join, basename
 
 def Capture(CookFirst:bool) -> None:
     CurrentNotes = CurrentSampleNotes()
@@ -129,12 +129,12 @@ def Capture(CookFirst:bool) -> None:
     # Copy the capture to DROPBOX
     # Try python CopyFunctions first:
     try:
-        CopyDir(f"{DataPath}/{CaptureDir}", CopyPath, CaptureDir)
+        CopyDir(DataPath, CopyPath, basename(CaptureDir))
         SendStop(CaptureDir)
     except:
         sem.CallFunction("Notifications::SendMessage", f"Python CopyDir failed with error {sys.exc_info()[0]}. Trying again with old version")
         sem.SetVariable("CopyTarget", CopyPath)
-        sem.SetVariable("TargetDirName", CaptureDir)
-        sem.SetVariable("CopySource", f"{DataPath}\{CaptureDir}")
+        sem.SetVariable("TargetDirName", basename(CaptureDir))
+        sem.SetVariable("CopySource", DataPath)
         sem.CallFunction("CopyFunctions::CopyDir")
         sem.CallFunction("Notifications::SendStop")

@@ -7,6 +7,8 @@ use crate::run::*;
 use crate::config::*;
 use crate::rc3_builds::*;
 use crate::core_builds::*;
+use crate::robocopy::RobocopyType::*;
+use crate::robocopy::*;
 
 use std::collections::HashMap;
 pub enum CommandBehavior {
@@ -73,7 +75,14 @@ pub fn command_map() -> HashMap<String, fn(Vec<String>) -> Option<CommandBehavio
             _ => None
         }
     });
-
+    // Run robocopy to copy a folder
+    commands.insert("Copy".to_string(), |args| {
+        robocopy_command(Copy, args)
+    });
+    // Run robocopy to move a folder
+    commands.insert("Move".to_string(), |args| {
+        robocopy_command(Move, args)
+    });
     // Add a raw shell command to the queue (i.e. RC3Align)
     commands.insert("Raw".to_string(), |args| {
         match args.as_slice() {
@@ -119,4 +128,24 @@ fn build_command(is_automatic: bool, is_rebuild: bool, args:Vec<String>) -> Opti
         },
         _ => None
     }
+}
+
+fn robocopy_command(typ:RobocopyType, args:Vec<String>) -> Option<CommandBehavior> {
+    match args.as_slice() {
+            [exp] => {
+                // TODO tokenize folders by passing the lines through a filter that just prints each arg on a line
+                // TODO The file has to tokenize source and dest like->this
+                let folders: Vec<String> = exp.split("->").map(|token| token.trim().to_string()).collect();
+                match folders.as_slice() {
+                    [point_a, point_b] => {
+                        Some(Queue(CommandChain {
+                            label: format!("bob robocopy {:?} {} -> {}", typ, point_a, point_b),
+                            commands: vec![robocopy(typ, point_a.clone(), point_b.clone())], 
+                        }))
+                    },
+                    _ => None
+                }
+            },
+            _ => None
+        }
 }

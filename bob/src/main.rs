@@ -114,7 +114,7 @@ fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>
             let command_name = command_parts.next().unwrap();
             let command_args = command_parts.next().unwrap().split(" ").map(|s| s.to_string()).collect::<Vec<String>>();
             let config = config_from_yaml();
-            run_warn(vec![format!(r#"@echo {} >> {}\{}\processedMessage.txt"#, config.notification_dir, next_command_full, tem_name)], Print);
+            run_warn(vec![format!(r#"@echo {} >> {}\{}\processedMessage.txt"#, next_command_full, config.notification_dir, tem_name)], Print);
 
             if let Some(command_behavior) = commands.get(command_name) {
                 match command_behavior(command_args) {

@@ -1,11 +1,12 @@
 // These functions return Commands that run robocopy
 
-enum RobocopyType {
+#[derive(Debug)]
+pub enum RobocopyType {
     Move,
     Copy,
 }
 
-fn robocopy<'a>(typ: RobocopyType, source: String, dest: String) -> Vec<String> {
+pub fn robocopy<'a>(typ: RobocopyType, source: String, dest: String) -> Vec<String> {
     let mut command = vec![
         "robocopy".to_string(),
         source,

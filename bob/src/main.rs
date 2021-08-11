@@ -13,12 +13,15 @@ use config::*;
 
 mod run;
 use run::*;
+use run::ShouldPrint::*;
 
 mod rito;
 use rito::*;
 
 mod robocopy;
 use robocopy::*;
+
+mod errors;
 
 fn rc3_build_chain(section: String, is_rebuild: bool) -> CommandChain {
     let config = config_from_yaml();
@@ -154,8 +157,9 @@ fn core_build_chain(section: String, is_rebuild: bool) -> CommandChain {
             }
         },
         _ => {
-            run_and_print_output(rito(format!("{0} should be named with pattern core_[volume]_[section] and was not built automatically", section))).unwrap();
+            run_warn(rito(format!("{0} should be named with pattern core_[volume]_[section] and was not built automatically", section)), Print);
             // TODO this is an error, shouldn't be an empty chain
+            // (make the function return a result)
             CommandChain {
                 commands: Vec::new(),
                 label: "do nothing".to_string()
@@ -252,13 +256,16 @@ fn lines_from_file(filename: impl AsRef<Path>) -> Vec<String> {
 fn spawn_tem_message_reader_thread(tem_name: &'static str, sender: Sender<String>) -> JoinHandle<()> {
     let config = config_from_yaml();
     thread::spawn(move || {
-        run_on_interval_and_filter_output(
+        if run_on_interval_and_filter_output(
             vec![format!(r#"type {0}\{1}\message.txt && break>{0}\{1}\message.txt"#, config.notification_dir, tem_name)],
             |output| {
-                sender.send(format!("{}: {}", tem_name, output)).unwrap();
+                sender.send(format!("{}: {}", tem_name, output))?;
+                Ok(())
             }, 
-            60,
-            rito(format!("bob the builder {} thread failed", tem_name))).unwrap();
+            60).is_err() {
+                run_warn(rito(format!("bob the builder {} thread failed", tem_name)), Silent);
+            }
+            
         }
     )
 }
@@ -355,7 +362,7 @@ fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>
             let command_name = command_parts.next().unwrap();
             let command_args = command_parts.next().unwrap().split(" ").map(|s| s.to_string()).collect::<Vec<String>>();
             let config = config_from_yaml();
-            run_and_print_output(vec![format!(r#"@echo {} >> {}\{}\processedMessage.txt"#, config.notification_dir, next_command_full, tem_name)]).unwrap();
+            run_warn(vec![format!(r#"@echo {} >> {}\{}\processedMessage.txt"#, config.notification_dir, next_command_full, tem_name)], Print);
 
             let command_behavior = commands.get(command_name).unwrap();
 
@@ -368,7 +375,7 @@ fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>
                     sender.send(chain).unwrap();
                 },
                 Some(NoOp) => {},
-                None => { run_and_print_output(rito(format!("bad bob command: {}", next_command_full))).unwrap(); }
+                None => { run_warn(rito(format!("bad bob command: {}", next_command_full)), Print); }
             };
 
             /*match tokens.next() {

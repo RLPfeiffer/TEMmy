@@ -122,3 +122,13 @@ def WriteNotesFiles(Block:str, Notes:SampleNotes) -> None:
     with open(join(BlockFolder, f"{Block}.txt"), "w") as txt:
         for idx, key in enumerate(SampleInfoKeys):
             txt.write(f"{key}: {Notes[idx]}{newline}")
+
+    # Make an empty idoc file so the operator doesn't have to type the name
+    IdocPath = join(BlockFolder, f"{Block}.idoc")
+    if not os.path.exists(IdocPath):
+        with open(IdocPath, "w") as f:
+            pass
+        
+        # Set the working directory there, and use it in the next file prompt
+        SetWorkingDir(BlockFolder)
+        sem.OpenChooserInCurrentDir()

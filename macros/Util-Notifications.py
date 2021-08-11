@@ -14,7 +14,7 @@ def SendStart() -> None:
    if sem.ReportNumTableItems() < 1:
       print("Nav table does not have items indicating total capture time.")
    else:
-      NumTiles = sem.ReportNumMontagePieces(1)
+      NumTiles = NumMontageTiles()
       
       if NumTiles == 1:
          print("Montage claims to have only one image. Using 1 hour as timeframe")

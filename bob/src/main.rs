@@ -22,8 +22,9 @@ mod robocopy;
 use robocopy::*;
 
 mod errors;
+use errors::*;
 
-fn rc3_build_chain(section: String, is_rebuild: bool) -> CommandChain {
+fn rc3_build_chain(section: String, is_rebuild: bool) -> Option<CommandChain> {
     let config = config_from_yaml();
     let temp_volume_dir = format!(r#"{}\RC3{}"#, config.build_target, section);
     let mosaic_report_dest = format!(r#"{}\MosaicReports\{}\MosaicReport.html"#, config.dropbox_link_dir, section);
@@ -68,10 +69,10 @@ fn rc3_build_chain(section: String, is_rebuild: bool) -> CommandChain {
         commands.push(rito(format!("{} copied to RawData", section)));
     }
 
-    CommandChain {
+    Some(CommandChain {
         commands: commands,
         label: format!("automatic copy and build for RC3 {}", section)
-    }
+    })
 }
 
 // TODO not all merges will be RC3 merges forever
@@ -320,12 +321,11 @@ fn spawn_worker_threadpool(receiver: Receiver<CommandChain>) -> JoinHandle<()> {
     })
 }
 
-fn build_chain(section:&str, is_rebuild: bool) -> CommandChain {
+fn build_chain(section:&str, is_rebuild: bool) -> Option<CommandChain> {
     if section.starts_with("core") {
         core_build_chain(section.to_string(), is_rebuild)
     }
     else {
-        println!("{}", section);
         rc3_build_chain(section.to_string(), is_rebuild)
     }
 }
@@ -337,21 +337,32 @@ enum CommandBehavior {
 }
 use crate::CommandBehavior::*;
 
+fn build_command(is_automatic: bool, is_rebuild: bool, args:Vec<String>) -> Option<CommandBehavior> {
+    match args.as_slice() {
+        [capture_dir] => {
+            let config = config_from_yaml();
+
+            if config.automatic_builds || !is_automatic {
+                if let Some(chain) = build_chain(capture_dir, is_rebuild) {
+                    Some(Queue(chain))
+                } else {
+                    None
+                }
+            } else {
+                Some(NoOp)
+            }
+        },
+        _ => None
+    }
+}
+
 fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>) -> JoinHandle<()> {
  
     // TODO make commands return result<CommandBehavior>
     let mut commands:HashMap<String, fn(Vec<String>) -> Option<CommandBehavior>> = HashMap::new();
-    commands.insert("Copied".to_string(), |args|
-        match args.as_slice() {
-            [capture_dir] => {
-                let config = config_from_yaml();
-                Some(if config.automatic_builds {
-                        Queue(build_chain(capture_dir, false))
-                    } else { NoOp })
-            },
-            _ => None
-        }
-    );
+    commands.insert("Copied".to_string(), |args| build_command(true, false, args));
+    commands.insert("Build".to_string(), |args| build_command(false, false, args));
+    commands.insert("Rebuild".to_string(), |args| build_command(false, true, args));
     
     thread::spawn(move || {
         loop {
@@ -379,20 +390,6 @@ fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>
             };
 
             /*match tokens.next() {
-                Some("Copied") => {
-                    if config.automatic_builds {
-                        let section = tokens.next().unwrap().split(" ").next().unwrap();
-                        send_build_chain(section, false, &sender);
-                    }
-                },
-                Some("Build") => {
-                    let section = tokens.next().unwrap().split(" ").next().unwrap();
-                    send_build_chain(section, false, &sender);
-                },
-                Some("Rebuild") => {
-                    let section = tokens.next().unwrap().split(" ").next().unwrap();
-                    send_build_chain(section, true, &sender);
-                },
                 Some("CoreFixMosaicStage") => {
                     let mut args = tokens.next().unwrap().split(" ");
                     let volume = args.next().unwrap().to_string();

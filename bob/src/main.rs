@@ -3,7 +3,6 @@ use std::thread::JoinHandle;
 use std::sync::mpsc::{channel, Sender, Receiver};
 use std::convert::TryInto;
 use threadpool::ThreadPool;
-use std::fs;
 use std::io::prelude::*;
 use std::io::BufReader;
 use std::collections::HashMap;
@@ -23,6 +22,9 @@ use robocopy::*;
 
 mod errors;
 use errors::*;
+
+mod core_builds;
+use core_builds::*;
 
 fn rc3_build_chain(section: String, is_rebuild: bool) -> Option<CommandChain> {
     let config = config_from_yaml();
@@ -105,141 +107,7 @@ fn send_rc3_merge_chain(section: String, sender: &Sender<CommandChain>) {
         }).unwrap();
 }
 
-fn core_build_chain(section: String, is_rebuild: bool) -> CommandChain {
-    let config = config_from_yaml();
 
-    let section_dir = format!(r#"{}\TEMXCopy\{}"#, config.dropbox_dir, section);
-    let section_parts = section.split("_").collect::<Vec<&str>>();
-
-    match &section_parts[..] {
-        ["core", volume, section_number] => {
-            let volume_dir = format!(r#"{}\TEMXCopy\{}"#, config.dropbox_dir, volume.clone());
-            let mosaic_report_dest = format!(r#"{}\MosaicReports\{}\MosaicReport.html"#, config.dropbox_link_dir, volume.clone());
-            let build_target = format!(r#"{}\{}"#, config.build_target, volume.clone());
-
-            // If the volume dir doesn't exist, make it
-            fs::create_dir_all(&volume_dir).unwrap();
-
-            let mut commands = vec![
-                // Run TEMCoreBuildFast
-                vec![
-                    "TEMCoreBuildFast".to_string(),
-                    build_target.clone(),
-                    volume_dir.clone(),
-                ],
-
-                // Copy the automatic build's mosaicreport files to DROPBOX and send a link.
-                // If the mosaicreport files aren't there, the chain will fail (as it should) because that's
-                // a secondary indicator of build failure
-                robocopy_copy(
-                    format!(r#"{}\MosaicReport"#, build_target.clone()),
-                    format!(r#"{}\MosaicReports\{}\MosaicReport\"#, config.dropbox_dir, volume.clone())),
-                vec![
-                    "copy".to_string(),
-                    format!(r#"{}\MosaicReport.html"#, build_target.clone()),
-                    mosaic_report_dest.clone(),
-                ],
-                rito(format!("{0} built automatically. Check {1}, and if all sections have been built properly, run `Deploy: {0}` if it looks good", volume, mosaic_report_dest)),
-            ];
-
-            // Unless this a rebuild attempt, sections need to be moved to their volume directory:
-            if !is_rebuild {
-                // Move section into volume dir
-                commands.insert(0, vec![
-                    "move".to_string(),
-                    section_dir,
-                    format!(r#"{}\{}"#, volume_dir.clone(), section_number.clone()),
-                ]);
-            }
-
-            CommandChain {
-                commands: commands,
-                label: format!("automatic core build for {0}", section)
-            }
-        },
-        _ => {
-            run_warn(rito(format!("{0} should be named with pattern core_[volume]_[section] and was not built automatically", section)), Print);
-            // TODO this is an error, shouldn't be an empty chain
-            // (make the function return a result)
-            CommandChain {
-                commands: Vec::new(),
-                label: "do nothing".to_string()
-            }
-        },
-    }
-    
-}
-
-fn send_core_fixmosaic_stage(volume:String, sections: Vec<String>, sender: &Sender<CommandChain>) {
-    let config = config_from_yaml();
-
-    let mosaic_report_dest = format!(r#"{}\MosaicReports\{}\MosaicReport.html"#, config.dropbox_link_dir, volume.clone());
-    let build_target = format!(r#"{}\{}"#, config.build_target, volume.clone());
-
-    let mut commands = vec![];
-
-    // Delete existing mosaics
-    for section in &sections {
-        let section_folder = format!("{:04}", section.parse::<i32>().unwrap()); // "420" -> "0420", "13345" -> "13345"
-        commands.push(vec![
-            "del".to_string(),
-            format!(r#"{}\TEM\{}\TEM\Grid_Cel128_Mes8_Mes8_Thr0.25_it10_sp4.mosaic"#, build_target, section_folder),
-        ]);
-    }
-
-    commands.append(&mut vec![
-        vec![
-            "TEMCoreBuildFixMosaic_Stage".to_string(),
-            build_target.clone(),
-            sections.join(","),
-        ],
-        // Copy the automatic build's mosaicreport files to DROPBOX and send a link.
-        // If the mosaicreport files aren't there, the chain will fail (as it should) because that's
-        // a secondary indicator of build failure
-        robocopy_copy(
-            format!(r#"{}\MosaicReport"#, build_target.clone()),
-            format!(r#"{}\MosaicReports\{}\MosaicReport\"#, config.dropbox_dir, volume.clone())),
-        vec![
-            "copy".to_string(),
-            format!(r#"{}\MosaicReport.html"#, build_target.clone()),
-            mosaic_report_dest.clone(),
-        ],
-        rito(format!("{0} mosaic fixed with stage positions automatically. Check {1}, and if all sections have been built properly, run `Deploy: {0}` if it looks good", volume, mosaic_report_dest)),
-    ]);
-
-    sender.send(
-        CommandChain {
-            commands: commands,
-            label: format!("automatic fixmosaic_stage for {} {:?}", volume, sections)
-        }).unwrap();
-}
-
-fn send_core_deploy_chain(volume: String, sender: &Sender<CommandChain>) {
-    let config = config_from_yaml();
-
-    let volume_dir = format!(r#"{}\{}"#, config.build_target.clone(), volume.clone());
-    let deploy_dir = format!(r#"{}\{}"#, config.core_deployment_dir.clone(), volume.clone());
-
-    sender.send(
-        CommandChain {
-            commands: vec![
-                robocopy_copy(
-                    volume_dir.clone(),
-                    format!(r#"{}\"#,deploy_dir.clone())),
-                vec![
-                    "TEMCoreBuildOptimizeTiles".to_string(),
-                    deploy_dir.clone(),
-                ],
-                vec![
-                    "add-volume-path".to_string(),
-                    format!(r#"{}\Mosaic.VikingXML"#, deploy_dir.clone()),
-                    "bob-output".to_string() // backup dir for Mosaic.VikingXML files
-                ],
-                rito(format!(r#"{0} might be ready! Check http://storage1.connectomes.utah.edu/{0}/Mosaic.VikingXML in Viking"#, volume))
-            ],
-            label: format!("automatic core volume deployment for {0} to http://storage1.connectomes.utah.edu/{0}/Mosaic.VikingXML", volume)
-        }).unwrap();
-}
 
 // Source: https://stackoverflow.com/a/35820003
 use std::{
@@ -363,7 +231,23 @@ fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>
     commands.insert("Copied".to_string(), |args| build_command(true, false, args));
     commands.insert("Build".to_string(), |args| build_command(false, false, args));
     commands.insert("Rebuild".to_string(), |args| build_command(false, true, args));
-    
+    commands.insert("CoreFixMosaicStage".to_string(), |args| {
+        if args.len() < 2 {
+            None
+        } else {
+            let volume = args[0].clone();
+            let sections = &args[1..];
+            Some(Queue(core_fixmosaic_stage(volume, sections.to_vec())))
+        }
+    });
+    // Deploy a core capture volume
+    commands.insert("Deploy".to_string(), |args| {
+        match args.as_slice() {
+            [volume] => Some(Queue(core_deploy_chain(volume.clone()))),
+            _ => None
+        }
+    });
+
     thread::spawn(move || {
         loop {
             let next_command_full = receiver.recv().unwrap();
@@ -390,12 +274,6 @@ fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>
             };
 
             /*match tokens.next() {
-                Some("CoreFixMosaicStage") => {
-                    let mut args = tokens.next().unwrap().split(" ");
-                    let volume = args.next().unwrap().to_string();
-                    let sections: Vec<String> = args.map(|s| s.to_string()).collect();
-                    send_core_fixmosaic_stage(volume, sections, &sender);
-                },
                 // Send snapshots to #tem-bot as images
                 Some("Snapshot") => {
                     let snapshot_name = tokens.next().unwrap();
@@ -441,11 +319,7 @@ fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>
                         label: format!("raw command '{}'", command_string),
                     }).unwrap();
                 },
-                // Deploy a core capture volume
-                Some("Deploy") => {
-                    let volume = tokens.next().unwrap();
-                    send_core_deploy_chain(volume.to_string(), &sender);
-                },
+                
                 // This case will be used even if there's no colon in the message
                 Some(other_label) => {
                     println!("{}", other_label);

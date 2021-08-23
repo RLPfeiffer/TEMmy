@@ -1,4 +1,4 @@
 MacroName ThreeChoiceBox
 
 # Call this macro via the python function ThreeChoiceBox() defined in Util-ThreeChoiceBox.py
-ThreeChoiceBox header prompt1 prompt2 buttons
+ThreeChoiceBox header prompt1 prompt2 prompt3 buttons

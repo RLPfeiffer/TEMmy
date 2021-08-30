@@ -1,15 +1,23 @@
 from os.path import exists
 from typing import Callable
+from typing import Any
 
-# A Step is a function without arguments or a return value
-Step = Callable[[], None]
+# A Step is a function without arguments. Its return value will be ignored
+Step = Callable[[], Any]
 
 # Allow multiple named tutorials, i.e. RC3 vs. Core, as differently-keyed lists of lambdas in this variable:
 Steps: dict[str, list[Step]] = {}
 
 # TODO
 Steps["RC3"] = [
-    lambda: print("Starting RC3 capture tutorial")
+    # TODO coach on closing the previous serialEM, and deciding whether to recapture.
+    # TODO coach on specifics of switching the rod and specimen.
+    TellOperator("Put a new specimen in the scope."),
+    # TODO go to low mag 150x automatically. Only prompt to change aperture
+    TellOperator("Go to low mag 150x with no aperture inserted."),
+    # TODO on TEM2, coach a camera insertion workaround to avoid penning gauge spike with filament on?
+    DoAutomatically(TurnOnFilament),
+
 ]
 
 # TODO
@@ -61,9 +69,18 @@ def StartTutorial() -> None:
 def RunCurrentStep() -> None:
     Steps[CurrentTutorial()][CurrentStep()]()
 
-def RunNextStep() -> None:
+def RunNextStep() -> Any:
     if CurrentStep() + 1 < len(Steps[CurrentTutorial()]):
         SetCurrentStep(CurrentStep() + 1)
         RunCurrentStep()
     else:
         OkBox(f"Reached the end of tutorial {CurrentTutorial()}")
+    # Must return a value so it can be used in fake multiline lambdas
+    return 0
+
+# Types of protocol step:
+def TellOperator(message:str) -> Step:
+    return lambda: OkBox(message)
+
+def DoAutomatically(func:Callable[[], Any]) -> Step:
+    return lambda: (func(), RunNextStep())

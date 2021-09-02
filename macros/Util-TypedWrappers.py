@@ -1,4 +1,5 @@
-# Type-annotated functions for SerialEM commands
+# Type-annotated functions for SerialEM script commands.
+# Some add additional safety checks.
 
 def NumMontageTiles() -> int:
     return int(sem.ReportNumMontagePieces())
@@ -13,3 +14,12 @@ def TurnOnFilament() -> None:
 
 def TurnOffFilament() -> None:
     sem.SetColumnOrGunValve(0)
+
+def SetSpotSize(size:int) -> None:
+    sem.SetSpotSize(size)
+
+def OkBox(message:str) -> None:
+    sem.OKBox(message)
+
+def Record() -> None:
+    sem.Record()

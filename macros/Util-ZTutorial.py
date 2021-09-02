@@ -1,9 +1,9 @@
+# This file is named with a Z so it comes after every other Python function in Util files is defined
+
 from os.path import exists
 from typing import Callable
 from typing import Any
 
-# A Step is a function without arguments. Its return value will be ignored
-Step = Callable[[], Any]
 
 # Allow multiple named tutorials, i.e. RC3 vs. Core, as differently-keyed lists of lambdas in this variable:
 Steps: dict[str, list[Step]] = {}
@@ -17,7 +17,16 @@ Steps["RC3"] = [
     TellOperator("Go to low mag 150x with no aperture inserted."),
     # TODO on TEM2, coach a camera insertion workaround to avoid penning gauge spike with filament on?
     DoAutomatically(TurnOnFilament),
-
+    TellOperator("Put the screen down. Scroll the stage to find a region of formvar, and click 'Add Stage Pos' in the navigator window."),
+    DoAutomatically(lambda: SetSpotSize(1)),
+    TellOperator("Scroll the stage to the center of the tissue. Center and tighten the beam to the inner brackets. Then click 'Next Step' and wait for 7 minutes."),
+    DoAutomatically(lambda: LowMagCook(7)),
+    # TODO automatically open the last 150x snapshot
+    TellOperator("Locate the center point at 150x, click it, and click 'Add Marker' in the navigator window."),
+    # TODO automatically go to the new marker point, and re-record
+    TellOperator("Click 'Go to Marker' in the navigator window."),
+    DoAutomatically(Record),
+    DoAutomatically(lambda: TakeSnapshotWithNotes("", False)),
 ]
 
 # TODO
@@ -77,10 +86,3 @@ def RunNextStep() -> Any:
         OkBox(f"Reached the end of tutorial {CurrentTutorial()}")
     # Must return a value so it can be used in fake multiline lambdas
     return 0
-
-# Types of protocol step:
-def TellOperator(message:str) -> Step:
-    return lambda: OkBox(message)
-
-def DoAutomatically(func:Callable[[], Any]) -> Step:
-    return lambda: (func(), RunNextStep())

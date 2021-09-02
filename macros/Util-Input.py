@@ -26,6 +26,3 @@ def EnterFloat(prompt:str, default:float=0, decimal_places:int = 2, minvalue:Opt
 
 def EnterInt(prompt:str, default:int=0, minvalue:Optional[int]=None, maxvalue:Optional[int]=None) -> int:
     return int(EnterFloat(prompt, default, -1, minvalue, maxvalue))
-
-def OkBox(message:str) -> None:
-    sem.OKBox(message)

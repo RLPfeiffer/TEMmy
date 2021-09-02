@@ -26,7 +26,7 @@ Steps["Core"] = [
 ]
 
 # TODO
-Steps["S"] = [
+Steps["SingleTileRecaptures"] = [
     lambda: print("Starting Single-Tile Recapture tutorial")
 ]
 

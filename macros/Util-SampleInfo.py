@@ -98,6 +98,17 @@ def GetCaptureDir(Block:str) -> str:
         Dir = f"core_{Dir}"
     return join(DataPath, Dir)
 
+def GetOverviewFilename(Block:str) -> str:
+    ''' Return the full filename where the overview of this capture should be stored '''
+    CurrentNotes = CurrentSampleNotes()
+    assert CurrentNotes is not None
+    Notes = CurrentNotes[Block]
+    Investigator = Notes[SampleInfoKeys.index("Investigator")]
+    Experiment = Notes[SampleInfoKeys.index("Experiment")]
+    BlockPadded = Block.zfill(4)
+    Filename = f"overview{Investigator}_{Experiment}_{BlockPadded}.jpg"
+    return Filename
+
 def WriteNotesFiles(Block:str, Notes:SampleNotes) -> None:
     # Make a data output folder for the block
     BlockFolder = GetCaptureDir(Block)

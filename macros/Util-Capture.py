@@ -55,6 +55,7 @@ def Capture(CookFirst:bool) -> None:
     CurrentNotes.move_to_end(Block, last=False)
     WriteSampleNotes(CurrentNotes)
     CaptureDir = GetCaptureDir(Block)
+    OverviewFilename = GetOverviewFilename(Block)
 
     ### FOCUS ###
     if NumNavItems < 3:
@@ -124,7 +125,7 @@ def Capture(CookFirst:bool) -> None:
         return
 
     # Send the overview to Slack
-    TakeSnapshot(True, f"overview{CaptureDir}", Overview=True)
+    TakeSnapshot(True, OverviewFilename, Overview=True)
 
     # Copy the capture to DROPBOX
     # Try python CopyFunctions first:

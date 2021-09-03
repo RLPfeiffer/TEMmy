@@ -4,6 +4,7 @@ from typing import Optional
 # Function for automated use: saves a snapshot of the current image to our DROPBOX.
 # If called with True for the first argument, will also send this image to slack in the #tem-bot channel
 def TakeSnapshot(SendToSlack:bool, Name:str, Overview:bool=False) -> None:
+   assert ':' not in Name and '/' not in Name, f"{Name} is a bad filename for an overview! Remove : and /"
    # Reports the current mag; also sets reportedValue2 to 1 if low mag mode, 0 if not
    (CurrentMag, LowMag) = sem.ReportMag()
    Filename = f"TEMSnapshots/{Name} x{int(CurrentMag)} {ScopeName}.jpg"

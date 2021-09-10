@@ -106,7 +106,7 @@ def GetOverviewFilename(Block:str) -> str:
     Investigator = Notes[SampleInfoKeys.index("Investigator")]
     Experiment = Notes[SampleInfoKeys.index("Experiment")]
     BlockPadded = Block.zfill(4)
-    Filename = f"overview{Investigator}_{Experiment}_{BlockPadded}.jpg"
+    Filename = f"overview{Investigator}_{Experiment}_{BlockPadded}"
     return Filename
 
 def WriteNotesFiles(Block:str, Notes:SampleNotes) -> None:

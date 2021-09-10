@@ -13,7 +13,8 @@ pub fn core_build_chain(section: String, is_rebuild: bool) -> Option<CommandChai
     let section_parts = section.split("_").collect::<Vec<&str>>();
 
     match &section_parts[..] {
-        ["core", volume, section_number] => {
+        ["core", investigator, volume, section_number] => {
+            // TODO preserve the investigator name in the volume dir, and update fixmosaic_stage and deploy to acknowledge this & deploy to put the volume in the investigator's folder
             let volume_dir = format!(r#"{}\TEMXCopy\{}"#, config.dropbox_dir, volume.clone());
             let mosaic_report_dest = format!(r#"{}\MosaicReports\{}\MosaicReport.html"#, config.dropbox_link_dir, volume.clone());
             let build_target = format!(r#"{}\{}"#, config.build_target, volume.clone());

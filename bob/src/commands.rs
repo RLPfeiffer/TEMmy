@@ -48,15 +48,12 @@ pub fn command_map() -> HashMap<String, fn(Vec<String>) -> Option<CommandBehavio
     });
     // Send snapshots to #tem-bot as images
     commands.insert("Snapshot".to_string(), |args| {
-        match args.as_slice() {
-            [snapshot_name] => {
-                let config = config_from_yaml();
-                let snapshot_path = format!(r#"{}\{}"#, config.dropbox_dir, snapshot_name);
-                run_warn(rito_image(snapshot_path), Print);
-                Some(NoOp)
-            },
-            _ => None
-        }
+        // The snapshot command accepts a filename that can include spaces, so the args vec actually needs to be rejoined:
+        let snapshot_name = args.join(" ");
+        let config = config_from_yaml();
+        let snapshot_path = format!(r#"{}\{}"#, config.dropbox_dir, snapshot_name);
+        run_warn(rito_image(snapshot_path), Print);
+        Some(NoOp)
     });
     // queue commands from a text file and save their outputs:
     commands.insert("Queue".to_string(), |args| {

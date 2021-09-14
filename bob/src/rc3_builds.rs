@@ -14,12 +14,19 @@ pub fn rc3_build_chain(section: String, is_rebuild: bool) -> Option<CommandChain
         ["Jones", "RC3", section_number] => {
             let temp_volume_dir = format!(r#"{}\RC3{}"#, config.build_target, section_number);
             let mosaic_report_dest = format!(r#"{}\MosaicReports\{}\MosaicReport.html"#, config.dropbox_link_dir, section_number);
+            let mut commands: Vec<Vec<String>> = vec![];
             let source = if is_rebuild {
                 format!(r#"{}\RC3\{}"#, config.raw_data_dir, section_number)
             } else {
-                format!(r#"{}\TEMXCopy\{}"#, config.dropbox_dir, section)
+                // Rename the folder to just the section number so RC3Import knows it contains only 1 section:
+                commands.push(vec![
+                    "rename".to_string(),
+                    format!(r#"{}\TEMXCopy\{}"#, config.dropbox_dir, section),
+                    section_number.to_string(),
+                ]);
+                format!(r#"{}\TEMXCopy\{}"#, config.dropbox_dir, section_number)
             };
-            let mut commands = vec![
+            let mut rest_commands = vec![
                 vec![
                     "RC3Import".to_string(),
                     temp_volume_dir.clone(),
@@ -47,6 +54,7 @@ pub fn rc3_build_chain(section: String, is_rebuild: bool) -> Option<CommandChain
                 ],
                 rito(format!("{0} built automatically. Check {1} and run `Merge: {0}` if it looks good", section_number, mosaic_report_dest)),
             ];
+            commands.append(&mut rest_commands);
 
             if !is_rebuild {
                 commands.push(robocopy_move(

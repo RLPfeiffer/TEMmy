@@ -55,6 +55,7 @@ pub fn command_map() -> HashMap<String, fn(Vec<String>) -> Option<CommandBehavio
         run_warn(rito_image(snapshot_path), Print);
         Some(NoOp)
     });
+    // Started: is just intended to send a message
     // queue commands from a text file and save their outputs:
     commands.insert("Queue".to_string(), |args| {
         match args.as_slice() {

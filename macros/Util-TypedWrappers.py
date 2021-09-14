@@ -26,3 +26,6 @@ def OkBox(message:str) -> None:
 
 def Record() -> None:
     sem.Record()
+
+def SetBeamBlank(on:bool) -> None:
+    sem.SetBeamBlank(1 if on else 0)

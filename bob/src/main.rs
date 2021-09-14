@@ -95,7 +95,10 @@ fn spawn_worker_threadpool(receiver: Receiver<CommandChain>) -> JoinHandle<()> {
         loop {
             let next_chain = receiver.recv().unwrap();
             pool.execute(move || {
-                run_chain_and_save_output(next_chain).unwrap();
+                let label = next_chain.label.clone();
+                if run_chain_and_save_output(next_chain).is_err() {
+                    println!("error from {} -- should have been reported via slack also", label);
+                };
             });
         }
     })

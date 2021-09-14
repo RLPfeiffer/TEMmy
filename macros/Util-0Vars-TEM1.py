@@ -22,6 +22,9 @@ PrecookMontageD = 0
 # Globally set the variable SecondsPerTile
 SecondsPerTile = 15
 
+# Filament heat-up time
+FilamentHeatupSec = 45
+
 ##################################
 # Change MaxPercentChangeOverCapture to adjust sensitivity of filament stability.  
 # Must be a value 0 to 1.0.

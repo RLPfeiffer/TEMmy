@@ -1,3 +1,4 @@
+use std::env;
 use std::thread;
 use std::thread::JoinHandle;
 use std::sync::mpsc::{channel, Sender, Receiver};
@@ -5,6 +6,7 @@ use std::convert::TryInto;
 use threadpool::ThreadPool;
 use std::io::prelude::*;
 use std::io::BufReader;
+use duct::cmd;
 
 mod config;
 use config::*;
@@ -115,6 +117,7 @@ fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>
             let mut command_parts = next_command_full.split(": ");
             let tem_name = command_parts.next().unwrap();
             let command_name = command_parts.next().unwrap();
+            println!("{}", command_name);
             let command_args = command_parts.next().unwrap().split(" ").map(|s| s.to_string()).collect::<Vec<String>>();
             let config = config_from_yaml();
             run_warn(vec![format!(r#"@echo {} >> {}\{}\processedMessage.txt"#, next_command_full, config.notification_dir, tem_name)], Print);
@@ -129,7 +132,7 @@ fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>
                         sender.send(chain).unwrap();
                     },
                     Some(NoOp) => {},
-                    None => { run_warn(rito(format!("bad bob command: {}", next_command_full)), Print); }
+                    None => { run_warn(rito(format!("bad bob command (command_behavior returned None): {}", next_command_full)), Print); }
                 };
             } else {
                 run_warn(rito(format!("bad bob command: {}", next_command_full)), Print);
@@ -138,6 +141,26 @@ fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>
     })
 }
 fn main() {
+    let args:Vec<String> = env::args().collect();
+    match args.as_slice() {
+        [_, arg] if arg.as_str() == "run_unsafe" => {
+            unsafe_main();
+        },
+        [ref bob_path] => {
+            loop {
+                let unsafe_result = cmd!(bob_path, "run_unsafe").run();
+                if let Ok(output) = unsafe_result {
+                    let _ = run_warn(rito(format!("bob the builder crashed: {}. Restarting", String::from_utf8(output.stderr).expect("utf-8 output"))), Silent);
+                }
+            }
+        }
+        _ => {
+            println!("bad args for bob");
+        }
+    }
+}
+
+fn unsafe_main() {
     let config = config_from_yaml();
 
     // Create a channel for all Bob commands to be sent safely to a command processor thread:

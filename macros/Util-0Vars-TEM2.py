@@ -11,7 +11,7 @@ MessagePath = f"{MessageDir}/message.txt"
 DropboxPath = "Y:"
 
 # Globally set the variable $CopyDir
-CopyPath = f"{DropboxPath}\TEMXcopy"
+CopyPath = f"{DropboxPath}/TEMXcopy"
 
 # Globally set the variable $DataPath
 DataPath = "G:"

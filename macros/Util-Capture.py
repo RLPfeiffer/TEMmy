@@ -130,8 +130,10 @@ def Capture(CookFirst:bool) -> None:
     # Copy the capture to DROPBOX
     # Try python CopyFunctions first:
     try:
-        CopyDir(DataPath, CopyPath, basename(CaptureDir))
-        SendStop(CaptureDir)
+        if CopyDir(DataPath, CopyPath, basename(CaptureDir)):
+            SendStop(basename(CaptureDir))
+        else:
+            SendMessage(f"Failed to copy {CaptureDir} to DROPBOX")
     except:
         sem.CallFunction("Notifications::SendMessage", f"Python CopyDir failed with error {sys.exc_info()[0]}. Trying again with old version")
         sem.SetVariable("CopyTarget", CopyPath)

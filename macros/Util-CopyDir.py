@@ -33,7 +33,10 @@ def CheckSpaceForCopyDir(CopySource:str, CopyTarget:str, TargetDirName:str) -> b
 # (External-use functions all check before calling this one)
 def CopyDirWithoutCheckingSpace(CopySource:str, CopyTarget:str, TargetDirName:str) -> bool:
    try:
-      shutil.copytree(path.join(CopySource, TargetDirName), path.join(CopyTarget, TargetDirName))
+      source = path.join(CopySource, TargetDirName)
+      destination = path.join(CopyTarget, TargetDirName)
+      print(f"Calling copytree from {source}->{destination}")
+      shutil.copytree(source, destination)
       return True
    except:
       SendMessage(f"Error {sys.exc_info()[0]} while attempting to copy {TargetDirName} from {ScopeName} to {CopyTarget}")

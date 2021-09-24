@@ -131,21 +131,23 @@ fn build_chain(section:&str, is_rebuild: bool) -> Option<CommandChain> {
 
 
 fn build_command(is_automatic: bool, is_rebuild: bool, args:Vec<String>) -> Option<CommandBehavior> {
-    match args.as_slice() {
-        [capture_dir] => {
-            let config = config_from_yaml();
+    // Copied: can have multiple plaintext words after the section name/number
+    if args.len() >= 1 {
+        let capture_dir = &args[0];
+        
+        let config = config_from_yaml();
 
-            if config.automatic_builds || !is_automatic {
-                if let Some(chain) = build_chain(capture_dir, is_rebuild) {
-                    Some(Queue(chain))
-                } else {
-                    None
-                }
+        if config.automatic_builds || !is_automatic {
+            if let Some(chain) = build_chain(capture_dir, is_rebuild) {
+                Some(Queue(chain))
             } else {
-                Some(NoOp)
+                None
             }
-        },
-        _ => None
+        } else {
+            Some(NoOp)
+        }
+    } else {
+        None
     }
 }
 

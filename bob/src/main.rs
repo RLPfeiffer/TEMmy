@@ -120,7 +120,7 @@ fn command_thread_step(commands: &CommandMap, receiver: &Receiver<String>, sende
 
     if let Some(command_behavior) = commands.get(command_name) {
         match command_behavior(command_args) {
-            // TODO won't be matching Some, will be matchking Ok()
+            // TODO won't be matching Some, will be matchking Oka()
             Some(Immediate(chain)) => {
                 run_chain_and_save_output(chain)?;
             },

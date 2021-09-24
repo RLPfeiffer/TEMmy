@@ -13,11 +13,17 @@ pub enum BobError {
     #[error(transparent)]
     ParseExitCodeError(#[from] std::num::ParseIntError),
 
+    #[error("No error code in exit message {0}")]
+    BadExitMessage(String),
+
     #[error(transparent)]
     IOError(#[from] std::io::Error),
     
     #[error("Fatal error {0}")]
     FatalRegex(String),
+
+    #[error("Badly formed regex in bob-config.yaml: {0}")]
+    RegexCompileError(#[from] regex::Error),
 
     #[error(transparent)]
     SendErrorString(#[from] std::sync::mpsc::SendError<String>),
@@ -27,6 +33,9 @@ pub enum BobError {
 
     #[error(transparent)]
     RecvError(#[from] std::sync::mpsc::RecvError),
+
+    #[error(transparent)]
+    ReadlineError(#[from] rustyline::error::ReadlineError),
 }
 
 pub type BobResult<T> = Result<T, BobError>;

@@ -17,8 +17,14 @@ pub struct Config {
 }
 
 pub fn config_from_yaml() -> Config {
-    let yaml_str = fs::read_to_string("bob-config.yaml").expect("bob requires a bob-config.yaml file");
-    serde_yaml::from_str(&yaml_str).unwrap()
+    let yaml_str = match fs::read_to_string("bob-config.yaml") {
+        Ok(str) => str,
+        Err(err) => panic!("bob requires a bob-config.yaml file: {}", err)
+    };
+    match serde_yaml::from_str(&yaml_str) {
+        Ok(yaml) => yaml,
+        Err(err) => panic!("bob-config.yml failed to parse: {}", err)
+    }
     // TODO have a list of volumes in the yaml file and let them define
     // import/build/merge/align script chains
 }

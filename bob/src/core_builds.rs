@@ -3,6 +3,7 @@ use crate::rito::*;
 use crate::config::*;
 use crate::CommandChain;
 use crate::run::*;
+use crate::errors::*;
 use std::fs;
 use crate::run::ShouldPrint::*;
 
@@ -13,14 +14,17 @@ pub fn core_build_chain(section: String, is_rebuild: bool) -> Option<CommandChai
     let section_parts = section.split("_").collect::<Vec<&str>>();
 
     match &section_parts[..] {
-        ["core", investigator, volume, section_number] => {
+        ["core", _investigator, volume, section_number] => {
             // TODO preserve the investigator name in the volume dir, and update fixmosaic_stage and deploy to acknowledge this & deploy to put the volume in the investigator's folder
             let volume_dir = format!(r#"{}\TEMXCopy\{}"#, config.dropbox_dir, volume.clone());
             let mosaic_report_dest = format!(r#"{}\MosaicReports\{}\MosaicReport.html"#, config.dropbox_link_dir, volume.clone());
             let build_target = format!(r#"{}\{}"#, config.build_target, volume.clone());
 
             // If the volume dir doesn't exist, make it
-            fs::create_dir_all(&volume_dir).unwrap();
+            if fs::create_dir_all(&volume_dir).is_err() {
+                run_warn(rito(format!("failed to create volume dir {}", volume_dir)), Print);
+                return None;
+            }
 
             let mut commands = vec![
                 // Run TEMCoreBuildFast
@@ -67,7 +71,7 @@ pub fn core_build_chain(section: String, is_rebuild: bool) -> Option<CommandChai
     
 }
 
-pub fn core_fixmosaic_stage(volume:String, sections: Vec<String>) -> CommandChain {
+pub fn core_fixmosaic_stage(volume:String, sections: Vec<String>) -> BobResult<CommandChain> {
     let config = config_from_yaml();
 
     let mosaic_report_dest = format!(r#"{}\MosaicReports\{}\MosaicReport.html"#, config.dropbox_link_dir, volume.clone());
@@ -77,7 +81,7 @@ pub fn core_fixmosaic_stage(volume:String, sections: Vec<String>) -> CommandChai
 
     // Delete existing mosaics
     for section in &sections {
-        let section_folder = format!("{:04}", section.parse::<i32>().unwrap()); // "420" -> "0420", "13345" -> "13345"
+        let section_folder = format!("{:04}", section.parse::<i32>()?); // "420" -> "0420", "13345" -> "13345"
         commands.push(vec![
             "del".to_string(),
             format!(r#"{}\TEM\{}\TEM\Grid_Cel128_Mes8_Mes8_Thr0.25_it10_sp4.mosaic"#, build_target, section_folder),
@@ -104,10 +108,10 @@ pub fn core_fixmosaic_stage(volume:String, sections: Vec<String>) -> CommandChai
         rito(format!("{0} mosaic fixed with stage positions automatically. Check {1}, and if all sections have been built properly, run `Deploy: {0}` if it looks good", volume, mosaic_report_dest)),
     ]);
 
-    CommandChain {
+    Ok(CommandChain {
         commands: commands,
         label: format!("automatic fixmosaic_stage for {} {:?}", volume, sections)
-    }
+    })
 }
 
 pub fn core_deploy_chain(volume: String) -> CommandChain {

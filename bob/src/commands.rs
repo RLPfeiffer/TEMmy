@@ -30,7 +30,13 @@ pub fn command_map() -> CommandMap {
         } else {
             let volume = args[0].clone();
             let sections = &args[1..];
-            Some(Queue(core_fixmosaic_stage(volume, sections.to_vec())))
+            match core_fixmosaic_stage(volume.clone(), sections.to_vec()) {
+                Ok(chain) => Some(Queue(chain)),
+                Err(err) => {
+                    run_warn(rito(format!("failure parsing section# from {}: {:?}", volume, err)), Print);
+                    None
+                }
+            }
         }
     });
     // Deploy a core capture volume
@@ -54,8 +60,14 @@ pub fn command_map() -> CommandMap {
         let snapshot_name = args.join(" ");
         let config = config_from_yaml();
         let snapshot_path = format!(r#"{}\{}"#, config.dropbox_dir, snapshot_name);
-        run_warn(rito_image(snapshot_path), Print);
-        Some(NoOp)
+        Some(
+            Immediate(
+                CommandChain {
+                    commands: vec![
+                        rito_image(snapshot_path)
+                    ],
+                    label: "send snapshot to slack".to_string()
+                }))
     });
     // Started: is just intended to send a message
     // queue commands from a text file and save their outputs:
@@ -63,14 +75,21 @@ pub fn command_map() -> CommandMap {
         match args.as_slice() {
             [queue_file] => {
                 println!("called as queue");
-                let queue = lines_from_file(queue_file);
+                match lines_from_file(queue_file) {
+                    Ok(queue) => {
+                        let queue: Vec<Vec<String>> = queue.iter().map(|line| line.split("~").map(|token| token.trim().to_string()).collect()).collect();
+                        Some(Queue(CommandChain {
+                            commands: queue, 
+                            label: format!("bob queue file {}", queue_file)
+                        }))
+                    },
+                    Err(err) => {
+                        run_warn(rito(format!("error reading lines from queue file {}: {:?}", queue_file, err)), Print);
+                        None
+                    }
+                }
                 // TODO tokenize queue files by passing the lines through a filter that just prints each arg on a line
                 // TODO The file has to tokenize command arguments like~this~"even though it's weird"
-                let queue: Vec<Vec<String>> = queue.iter().map(|line| line.split("~").map(|token| token.trim().to_string()).collect()).collect();
-                Some(Queue(CommandChain {
-                    commands: queue, 
-                    label: format!("bob queue file {}", queue_file)
-                }))
             },
             _ => None
         }

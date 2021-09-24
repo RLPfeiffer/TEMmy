@@ -34,7 +34,7 @@ pub fn run(command: Vec<String>, print_output:ShouldPrint) -> BobResult<()> {
     let file = File::create(output_file.clone())?;
     let mut buffer = BufWriter::new(file);
     buffer.write_all(format!("{:?}\n", command).as_bytes())?;
-    buffer.flush().unwrap();
+    buffer.flush()?;
     println!("{} {:?}", output_file.clone(), command);
     
     let mut process_line = |line:String| {
@@ -69,8 +69,14 @@ fn run_and_filter_output<F>(command: Vec<String>, mut process_line: F) -> BobRes
     let config = config_from_yaml();
 
     // Only compile regexes once per command
-    let junk_output_regexes: Vec<Regex> = config.junk_outputs.iter().map(|pattern| Regex::new(&pattern).unwrap()).collect();
-    let fatal_error_regexes: Vec<Regex> = config.fatal_errors.iter().map(|pattern| Regex::new(&pattern).unwrap()).collect();
+    let mut junk_output_regexes: Vec<Regex> = vec![];
+    for regex_str in config.junk_outputs {
+        junk_output_regexes.push(Regex::new(&regex_str)?);
+    }
+    let mut fatal_error_regexes: Vec<Regex> = vec![];
+    for regex_str in config.fatal_errors {
+        fatal_error_regexes.push(Regex::new(&regex_str)?);
+    }
 
     let mut args = vec![String::from("/C")];
     for arg in &command {
@@ -106,7 +112,7 @@ fn run_and_filter_output<F>(command: Vec<String>, mut process_line: F) -> BobRes
                 // check if the line matches a set of known error patterns, i.e. 64-thread python error
                 for fatal_error_regex in &fatal_error_regexes {
                     if fatal_error_regex.is_match(&line) {
-                        reader.kill().unwrap();
+                        reader.kill()?;
                         return report_error(BobError::FatalRegex(line), command);
                     }
                 }
@@ -118,7 +124,7 @@ fn run_and_filter_output<F>(command: Vec<String>, mut process_line: F) -> BobRes
                 if err_str.contains("exited with code") {
                     let exit_code = err_str.split(" ")
                                 .collect::<Vec<&str>>()
-                                .pop().unwrap()
+                                .pop().ok_or(BobError::BadExitMessage(err_str.clone()))?
                                 .parse::<i32>()?;
 
                     // Robocopy returns 1 and 3 on some successes. yikes

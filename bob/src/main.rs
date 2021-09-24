@@ -29,12 +29,14 @@ use std::{
     fs::File,
     path::Path,
 };
-fn lines_from_file(filename: impl AsRef<Path>) -> Vec<String> {
-    let file = File::open(filename).expect("no such file");
+fn lines_from_file(filename: impl AsRef<Path>) -> BobResult<Vec<String>> {
+    let file = File::open(filename)?;
     let buf = BufReader::new(file);
-    buf.lines()
-        .map(|l| l.expect("Could not parse line"))
-        .collect()
+    let mut lines:Vec<String> = vec![];
+    for line in buf.lines() {
+        lines.push(line?);
+    }
+    Ok(lines)
 }
 
 fn spawn_tem_message_reader_thread(tem_name: &'static str, sender: Sender<String>) -> JoinHandle<()> {
@@ -57,6 +59,32 @@ fn spawn_tem_message_reader_thread(tem_name: &'static str, sender: Sender<String
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
 
+// return true if the CLI needs to shut down
+fn cli_thread_step(rl: &mut Editor<()>, sender: &Sender<String>) -> BobResult<bool> {
+    let readline = rl.readline(">> ");
+    match readline {
+        Ok(line) => {
+            rl.add_history_entry(line.as_str());
+            // Pretend it's from a scope called CLI so the command gets saved to processed messages:
+            sender.send(format!("CLI: {}", line))?;
+        },
+        Err(ReadlineError::Interrupted) => {
+            println!("CTRL-C");
+            return Ok(true);
+        },
+        Err(ReadlineError::Eof) => {
+            println!("CTRL-D");
+            return Ok(true);
+        },
+        Err(err) => {
+            println!("Readline Error: {:?}", err);
+            return Ok(false);
+        }
+    }
+    rl.save_history("history.txt")?;
+    Ok(false)
+}
+
 // TODO cli thread could allow serialization/suspension of chains to restart bob????
 fn spawn_cli_thread(sender: Sender<String>) -> JoinHandle<()> {
     thread::spawn(move || {
@@ -65,44 +93,42 @@ fn spawn_cli_thread(sender: Sender<String>) -> JoinHandle<()> {
             println!("No previous history.");
         }
         loop {
-            let readline = rl.readline(">> ");
-            match readline {
-                Ok(line) => {
-                    rl.add_history_entry(line.as_str());
-                    // Pretend it's from a scope called CLI so the command gets saved to processed messages:
-                    sender.send(format!("CLI: {}", line)).unwrap();
-                },
-                Err(ReadlineError::Interrupted) => {
-                    println!("CTRL-C");
-                    break
-                },
-                Err(ReadlineError::Eof) => {
-                    println!("CTRL-D");
-                    break
-                },
-                Err(err) => {
-                    println!("Error: {:?}", err);
-                    break
-                }
-            }
-            rl.save_history("history.txt").unwrap();
+            match cli_thread_step(&mut rl, &sender) {
+                Err(err) => run_warn(rito(format!("bob cli thread error: {}", err)), Print),
+                Ok(true) => break, // end the program 
+                Ok(false) => {},
+            };
         }
     })
 
 }
 
+fn threadpool_step(receiver: &Receiver<CommandChain>, pool:&ThreadPool) -> BobResult<()> {
+    let next_chain = receiver.recv()?;
+    pool.execute(move || {
+        let label = next_chain.label.clone();
+        if run_chain_and_save_output(next_chain).is_err() {
+            println!("error from {} -- should have been reported via slack also", label);
+        };
+    });
+    Ok(())
+}
+
 fn spawn_worker_threadpool(receiver: Receiver<CommandChain>) -> JoinHandle<()> {
     let config = config_from_yaml();
-    let pool = ThreadPool::new(config.worker_threads.try_into().unwrap());
+    let pool_size = match config.worker_threads.try_into() {
+        Ok(size) => size,
+        Err(err) => {
+            run_warn(rito(format!("worker_threads in bob-config.yml failed to convert to integer: {:?}. using 1 thread", err)), Print);
+            1
+        }
+    };
+    let pool = ThreadPool::new(pool_size);
     thread::spawn(move || {
         loop {
-            let next_chain = receiver.recv().unwrap();
-            pool.execute(move || {
-                let label = next_chain.label.clone();
-                if run_chain_and_save_output(next_chain).is_err() {
-                    println!("error from {} -- should have been reported via slack also", label);
-                };
-            });
+            if let Err(err) = threadpool_step(&receiver, &pool) {
+                run_warn(rito(format!("error in threadpool step: {}", err)), Print);
+            }
         }
     })
 }
@@ -120,7 +146,7 @@ fn command_thread_step(commands: &CommandMap, receiver: &Receiver<String>, sende
 
     if let Some(command_behavior) = commands.get(command_name) {
         match command_behavior(command_args) {
-            // TODO won't be matching Some, will be matchking Oka()
+            // TODO won't be matching Some, will be matching Ok()
             Some(Immediate(chain)) => {
                 run_chain_and_save_output(chain)?;
             },
@@ -158,7 +184,10 @@ fn main() {
             loop {
                 let unsafe_result = cmd!(bob_path, "run_unsafe").run();
                 if let Ok(output) = unsafe_result {
-                    let _ = run_warn(rito(format!("bob the builder crashed: {}. Restarting", String::from_utf8(output.stderr).expect("utf-8 output"))), Silent);
+                    run_warn(rito(format!("bob the builder crashed: {}. Restarting", match String::from_utf8(output.stderr) {
+                        Ok(err_output) => err_output,
+                        Err(err) => format!("non-utf8 output error {}", err)
+                    })), Silent);
                 }
             }
         }
@@ -188,5 +217,7 @@ fn unsafe_main() {
     }
 
     // The CLI thread listens for manually entered CommandChains via queues or raw commands
-    spawn_cli_thread(command_sender.clone()).join().unwrap();
+    if spawn_cli_thread(command_sender.clone()).join().is_err() {
+        panic!("CLI Thread crashed!");
+    }
 }

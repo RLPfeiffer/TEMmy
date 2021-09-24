@@ -17,6 +17,7 @@ mod rito;
 use rito::*;
 mod robocopy;
 mod errors;
+use errors::*;
 mod core_builds;
 mod rc3_builds;
 mod commands;
@@ -106,38 +107,45 @@ fn spawn_worker_threadpool(receiver: Receiver<CommandChain>) -> JoinHandle<()> {
     })
 }
 
+fn command_thread_step(commands: &CommandMap, receiver: &Receiver<String>, sender: &Sender<CommandChain>) -> BobResult<()> {
+    let next_command_full = receiver.recv()?;
+    println!("saving the Message output: {}", next_command_full);
+    let mut command_parts = next_command_full.split(": ");
+    let tem_name = command_parts.next().ok_or(BobError::CommandNoneError("TEM Name", next_command_full.clone()))?;
+    let command_name = command_parts.next().ok_or(BobError::CommandNoneError("Command name", next_command_full.clone()))?;
+    println!("{}", command_name);
+    let command_args = command_parts.next().ok_or(BobError::CommandNoneError("Command args", next_command_full.clone()))?.split(" ").map(|s| s.to_string()).collect::<Vec<String>>();
+    let config = config_from_yaml();
+    run_warn(vec![format!(r#"@echo {} >> {}\{}\processedMessage.txt"#, next_command_full, config.notification_dir, tem_name)], Print);
+
+    if let Some(command_behavior) = commands.get(command_name) {
+        match command_behavior(command_args) {
+            // TODO won't be matching Some, will be matchking Ok()
+            Some(Immediate(chain)) => {
+                run_chain_and_save_output(chain)?;
+            },
+            Some(Queue(chain)) => {
+                sender.send(chain)?;
+            },
+            Some(NoOp) => {},
+            None => { run_warn(rito(format!("bad bob command (command_behavior returned None): {}", next_command_full)), Print); }
+        };
+    } else {
+        run_warn(rito(format!("bad bob command: {}", next_command_full)), Print);
+    }
+    Ok(())
+}
+
 fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>) -> JoinHandle<()> {
  
     let commands = command_map();
 
     thread::spawn(move || {
         loop {
-            let next_command_full = receiver.recv().unwrap();
-            println!("saving the Message output: {}", next_command_full);
-            let mut command_parts = next_command_full.split(": ");
-            let tem_name = command_parts.next().unwrap();
-            let command_name = command_parts.next().unwrap();
-            println!("{}", command_name);
-            let command_args = command_parts.next().unwrap().split(" ").map(|s| s.to_string()).collect::<Vec<String>>();
-            let config = config_from_yaml();
-            run_warn(vec![format!(r#"@echo {} >> {}\{}\processedMessage.txt"#, next_command_full, config.notification_dir, tem_name)], Print);
-
-            if let Some(command_behavior) = commands.get(command_name) {
-                match command_behavior(command_args) {
-                    // TODO won't be matching Some, will be matchking Ok()
-                    Some(Immediate(chain)) => {
-                        run_chain_and_save_output(chain).unwrap();
-                    },
-                    Some(Queue(chain)) => {
-                        sender.send(chain).unwrap();
-                    },
-                    Some(NoOp) => {},
-                    None => { run_warn(rito(format!("bad bob command (command_behavior returned None): {}", next_command_full)), Print); }
-                };
-            } else {
-                run_warn(rito(format!("bad bob command: {}", next_command_full)), Print);
+            if let Err(err) = command_thread_step(&commands, &receiver, &sender) {
+                run_warn(rito(format!("bob command thread error: {}", err)), Print);
             }
-       }
+        }
     })
 }
 fn main() {

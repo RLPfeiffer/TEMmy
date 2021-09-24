@@ -17,8 +17,10 @@ pub enum CommandBehavior {
     NoOp,
 }
 
-pub fn command_map() -> HashMap<String, fn(Vec<String>) -> Option<CommandBehavior>> {
-    let mut commands:HashMap<String, fn(Vec<String>) -> Option<CommandBehavior>> = HashMap::new();
+pub type CommandMap = HashMap<String, fn(Vec<String>) -> Option<CommandBehavior>>;
+
+pub fn command_map() -> CommandMap {
+    let mut commands:CommandMap = HashMap::new();
     commands.insert("Copied".to_string(), |args| build_command(true, false, args));
     commands.insert("Build".to_string(), |args| build_command(false, false, args));
     commands.insert("Rebuild".to_string(), |args| build_command(false, true, args));

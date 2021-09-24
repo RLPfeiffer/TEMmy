@@ -7,6 +7,9 @@ pub enum BobError {
     #[error("Exit code {0}")]
     BadExitCode(i32),
 
+    #[error("{0} is None from {1}")]
+    CommandNoneError(&'static str, String),
+
     #[error(transparent)]
     ParseExitCodeError(#[from] std::num::ParseIntError),
 
@@ -21,6 +24,9 @@ pub enum BobError {
 
     #[error(transparent)]
     SendErrorCommandChain(#[from] std::sync::mpsc::SendError<CommandChain>),
+
+    #[error(transparent)]
+    RecvError(#[from] std::sync::mpsc::RecvError),
 }
 
 pub type BobResult<T> = Result<T, BobError>;

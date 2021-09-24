@@ -1,29 +1,17 @@
 # Globally set the variable $ScopeName
 ScopeName = "TEM2"
 
-# Globally set the variable $MessageDir
-MessageDir = f"Y:/Notification/{ScopeName}"
-
-# Globally set the variable $MessagePath
-MessagePath = f"{MessageDir}/message.txt"
-
 # Globally set the variable $DropboxPath
-DropboxPath = "Y:"
-
-# Globally set the variable $CopyDir
-CopyPath = f"{DropboxPath}/TEMXcopy"
+DropboxPath = "Y:/"
 
 # Globally set the variable $DataPath
-DataPath = "G:"
-
-# Globally set the variable PrecookMontageD
-PrecookMontageD = 0
-
-# Globally set the variable SecondsPerTile
-SecondsPerTile = 15
+DataPath = "G:/"
 
 # Filament heat-up time
 FilamentHeatupSec = 50
+
+# Globally set the variable PrecookMontageD
+PrecookMontageD = 0
 
 ##################################
 # Change MaxPercentChangeOverCapture to adjust sensitivity of filament stability.  

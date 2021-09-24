@@ -58,7 +58,7 @@ pub fn rc3_build_chain(section: String, is_rebuild: bool) -> Option<CommandChain
 
             if !is_rebuild {
                 commands.push(robocopy_move(
-                        format!(r#"{}\TEMXCopy\{}"#, config.dropbox_dir, section),
+                        format!(r#"{}\TEMXCopy\{}"#, config.dropbox_dir, section_number),
                         format!(r#"{}\RC3\{}\"#, config.raw_data_dir, section_number)));
                 commands.push(rito(format!("{} copied to RawData", section_number)));
             }

@@ -67,11 +67,9 @@ def SetCurrentTutorial(t: str) -> None:
         f.write(t)
 
 def StartTutorial() -> None:
-    TutorialNames = Steps.keys()
-    assert 3 == len(TutorialNames), "SerialEM can only fit 3 choices in a dialog box, so we can only have 3 tutorials."
-    t1, t2, t3 = TutorialNames
+    TutorialNames = [name for name in Steps.keys()]
     SetCurrentStep(0)
-    SetCurrentTutorial(ThreeChoiceBox("What kind of capture are you running?", t1, t2, t3))
+    SetCurrentTutorial(ManyChoiceBox("Choose a tutorial", TutorialNames))
     RunCurrentStep()
     
 # Run the current tutorial step. Some steps may automatically perform work and increment the step counter, but ones with information can be re-run as many times as necessary to remind the operator what step is next.

@@ -29,3 +29,12 @@ def Record() -> None:
 
 def SetBeamBlank(on:bool) -> None:
     sem.SetBeamBlank(1 if on else 0)
+
+def ScreenDown() -> None:
+    sem.ScreenDown()
+
+def ScreenUp() -> None:
+    sem.ScreenUp()
+
+def Autofocus() -> None:
+    sem.Autofocus()

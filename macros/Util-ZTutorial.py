@@ -10,23 +10,50 @@ Steps: dict[str, list[Step]] = {}
 
 # TODO
 Steps["RC3"] = [
-    # TODO coach on closing the previous serialEM, and deciding whether to recapture.
     # TODO coach on specifics of switching the rod and specimen.
     TellOperator("Put a new specimen in the scope."),
     # TODO go to low mag 150x automatically. Only prompt to change aperture
     TellOperator("Go to low mag 150x with no aperture inserted."),
     # TODO on TEM2, coach a camera insertion workaround to avoid penning gauge spike with filament on?
     DoAutomatically(TurnOnFilament),
-    TellOperator("Put the screen down. Scroll the stage to find a region of formvar, and click 'Add Stage Pos' in the navigator window."),
+    DoAutomatically(ScreenDown),
+    TellOperator("Scroll the stage to find a region of formvar, and click 'Add Stage Pos' in the navigator window."),
     DoAutomatically(lambda: SetSpotSize(1)),
     TellOperator("Scroll the stage to the center of the tissue. Center and tighten the beam to the inner brackets. Then click 'Next Step' and wait for 7 minutes."),
     DoAutomatically(lambda: LowMagCook(7)),
     # TODO automatically open the last 150x snapshot
     TellOperator("Locate the center point at 150x, click it, and click 'Add Marker' in the navigator window."),
-    # TODO automatically go to the new marker point, and re-record
+    # TODO automatically go to the new marker point (if "current navigator item" refers to the selected item in the UI)
     TellOperator("Click 'Go to Marker' in the navigator window."),
     DoAutomatically(Record),
     DoAutomatically(lambda: TakeSnapshotWithNotes("", False)),
+    
+    DoAutomatically(lambda: SetBeamBlank(True)),
+    # TODO go to high mag 2000x automatically
+    TellOperator("Go to high mag 2000x with the second aperture inserted."),
+    # TODO if TEM1, prompt to spread the beam a lot to prevent a cook spot
+    DoAutomatically(ScreenDown),
+    TellOperator("Use the aperture dials to center the aperture."),
+    TellOperator("Center the beam and use image wobble and the focus knob to adjust focus."),
+    DoAutomatically(Record),
+    # TODO automatically open the last 2000x screenshot
+    TellOperator("Find the center point at 2000x, and click it. Then delete the last navigator item."),
+    DoAutomatically(lambda: TakeSnapshotWithNotes("", False)),
+    TellOperator("In the menubar, click Navigator -> Montaging and Grids -> Add Circle Polygon. Type 125"),
+    # TODO automatically go to 5000x
+    TellOperator("Go to 5000x."),
+    TellOperator("In the navigator window, click and drag the circle polygon item above the formvar point."),
+    TellOperator("In the navigator window, check 'Aquire', 'New File At Item', and select the idoc file. Choose to overwrite it."),
+    # TODO automatically go to the center
+    TellOperator("In the navigator window, click Go To XY"),
+    DoAutomatically(ScreenDown),
+    TellOperator("Tighten the beam and center it. Check focus again, then go to 100 Current density."),
+    DoAutomatically(Autofocus),
+    DoAutomatically(Record),
+    TellOperator("If the number representing the center has shifted from where you put it, use 'Move item' to fix it, then click 'Stop Moving.'"),
+    TellOperator("In the menubar, click Navigator -> AcquireAtItems. Choose 'CalibrateAndRecapturePy' if there are any holes in the section. Otherwise, choose 'HighMagCookPy' and move the mirror out of the way."),
+
+    # TODO coach on closing the previous serialEM, and deciding whether to recapture.
 ]
 
 # TODO

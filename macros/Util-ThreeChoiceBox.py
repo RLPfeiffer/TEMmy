@@ -1,3 +1,5 @@
+from typing import List
+
 def ThreeChoiceBox(header:str, choice1:str, choice2:str, choice3:str, prompt1:str="", prompt2:str="", prompt3:str="") -> str:
     sem.SetVariable("header", header)
     sem.SetVariable("prompt1", prompt1)
@@ -15,3 +17,23 @@ def ThreeChoiceBox(header:str, choice1:str, choice2:str, choice3:str, prompt1:st
         return choice3
     
     raise ValueError("SerialEM didn't set reportedValue1 correctly")
+
+def ManyChoiceBox(header:str, choices:List[str], prompt1:str="", prompt2:str="", prompt3:str="") -> str:
+    '''Recursively call ThreeChoiceBox to present an infinite number of choices'''
+    if len(choices) < 2:
+        raise ValueError("it doesn't make sense to call ManyChoiceBox with < 2 choices.")
+    for choice in choices:
+        assert choice != "More", "'More' cannot be used as a choice in ManyChoiceBox"
+    Choice1 = choices.pop(0)
+    Choice2 = choices.pop(0)
+    Choice3 = "More"   
+    if len(choices) == 1:
+        Choice3 = choices.pop(0)
+
+    ChosenValue = ThreeChoiceBox(header, Choice1, Choice2, Choice3, prompt1, prompt2, prompt3)
+    if ChosenValue == "More":
+        return ManyChoiceBox(header, choices, prompt1, prompt2, prompt3)
+    else:
+        return ChosenValue
+
+

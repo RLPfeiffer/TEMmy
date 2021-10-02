@@ -13,6 +13,7 @@ pub fn rc3_build_chain(section: String, is_rebuild: bool) -> Option<CommandChain
     match &section_parts[..] {
         ["Jones", "RC3", section_number] => {
             let temp_volume_dir = format!(r#"{}\RC3{}"#, config.build_target, section_number);
+            let mosaic_report_folder = format!(r#"{}\MosaicReports\{}"#, config.dropbox_link_dir, section_number);
             let mosaic_report_dest = format!(r#"{}\MosaicReports\{}\MosaicReport.html"#, config.dropbox_link_dir, section_number);
             let mut commands: Vec<Vec<String>> = vec![];
             let source = if is_rebuild {
@@ -52,20 +53,32 @@ pub fn rc3_build_chain(section: String, is_rebuild: bool) -> Option<CommandChain
                     format!(r#"{}\MosaicReport.html"#, temp_volume_dir),
                     mosaic_report_dest.clone(),
                 ],
-                rito(format!("{0} built automatically. Check {1} and run `Merge: {0}` if it looks good", section_number, mosaic_report_dest)),
+                vec![
+                    "send-first-mosaic-overview".to_string(),
+                    mosaic_report_folder
+                ],
             ];
             commands.append(&mut rest_commands);
 
+            let data_path = format!(r#"{}\TEMXCopy\{}"#, config.dropbox_dir, section_number);
+            let rawdata_path = format!(r#"{}\RC3\{}\"#, config.raw_data_dir, section_number);
+            commands.push(rito_image(format!(r"{}\Histogram.png", data_path.clone())));
             if !is_rebuild {
                 commands.push(robocopy_move(
-                        format!(r#"{}\TEMXCopy\{}"#, config.dropbox_dir, section_number),
-                        format!(r#"{}\RC3\{}\"#, config.raw_data_dir, section_number)));
+                        data_path,
+                        rawdata_path));
                 commands.push(rito(format!("{} copied to RawData", section_number)));
             }
 
+            commands.push(rito(format!("{0} built automatically. Run `Merge: {0}` if it looks good. Full MosaicReport: {1} ", section_number, mosaic_report_dest)));
+
             Some(CommandChain {
                 commands: commands,
-                label: format!("automatic copy and build for RC3 {}", section_number)
+                label: if is_rebuild {
+                    format!("automatic rebuild for RC3 {}", section_number)
+                } else {
+                    format!("automatic copy and build for RC3 {}", section_number)
+                }
             })
         },
         _ => {

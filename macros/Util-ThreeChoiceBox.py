@@ -27,9 +27,7 @@ def ManyChoiceBox(header:str, choices:List[str], prompt1:str="", prompt2:str="",
     Choice1 = choices.pop(0)
     Choice2 = choices.pop(0)
     Choice3 = "More"   
-    if len(choices) == 0:
-        Choice3 = ""
-    elif len(choices) == 1:
+    if len(choices) == 1:
         Choice3 = choices.pop(0)
 
     ChosenValue = ThreeChoiceBox(header, Choice1, Choice2, Choice3, prompt1, prompt2, prompt3)

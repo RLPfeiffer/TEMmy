@@ -60,7 +60,7 @@ MainRC3Steps:list[Step] = [
     # TODO automatically go to 5000x
     TellOperator("Go to 5000x."),
     TellOperator("In the navigator window, click and drag the circle polygon item above the formvar point in the item list."),
-    TellOperator("With the circle polygon selected, check the boxes for 'Aquire' and 'New File At Item'. Then select the idoc file. Choose to overwrite it."),
+    TellOperator("With the circle polygon selected, check the boxes for 'Aquire' and 'New File At Item'. Make sure 'Go from center out and anchor at 2000x' is active and click ok. Then select the generated idoc file. Choose to overwrite it."),
     # TODO automatically go to the center
     TellOperator("In the navigator window, click Go To XY"),
     DoAutomatically(ScreenDown),

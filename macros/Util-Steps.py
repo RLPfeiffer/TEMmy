@@ -18,7 +18,7 @@ def DoAutomatically(func:Callable[[], None]) -> Step:
     return step
 
 def DoNothing() -> None:
-    pass
+    RunNextStep()
 
 # Do a step differently depending on the scope being used
 def DependingOnScope(tem1Step:Step, tem2Step:Step) -> Step:

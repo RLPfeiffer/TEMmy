@@ -49,7 +49,7 @@ def PromptForSampleInfo() -> None:
     Blocks = []
     MoreBlocks = True
     while MoreBlocks:
-        Blocks.append(EnterString("Block # / Section #", forbidden_chars="_"))
+        Blocks.append(EnterString("Block # / Section # (including recapture letter)", forbidden_chars="_"))
         MoreBlocks = YesNoBox("Any more blocks or sections on this grid?")
 
     Grid = EnterString("Grid #")

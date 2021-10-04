@@ -30,3 +30,11 @@ def DependingOnScope(tem1Step:Step, tem2Step:Step) -> Step:
         else:
             raise ValueError(f"ScopeName has unexpected value {ScopeName}")
     return step
+
+def DependingOnYesNo(question:str, yesStep:Step, noStep:Step) -> Step:
+    def step() -> None:
+        if YesNoBox(question):
+            yesStep()
+        else:
+            noStep()
+    return step

@@ -23,7 +23,7 @@ NewSpecimenSteps:list[Step] = [
 
 LowMagCookSteps:list[Step] = [
     DoAutomatically(lambda: SetSpotSize(1)),
-    TellOperator("Scroll the stage to the center of the tissue. Center and tighten the beam to the inner brackets. Then click 'Next Step' and wait for 7 minutes."),
+    TellOperator("Scroll the stage to the center of the tissue. Remove the mirror. Center and tighten the beam to the inner brackets. Then click 'Next Step' and wait for 7 minutes."),
     DoAutomatically(lambda: LowMagCook(7)),
 ]
 
@@ -51,7 +51,7 @@ MainRC3Steps:list[Step] = [
     DependingOnScope(TellOperator("Spread the beam by several turns (by turning the 'brightness' knob clockwise.)"), DoNothing),
     DoAutomatically(ScreenDown),
     TellOperator("Use the aperture X/Y dials to center the aperture."),
-    TellOperator("Center the beam and use image wobble and the focus knob to adjust focus."),
+    TellOperator("Center the beam and use image wobble and the focus knob to adjust focus. Make sure the beam is spread around 100 Current Density, and click Next Step."),
     DoAutomatically(Record),
     OpenLastRC3Snapshot(2000),
     TellOperator("Find the center point at 2000x, and click it. Then delete the last navigator item."),
@@ -60,11 +60,11 @@ MainRC3Steps:list[Step] = [
     # TODO automatically go to 5000x
     TellOperator("Go to 5000x."),
     TellOperator("In the navigator window, click and drag the circle polygon item above the formvar point in the item list."),
-    TellOperator("With the circle polygon selected, check the boxes for 'Aquire' and 'New File At Item'. Make sure 'Go from center out and anchor at 2000x' is active and click ok. Then select the generated idoc file. Choose to overwrite it."),
+    TellOperator("With the circle polygon selected, check the boxes for 'Aquire', 'New File At Item', 'Montaged Images', 'Fit Montage to Polygon'. Make sure 'Go from center out and anchor at 2000x' is active and click ok. Then select the generated idoc file. Choose to overwrite it."),
     # TODO automatically go to the center
     TellOperator("In the navigator window, click Go To XY"),
     DoAutomatically(ScreenDown),
-    TellOperator("Tighten the beam and center it. Check focus again, then go to 100 Current density."),
+    TellOperator("Tighten the beam and center it. Check focus again, then go to 100 Current density and click Next Step."),
     DoAutomatically(Autofocus),
     DoAutomatically(Record),
     TellOperator("If the green number representing the circle's center has shifted from where you put it, use 'Move item' to fix it, then click 'Stop Moving.'"),

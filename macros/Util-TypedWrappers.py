@@ -37,4 +37,4 @@ def ScreenUp() -> None:
     sem.ScreenUp()
 
 def Autofocus() -> None:
-    sem.Autofocus()
+    sem.AutoFocus()

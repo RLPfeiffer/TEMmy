@@ -7,8 +7,11 @@ DropboxPath = "Y:/DROPBOX"
 # Globally set the variable $DataPath
 DataPath = "E:/"
 
-# Filament heat-up time
+# When turning the filament on, it takes this long to be fully on.
 FilamentHeatupSec = 45
+
+# When turning the filament off, it takes this long to be fully off.
+FilamentCooldownSec = 16
 
 # Globally set the variable PrecookMontageD
 PrecookMontageD = 0

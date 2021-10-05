@@ -9,14 +9,28 @@ def SetWorkingDir(d:str) -> None:
     sem.SetDirectory(d)
 
 def TurnOnFilament() -> None:
-    sem.SetColumnOrGunValve(1)
-    # Always turn on beam blank, for specimen safety:
-    sem.SetBeamBlank(1)
-    # Wait for the filament to heat up:
-    sleep(FilamentHeatupSec)
+    if not IsFilamentOn():
+        sem.SetColumnOrGunValve(1)
+        # Always turn on beam blank, for specimen safety:
+        sem.SetBeamBlank(1)
+        # Wait for the filament to heat up:
+        sleep(FilamentHeatupSec)
 
 def TurnOffFilament() -> None:
-    sem.SetColumnOrGunValve(0)
+    if IsFilamentOn():
+        sem.SetColumnOrGunValve(0)
+        sleep(FilamentCooldownSec)
+
+
+def IsFilamentOn() -> bool:
+    value:int = sem.ReportColumnOrGunValve()
+    if value == 1:
+        return True
+    elif value == 0:
+        return False
+    else:
+        # SerialEM can also report -1 for the filament status
+        raise ValueError("filament current is inconsistent with the beam switch state")
 
 def SetSpotSize(size:int) -> None:
     sem.SetSpotSize(size)

@@ -62,7 +62,7 @@ pub fn rc3_build_chain(section: String, is_rebuild: bool) -> Option<CommandChain
 
             let data_path = format!(r#"{}\TEMXCopy\{}"#, config.dropbox_dir, section_number);
             let rawdata_path = format!(r#"{}\RC3\{}\"#, config.raw_data_dir, section_number);
-            commands.push(rito_image(format!(r"{}\Histogram.png", data_path.clone())));
+            commands.push(rito_image(format!(r"{}\Histogram.png", if is_rebuild { rawdata_path.clone() } else { data_path.clone() })));
             if !is_rebuild {
                 commands.push(robocopy_move(
                         data_path,

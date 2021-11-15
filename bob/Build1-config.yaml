@@ -1,6 +1,7 @@
 dropbox_dir: 'Y:\DROPBOX'
 dropbox_link_dir: '\\OpR-Marc-RC2\Data\DROPBOX'
 build_target: 'D:\Volumes'
+overflow_build_target: 'W:\Volumes'
 raw_data_dir: '\\OpR-Marc-Syn3\Data\RawData'
 notification_dir: 'Y:\DROPBOX\Notification'
 core_deployment_dir: 'X:\Volumes'

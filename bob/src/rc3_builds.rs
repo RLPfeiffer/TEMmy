@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use crate::robocopy::*;
 use crate::rito::*;
 use crate::config::*;
@@ -92,6 +94,8 @@ pub fn rc3_merge_chain(section: String) -> CommandChain {
     let config = config_from_yaml();
 
     let temp_volume_dir = format!(r#"{}\RC3{}"#, config.build_target, section);
+    let overflow_volume_dir = format!(r#"{}\RC3{}"#, config.overflow_build_target, section);
+    let temp_volume_dir = if Path::new(&temp_volume_dir).exists() { temp_volume_dir } else { overflow_volume_dir }; 
 
     CommandChain {
         commands: vec![

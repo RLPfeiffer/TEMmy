@@ -1,4 +1,7 @@
 use std::path::Path;
+use fs2::free_space;
+extern crate fs_extra;
+use fs_extra::dir::get_size;
 
 use crate::robocopy::*;
 use crate::rito::*;
@@ -14,9 +17,6 @@ pub fn rc3_build_chain(section: String, is_rebuild: bool) -> Option<CommandChain
 
     match &section_parts[..] {
         ["Jones", "RC3", section_number] => {
-            let temp_volume_dir = format!(r#"{}\RC3{}"#, config.build_target, section_number);
-            let mosaic_report_folder = format!(r#"{}\MosaicReports\{}"#, config.dropbox_link_dir, section_number);
-            let mosaic_report_dest = format!(r#"{}\MosaicReports\{}\MosaicReport.html"#, config.dropbox_link_dir, section_number);
             let mut commands: Vec<Vec<String>> = vec![];
             let source = if is_rebuild {
                 format!(r#"{}\RC3\{}"#, config.raw_data_dir, section_number)
@@ -29,6 +29,23 @@ pub fn rc3_build_chain(section: String, is_rebuild: bool) -> Option<CommandChain
                 ]);
                 format!(r#"{}\TEMXCopy\{}"#, config.dropbox_dir, section_number)
             };
+            let source_size = get_size(Path::new(&source));
+            let temp_volume_dir = format!(r#"{}\RC3{}"#, config.build_target, section_number);
+            let overflow_volume_dir = format!(r#"{}\RC3{}"#, config.overflow_build_target, section_number);
+            let available_space = free_space(Path::new(&temp_volume_dir));
+            let enough_space = if let Ok(available) = available_space {
+                if let Ok(size) = source_size {
+                    if available > size { true } else { false }
+                } else {
+                    false
+                }
+            } else { false };
+                
+            let temp_volume_dir = if enough_space { temp_volume_dir } else { overflow_volume_dir };
+            
+            let mosaic_report_folder = format!(r#"{}\MosaicReports\{}"#, config.dropbox_link_dir, section_number);
+            let mosaic_report_dest = format!(r#"{}\MosaicReports\{}\MosaicReport.html"#, config.dropbox_link_dir, section_number);
+            
             let mut rest_commands = vec![
                 vec![
                     "RC3Import".to_string(),

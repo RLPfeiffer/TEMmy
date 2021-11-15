@@ -6,6 +6,7 @@ use std::convert::TryInto;
 use threadpool::ThreadPool;
 use std::io::prelude::*;
 use std::io::BufReader;
+
 use duct::cmd;
 
 mod config;
@@ -183,6 +184,7 @@ fn main() {
         [ref bob_path] => {
             loop {
                 let unsafe_result = cmd!(bob_path, "run_unsafe").run();
+                // TODO would this return Ok() in all crash cases??
                 if let Ok(output) = unsafe_result {
                     run_warn(rito(format!("bob the builder crashed: {}. Restarting", match String::from_utf8(output.stderr) {
                         Ok(err_output) => err_output,

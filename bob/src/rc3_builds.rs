@@ -125,6 +125,13 @@ pub fn rc3_merge_chain(section: String) -> CommandChain {
             robocopy_move(
                 format!(r#"{}\TEM"#, temp_volume_dir),
                 r#"W:\Volumes\RC3\TEM\"#.to_string()),
+            vec![
+                "nornir-build".to_string(),
+                r#"W:\Volumes\RC3"#.to_string(), 
+                "CreateVikingXML".to_string(),
+                "-OutputFile".to_string(),
+                "Mosaic".to_string()
+            ],
             // Delete the temp volume
             vec![
                 "rmdir".to_string(),

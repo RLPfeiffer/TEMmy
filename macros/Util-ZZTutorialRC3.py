@@ -23,8 +23,7 @@ MainRC3Steps:list[Step] = [
     TellOperator("Find the center point at 2000x, and click it. Then delete the last navigator item."),
     DoAutomatically(lambda: TakeSnapshotWithNotes("", False)),
     TellOperator("In the menubar, click Navigator -> Montaging and Grids -> Add Circle Polygon. Type 125"),
-    # TODO automatically go to 5000x
-    TellOperator("Go to 5000x."),
+    DoAutomatically(lambda: SetMagIndex(HighMag5000)),
     TellOperator("In the navigator window, click and drag the circle polygon item above the formvar point in the item list."),
     TellOperator("With the circle polygon selected, check the Navigator checkboxes for 'Aquire', 'New File At Item', 'Montaged Images', 'Fit Montage to Polygon'. Make sure 'Go from center out and anchor at 2000x' is active and click ok. Then select the generated idoc file. Choose to overwrite it."),
     # TODO automatically go to the center

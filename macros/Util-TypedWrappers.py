@@ -21,7 +21,6 @@ def TurnOffFilament() -> None:
         sem.SetColumnOrGunValve(0)
         sleep(FilamentCooldownSec)
 
-
 def IsFilamentOn() -> bool:
     value:int = sem.ReportColumnOrGunValve()
     if value == 1:
@@ -52,3 +51,6 @@ def ScreenUp() -> None:
 
 def Autofocus() -> None:
     sem.AutoFocus()
+
+def SetMagIndex(i:int) -> None:
+    sem.SetMagIndex(i)

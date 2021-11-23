@@ -5,8 +5,7 @@ MainCoreSteps:list[Step] = [
     TellOperator("Select each of the corner points and type 'C' on the keyboard to mark them as corner points."),
     DoAutomatically(lambda: TakeSnapshotWithNotes("corners", False))
 ] + SwitchToHighMagSteps + [
-    # TODO automatically go to 5000x
-    TellOperator("Go to 5000x."),
+    DoAutomatically(lambda: SetMagIndex(HighMag5000)),
     FocusStep,
     TellOperator("For each corner point, click 'Go to XY' and take a recording. If the point is not where you expect it to be, zoom out with the scrollbar to see its position relative to the other corners, then zoom back in and use 'Search' to find its real position. Then use 'Move item' to move the point."),
     TellOperator("In the menubar, click Navigator -> Montaging and Grids -> Polygon from Corners. Zoom out to make sure the generated polygon is your intended shape, then delete the corner points."),

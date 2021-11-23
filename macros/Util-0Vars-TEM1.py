@@ -21,3 +21,9 @@ PrecookMontageD = 0
 # Must be a value 0 to 1.0.
 #################################
 MaxPercentChangeOverCapture = 0.20
+
+# Mag indices for the magnifications we use:
+LowMag150 = 6
+HighMag600 = 20
+HighMag2000 = 25
+HighMag5000 = 29

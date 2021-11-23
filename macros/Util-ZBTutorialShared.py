@@ -16,8 +16,8 @@ RodChangeSteps:list[Step] = [
 NewSpecimenSteps:list[Step] = [
     DependingOnYesNo("Is the sample already loaded in the scope?", SkipSteps(RodChangeSteps), RunNextStep)
 ] + RodChangeSteps + [
-    # TODO go to low mag 150x automatically. Only prompt to change aperture
-    TellOperator("Go to low mag 150x with no aperture inserted."),
+    DoAutomatically(lambda: SetMagIndex(LowMag150)),
+    TellOperator("Remove the aperture by turning the dial to the red dot."),
     # TODO on TEM2, coach a camera insertion workaround to avoid penning gauge spike with filament on?
     DoAutomatically(TurnOnFilament),
     DoAutomatically(ScreenDown),
@@ -39,8 +39,8 @@ AcquireAtItemsMessage = "In the menubar, click Navigator -> AcquireAtItems. Choo
 
 SwitchToHighMagSteps:list[Step] = [
     DoAutomatically(lambda: SetBeamBlank(True)),
-    # TODO go to high mag 2000x automatically
-    TellOperator("Go to high mag 2000x with the second aperture inserted."),
+    DoAutomatically(lambda: SetMagIndex(HighMag2000)),
+    TellOperator("Insert the second aperture."),
     DependingOnScope(TellOperator("Spread the beam by several turns (by turning the 'brightness' knob clockwise.)"), DoNothing),
     DoAutomatically(ScreenDown),
     TellOperator("Use the aperture X/Y dials to center the aperture.")

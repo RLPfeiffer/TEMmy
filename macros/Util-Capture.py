@@ -1,6 +1,10 @@
 import sys
 from os.path import join, basename
 
+FormvarIndex = 1
+PolygonIndex = 2
+FocusPointIndex = 3
+
 def Capture(CookFirst:bool) -> None:
     CurrentNotes = CurrentSampleNotes()
     assert CurrentNotes is not None, "No sample notes have been entered!"
@@ -19,9 +23,9 @@ def Capture(CookFirst:bool) -> None:
     print("a montage.")
     print()
     print("The Navigator table should contain the following entries for this macro:")
-    print("    Item1: The 2D region of interest to be captured")
-    print("    Item2: A point surrounded by at least 10um of empty formvar")
+    print("    Item1: A point surrounded by at least 10um of empty formvar")
     print("                  used for the current stability check")
+    print("    Item2: The 2D region of interest to be captured")
     print("    Item3: An optional point to focus upon. The point should contain")     
     print("                  sufficient texture for autofocus to succeed. If not specified")
     print("                  the center of the capture region will be used instead.")
@@ -47,7 +51,7 @@ def Capture(CookFirst:bool) -> None:
         print("Go to high magnification mode before using this macro.")
         return
 
-    print(sem.NavItemFileToOpen(1))
+    print(sem.NavItemFileToOpen(PolygonIndex))
 
     # TODO get Block from the label of the navigator point instead of disturbing CurrentSampleNotes, when multiple captures are implemented
     Block, Notes = CurrentNotes.popitem(last=False)
@@ -59,9 +63,9 @@ def Capture(CookFirst:bool) -> None:
 
     ### FOCUS ###
     if NumNavItems < 3:
-        sem.MoveToNavItem(1)
+        sem.MoveToNavItem(PolygonIndex)
     else:
-        sem.MoveToNavItem(3)
+        sem.MoveToNavItem(FocusPointIndex)
 
     sem.Delay(3)
     sem.Focus()
@@ -96,7 +100,7 @@ def Capture(CookFirst:bool) -> None:
 
     ###  BEAM STABILITY CHECK ####
     # Move the stage to the area we've been told to use
-    sem.MoveToNavItem(2)
+    sem.MoveToNavItem(FormvarIndex)
 
     try:
         WaitForStableFilament()
@@ -105,7 +109,7 @@ def Capture(CookFirst:bool) -> None:
         sem.Call("WaitForStableFilament")
 
     ### Center on montage and capture ###
-    sem.MoveToNavItem(1)
+    sem.MoveToNavItem(PolygonIndex)
 
     try:
         SendStart()

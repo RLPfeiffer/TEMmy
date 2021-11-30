@@ -128,6 +128,7 @@ pub fn core_deploy_chain(volume: String) -> CommandChain {
             vec![
                 "TEMCoreBuildOptimizeTiles".to_string(),
                 deploy_dir.clone(),
+                "0-1000000000".to_string()
             ],
             vec![
                 "add-volume-path".to_string(),

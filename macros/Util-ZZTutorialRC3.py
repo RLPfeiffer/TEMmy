@@ -12,8 +12,7 @@ def OpenLastRC3Snapshot(mag:int) -> Step:
 MainRC3Steps:list[Step] = [
     OpenLastRC3Snapshot(150),
     TellOperator("Locate the center point at 150x, click it, and click 'Add Marker' in the navigator window."),
-    # TODO automatically go to the new marker point (if "current navigator item" refers to the selected item in the UI)
-    TellOperator("Click 'Go to Marker' in the navigator window."),
+    DoAutomatically(lambda: MoveToNavItem(PolygonIndex)),
     DoAutomatically(Record),
     DoAutomatically(lambda: TakeSnapshotWithNotes("", False))
 ] + SwitchToHighMagSteps + [
@@ -24,10 +23,8 @@ MainRC3Steps:list[Step] = [
     DoAutomatically(lambda: TakeSnapshotWithNotes("", False)),
     TellOperator("In the menubar, click Navigator -> Montaging and Grids -> Add Circle Polygon. Type 125"),
     DoAutomatically(lambda: SetMagIndex(HighMag5000)),
-    TellOperator("In the navigator window, click and drag the circle polygon item above the formvar point in the item list."),
     TellOperator("With the circle polygon selected, check the Navigator checkboxes for 'Aquire', 'New File At Item', 'Montaged Images', 'Fit Montage to Polygon'. Make sure 'Go from center out and anchor at 2000x' is active and click ok. Then select the generated idoc file. Choose to overwrite it."),
-    # TODO automatically go to the center
-    TellOperator("In the navigator window, click Go To XY"),
+    DoAutomatically(lambda: MoveToNavItem(PolygonIndex)),
     DoAutomatically(ScreenDown),
     FocusStep,
     DoAutomatically(Autofocus),

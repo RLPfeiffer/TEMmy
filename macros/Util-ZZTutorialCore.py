@@ -9,10 +9,8 @@ MainCoreSteps:list[Step] = [
     FocusStep,
     TellOperator("For each corner point, click 'Go to XY' and take a recording. If the point is not where you expect it to be, zoom out with the scrollbar to see its position relative to the other corners, then zoom back in and use 'Search' to find its real position. Then use 'Move item' to move the point."),
     TellOperator("In the menubar, click Navigator -> Montaging and Grids -> Polygon from Corners. Zoom out to make sure the generated polygon is your intended shape, then delete the corner points."),
-    TellOperator("In the navigator window, click and drag the polygon item above the formvar point in the item list."),
     TellOperator("With the polygon selected, check the Navigator checkboxes for 'Aquire', 'New File At Item', 'Montaged Images', 'Fit Montage to Polygon'. Make sure 'Go from center out and anchor at 2000x' is NOT active and click ok. Then select the generated idoc file. Choose to overwrite it."),
-    # TODO automatically go to the center
-    TellOperator("In the navigator window, click Go To XY"),
+    DoAutomatically(lambda: MoveToNavItem(PolygonIndex)),
     DoAutomatically(ScreenDown),
     FocusStep,
     DoAutomatically(Autofocus),

@@ -89,7 +89,10 @@ pub fn rc3_build_chain(section: String, is_rebuild: bool) -> Option<CommandChain
                 commands.push(rito(format!("{} copied to RawData", section_number)));
             }
 
-            commands.push(rito(format!("{0} built automatically. Run `Merge: {0}` if it looks good. Full MosaicReport: {1} ", section_number, mosaic_report_dest)));
+            commands.push(rito(format!("{0} built automatically. Run `Merge: {0}` or send `merge {0}` preceded by @TEMBot if it looks good. Full MosaicReport: {1} ", section_number, mosaic_report_dest)));
+            commands.push(rito_get(format!("@TEMBot merge {0}", section_number)));
+            commands.push(rito(format!("Merging {} via Slack command", section_number)));
+            commands.append(&mut merge_commands(section_number.to_string()));
 
             Some(CommandChain {
                 commands: commands,
@@ -107,39 +110,43 @@ pub fn rc3_build_chain(section: String, is_rebuild: bool) -> Option<CommandChain
     }
 }
 
-pub fn rc3_merge_chain(section: String) -> CommandChain {
+fn merge_commands(section:String) -> Vec<Vec<String>> {
     let config = config_from_yaml();
 
     let temp_volume_dir = format!(r#"{}\RC3{}"#, config.build_target, section);
     let overflow_volume_dir = format!(r#"{}\RC3{}"#, config.overflow_build_target, section);
     let temp_volume_dir = if Path::new(&temp_volume_dir).exists() { temp_volume_dir } else { overflow_volume_dir }; 
 
-    CommandChain {
-        commands: vec![
-            vec![    
-                "copy-section-links".to_string(),
-                r#"W:\Volumes\RC3\TEM\VolumeData.xml"#.to_string(), // TODO this is RC3 hard-coded
-                format!(r#"{}\TEM\VolumeData.xml"#, temp_volume_dir),
-                "bob-output".to_string()
-            ],
-            robocopy_move(
-                format!(r#"{}\TEM"#, temp_volume_dir),
-                r#"W:\Volumes\RC3\TEM\"#.to_string()),
-            vec![
-                "nornir-build".to_string(),
-                r#"W:\Volumes\RC3"#.to_string(), 
-                "CreateVikingXML".to_string(),
-                "-OutputFile".to_string(),
-                "Mosaic".to_string()
-            ],
-            // Delete the temp volume
-            vec![
-                "rmdir".to_string(),
-                "/S".to_string(),
-                "/Q".to_string(),
-                temp_volume_dir
-            ],
+    vec![
+        vec![    
+            "copy-section-links".to_string(),
+            r#"W:\Volumes\RC3\TEM\VolumeData.xml"#.to_string(), // TODO this is RC3 hard-coded
+            format!(r#"{}\TEM\VolumeData.xml"#, temp_volume_dir),
+            "bob-output".to_string()
         ],
+        robocopy_move(
+            format!(r#"{}\TEM"#, temp_volume_dir),
+            r#"W:\Volumes\RC3\TEM\"#.to_string()),
+        vec![
+            "nornir-build".to_string(),
+            r#"W:\Volumes\RC3"#.to_string(), 
+            "CreateVikingXML".to_string(),
+            "-OutputFile".to_string(),
+            "Mosaic".to_string()
+        ],
+        // Delete the temp volume
+        vec![
+            "rmdir".to_string(),
+            "/S".to_string(),
+            "/Q".to_string(),
+            temp_volume_dir
+        ],
+    ]
+}
+
+pub fn rc3_merge_chain(section: String) -> CommandChain {
+    CommandChain {
+        commands: merge_commands(section.clone()),
         label: format!("automatic merge for {} into RC3", section)
     }
 }

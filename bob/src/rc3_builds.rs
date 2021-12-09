@@ -86,7 +86,9 @@ pub fn rc3_build_chain(section: String, is_rebuild: bool) -> Option<CommandChain
                 commands.push(robocopy_move(
                         data_path,
                         rawdata_path));
-                commands.push(rito(format!("{} copied to RawData", section_number)));
+                commands.push(rito_text_file(
+                    format!(r#"{}\TEMXCopy\rawdata.txt"#, config.dropbox_dir),
+                    format!("{} copied to RawData", section)));
             }
 
             commands.push(rito(format!("{0} built automatically. Run `Merge: {0}` or send `merge {0}` preceded by @TEMBot if it looks good. Full MosaicReport: {1} ", section_number, mosaic_report_dest)));

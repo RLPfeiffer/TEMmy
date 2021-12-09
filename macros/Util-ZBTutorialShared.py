@@ -10,12 +10,12 @@ RodChangeSteps:list[Step] = [
     TellOperator("Keep your hand on the rod, and flip the switch from AIR to PUMP."),
     TellOperator("A yellow light should be on. Wait for the specimen chamber to pump down and turn Green in TEM Center."),
     TellOperator("Twist the rod handle clockwise and allow it to be pulled inward. Twist clockwise again and the rod should go in all the way."),
-    DependingOnScope(DoNothing, TellOperator("Wait for the Penning Gauge to turn on (Green) and stabilize below 30.")),
 ]
 
 NewSpecimenSteps:list[Step] = [
     DependingOnYesNo("Is the sample already loaded in the scope?", SkipSteps(RodChangeSteps), RunNextStep)
 ] + RodChangeSteps + [
+    DependingOnScope(DoNothing, TellOperator("Wait for the Penning Gauge to turn on (Green) and stabilize below 30.")),
     DoAutomatically(lambda: SetMagIndex(LowMag150)),
     TellOperator("Remove the aperture by turning the dial to the red dot."),
     # TODO on TEM2, coach a camera insertion workaround to avoid penning gauge spike with filament on?

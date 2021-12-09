@@ -36,7 +36,7 @@ def TakeSnapshotWithNotes(Label:Optional[str] = None, Slack:Optional[bool] = Non
          choices.append(key)
       while len(choices) < 3:
          choices.append("")
-      Sample = ThreeChoiceBox("Which sample are you snapshotting?", choices[0], choices[1], choices[2])
+      Sample = ManyChoiceBox("Which sample are you snapshotting?", choices)
    else:
       for key, _ in CurrentNotes.items():
          Sample = key

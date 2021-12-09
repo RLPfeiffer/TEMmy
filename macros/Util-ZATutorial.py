@@ -8,9 +8,20 @@ Step = Callable[[], None]
 
 # Types of protocol step for Tutorial.py:
 
-# Display an instruction that must be carried out manually:
+# Display an instruction that must be carried out
 def TellOperator(message:str) -> Step:
-    return lambda: OkBox(message)
+    def step() -> None:
+        OkBox(message)
+        RunNextStep()
+    return step
+
+# Display an instruction that must be carried out manually on the TEM controls:
+def TellOperatorTEM(message:str) -> Step:
+    return TellOperator(f"Do this using the TEM controls, then click OK when it's done: {message}")
+
+# Display an instruction that the operator must do in SerialEM, then click "Next Step"
+def TellOperatorSEM(message:str) -> Step:    
+    return lambda: OkBox(f"Click OK, do this in SerialEM, then click Next Step: {message}")
 
 # Do something through SerialEM Scripting and keep going when it's finished:
 def DoAutomatically(func:Callable[[], None]) -> Step:

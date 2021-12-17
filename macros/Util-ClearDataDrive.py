@@ -12,12 +12,9 @@ def ClearDataDrive() -> None:
         if len(line.strip()) != 0:
             section = line.split(" ")[0]
             path = join(DataPath, section).strip()
-            print (path)
             if exists(path):
-                print('exists')
                 sections_to_delete.append(path)
             else:
-                print('does not exist')
                 new_lines.append(section)
 
     if YesNoBox(f"Delete {len(sections_to_delete)} sections which have been copied to RawData?"):

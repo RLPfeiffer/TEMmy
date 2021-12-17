@@ -27,11 +27,12 @@ pub fn core_build_chain(section: String, is_rebuild: bool) -> Option<CommandChai
             }
 
             let mut commands = vec![
-                // Run TEMCoreBuildFast
+                // Run TEMCoreBuildFastStage
                 vec![
-                    "TEMCoreBuildFast".to_string(),
+                    "TEMCoreBuildFastStage".to_string(),
                     build_target.clone(),
                     volume_dir.clone(),
+                    "0-100000".to_string(),
                 ],
 
                 // Copy the automatic build's mosaicreport files to DROPBOX and send a link.

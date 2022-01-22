@@ -1,3 +1,4 @@
+from os import linesep
 from os.path import join, exists
 from shutil import rmtree
 
@@ -23,4 +24,4 @@ def ClearDataDrive() -> None:
         new_lines.extend(sections_to_delete)
     
     with open(join(CopyPath, "rawdata.txt"), "w") as f:
-        f.writelines(new_lines)
+        f.write(linesep.join(new_lines))

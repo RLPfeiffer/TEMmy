@@ -1,3 +1,5 @@
+import os.path
+import os
 from os.path import join
 from os import makedirs
 from typing import Tuple
@@ -143,3 +145,7 @@ def WriteNotesFiles(Block:str, Notes:SampleNotes) -> None:
         # Set the working directory there, and use it in the next file prompt
         SetWorkingDir(BlockFolder)
         sem.OpenChooserInCurrentDir()
+    
+def ClearSampleNotes() -> None:
+    if os.path.exists(SampleNotesFile):
+        os.remove(SampleNotesFile)

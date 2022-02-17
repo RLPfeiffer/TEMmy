@@ -8,7 +8,9 @@ def CopyDir(CopySource:str, CopyTarget:str, TargetDirName:str) -> bool:
    if CheckSpaceForCopyDir(CopySource, CopyTarget, TargetDirName):
       return CopyDirWithoutCheckingSpace(CopySource, CopyTarget, TargetDirName)
    else:
-      SendMessage(f"Not enough space to auto-copy {TargetDirName} from {ScopeName} {CopySource} to {CopyTarget}")
+      message = f"Not enough space to auto-copy {TargetDirName} from {ScopeName} {CopySource} to {CopyTarget}"
+      SendMessage(message)
+      print(message)
       return False
 
 # INTERNAL, called by CheckSpaceForCopyDir

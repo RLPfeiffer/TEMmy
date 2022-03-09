@@ -1,10 +1,10 @@
 from flask import Flask
+from . import rc3
 app = Flask(__name__)
 
 @app.route('/')
 def hello_geek():
-    return '<h1>Hello from Flask & Docker</h2>'
-
+    return rc3.checkFrom(1, 2000)
 
 if __name__ == "__main__":
     app.run(debug=True)

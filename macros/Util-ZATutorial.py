@@ -11,13 +11,13 @@ Step = Callable[[], None]
 # Display an instruction that must be carried out
 def TellOperator(message:str) -> Step:
     def step() -> None:
-        OkBox(message)
+        Pause(message)
         RunNextStep()
     return step
 
 # Display an instruction that must be carried out manually on the TEM controls:
 def TellOperatorTEM(message:str) -> Step:
-    return TellOperator(f"Do this using the TEM controls, then click OK when it's done: {message}")
+    return TellOperator(f"Do the following using the TEM controls, then click Yes when it's done. If you need to pause and make a manual correction first, click No: {message}")
 
 # Display an instruction that the operator must do in SerialEM, then click "Next Step"
 def TellOperatorSEM(message:str) -> Step:    

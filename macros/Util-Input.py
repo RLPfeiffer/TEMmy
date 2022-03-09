@@ -26,3 +26,9 @@ def EnterFloat(prompt:str, default:float=0, decimal_places:int = 2, minvalue:Opt
 
 def EnterInt(prompt:str, default:int=0, minvalue:Optional[int]=None, maxvalue:Optional[int]=None) -> int:
     return int(EnterFloat(prompt, default, -1, minvalue, maxvalue))
+
+def Pause(prompt:Optional[str]) -> None:
+    '''The None return type is misleading--if the operator chooses not to continue the script, it will halt an entire script and (as far as I know) cannot be prevented with a try-catch'''
+    if prompt is None:
+        prompt = ""
+    sem.Pause(prompt)

@@ -112,12 +112,50 @@ pub fn rc3_build_chain(section: String, is_rebuild: bool) -> Option<CommandChain
     }
 }
 
-fn merge_commands(section:String) -> Vec<Vec<String>> {
+pub fn rc3_fixmosaic(section:String) -> CommandChain {
+    let config = config_from_yaml();
+
+    let temp_volume_dir = find_temp_volume(section.clone());
+
+    CommandChain {
+        commands:
+            vec![
+                vec![
+                    "del".to_string(),
+                    format!(r#"{}\TEM\{}\TEM\Translated_Prune_Max0.5.mosaic"#, temp_volume_dir.clone(), section.clone())
+                ],
+                vec![
+                    "RC3FixMosaic".to_string(),
+                    temp_volume_dir.clone(),
+                    section.clone()
+                ],
+                rito(format!("RC3FixMosaic finished for {}", section.clone())),
+                vec![
+                    "send-first-mosaic-overview".to_string(),
+                    temp_volume_dir.clone()
+                ],
+            ],
+        label:
+            format!("automatic fixmosaic for RC3 {}", section)
+    }
+}
+
+fn find_temp_volume(section:String) -> String {
     let config = config_from_yaml();
 
     let temp_volume_dir = format!(r#"{}\RC3{}"#, config.build_target, section);
     let overflow_volume_dir = format!(r#"{}\RC3{}"#, config.overflow_build_target, section);
-    let temp_volume_dir = if Path::new(&temp_volume_dir).exists() { temp_volume_dir } else { overflow_volume_dir }; 
+    if Path::new(&temp_volume_dir).exists() {
+        temp_volume_dir
+    } else {
+        overflow_volume_dir
+    }
+}
+
+fn merge_commands(section:String) -> Vec<Vec<String>> {
+    let config = config_from_yaml();
+
+    let temp_volume_dir = find_temp_volume(section.clone());
 
     vec![
         vec![    

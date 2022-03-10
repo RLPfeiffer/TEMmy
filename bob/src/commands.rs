@@ -46,6 +46,12 @@ pub fn command_map() -> CommandMap {
             _ => None
         }
     });
+    commands.insert("RC3FixMosaic".to_string(), |args| {
+        match args.as_slice() {
+            [section] => Some(Queue(rc3_fixmosaic(section.clone()))),
+            _ => None
+        }
+    });
     // Merge automatically-built RC3 sections with the full volume
     // TODO not all merges will be RC3 forever
     commands.insert("Merge".to_string(), |args| {

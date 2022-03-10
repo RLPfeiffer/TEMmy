@@ -181,6 +181,12 @@ fn merge_commands(section:String) -> Vec<Vec<String>> {
             "/Q".to_string(),
             temp_volume_dir
         ],
+        vec![
+            "RC3OptimizeTiles".to_string(),
+            r#"W:\Volumes\RC3"#.to_string(),
+            section.clone()
+        ],
+
     ]
 }
 

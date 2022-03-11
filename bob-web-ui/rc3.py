@@ -3,12 +3,18 @@
 from os import listdir
 from os.path import exists
 
+def tr(*td_text):
+    return f'<tr>{"".join(map(td,td_text))}</tr>'
+
+def td(text):
+    return f'<td>{text}</td>'
+
 def checkFrom(lowest_section, highest_section):
     temxcopy = listdir('Y:/DROPBOX/temxcopy')
     rawdata = listdir('V:/rawdata/rc3')
     volume = listdir('W:/volumes/rc3/tem')
 
-    output = '<table><tr><td>sec#</td><td>in volume</td><td>in rawdata</td><td>in temcopy</td><td>mosaicreport</td></tr>'
+    output = f'<table>{tr("sec#", "in volume", "in rawdata", "in temxcopy", "mosaicreport")}'
 
     for section in range(lowest_section, highest_section+1):
         section = str(section).rjust(4, '0')
@@ -19,7 +25,7 @@ def checkFrom(lowest_section, highest_section):
             pass
         else:
             mosaic_report = find_mosaic_report(section)
-            output += f'<tr><td>{section}</td><td>{in_volume}</td><td>{in_rawdata}</td><td>{in_temxcopy}</td><td><a target="_blank" href="/file/{mosaic_report}">{mosaic_report}</a></td></tr>'
+            output += tr(section, in_volume, in_rawdata, in_temxcopy, f'<a target="_blank" href="/file/{mosaic_report}">{mosaic_report}</a>')
     output += '</table>'
     return output
 

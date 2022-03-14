@@ -215,12 +215,14 @@ fn unsafe_main() {
     spawn_command_thread(command_receiver, chain_sender);
     spawn_worker_threadpool(chain_receiver);    
 
+    // Two threads simply monitor the notification text files from the TEMs,
+    // and will send lines from them to the command processor thread
     if config.process_tem_output {
-        // Two threads simply monitor the notification text files from the TEMs,
-        // and will send lines from them to the command processor thread
         spawn_tem_message_reader_thread("TEM1", command_sender.clone());
         spawn_tem_message_reader_thread("TEM2", command_sender.clone());
     }
+    // This thread monitors an input file that is managed by the Bob Web UI. It is not technicaly a tem message reader but the behavior is the same
+    spawn_tem_message_reader_thread("BobUI", command_sender.clone());
 
     // The CLI thread listens for manually entered CommandChains via queues or raw commands
     if spawn_cli_thread(command_sender.clone()).join().is_err() {

@@ -8,6 +8,14 @@ app = Flask(__name__)
 def rc3_manager(start, end):
     return rc3.checkFrom(start, end)
 
+@app.route('/rc3fixmosaic/<section>')
+def rc3_fixmosaic(section):
+    return rc3.fixmosaic(section)
+
+@app.route('/rc3merge/<section>')
+def rc3_merge(section):
+    return rc3.merge(section)
+
 @app.route('/file/<path:p>')
 def file(p):
     with open(p, 'r') as f:

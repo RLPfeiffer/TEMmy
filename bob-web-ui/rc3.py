@@ -9,6 +9,13 @@ def tr(*td_text):
 def td(text):
     return f'<td>{text}</td>'
 
+def blank_link(href, text=None):
+    if href is None or len(href) == 0:
+        return ''
+    if text is None:
+        text = href
+    return f'<a target="_blank" href="{href}">{text}</a>'
+
 def checkFrom(lowest_section, highest_section):
     temxcopy = listdir('Y:/DROPBOX/temxcopy')
     rawdata = listdir('V:/rawdata/rc3')
@@ -25,7 +32,15 @@ def checkFrom(lowest_section, highest_section):
             pass
         else:
             mosaic_report = find_mosaic_report(section)
-            output += tr(section, in_volume, in_rawdata, in_temxcopy, f'<a target="_blank" href="/file/{mosaic_report}">{mosaic_report}</a>')
+            output += tr(
+                section,
+                in_volume,
+                in_rawdata,
+                in_temxcopy,
+                blank_link(f'/file/{mosaic_report}', mosaic_report),
+                blank_link(f'/rc3fixmosaic/{section}', 'fix mosaic'),
+                blank_link(f'/rc3merge/{section}', 'Merge'))
+
     output += '</table>'
     return output
 
@@ -36,3 +51,16 @@ def find_mosaic_report(section_str:str):
             return possible_path
 
     return ''
+
+def tell_bob(command):
+    print(command)
+    with open('Y:/DROPBOX/Notification/BobUI/message.txt', 'a') as f:
+        f.write(f'\n{command}\n')
+
+def fixmosaic(section):
+    tell_bob(f'RC3FixMosaic: {section}')
+    return f'fixing mosaic for {section}. monitor the #tem-bot slack channel for results. you can close this window'
+
+def merge(section):
+    tell_bob(f'Merge: {section}')
+    return f'merging {section} into rc3. monitor the #tem-bot slack channel for completion. you can close this window'

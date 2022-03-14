@@ -44,9 +44,13 @@ fn spawn_tem_message_reader_thread(tem_name: &'static str, sender: Sender<String
     let config = config_from_yaml();
     thread::spawn(move || {
         if run_on_interval_and_filter_output(
-            vec![format!(r#"type {0}\{1}\message.txt && break>{0}\{1}\message.txt"#, config.notification_dir, tem_name)],
+            vec![
+                format!(r#"type {0}\{1}\message.txt && break>{0}\{1}\message.txt"#, config.notification_dir, tem_name)
+            ],
             |output| {
-                sender.send(format!("{}: {}", tem_name, output))?;
+                if output.trim().len() > 0 {
+                    sender.send(format!("{}: {}", tem_name, output))?;
+                }
                 Ok(())
             }, 
             60).is_err() {

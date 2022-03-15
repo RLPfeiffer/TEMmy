@@ -6,8 +6,14 @@ from os.path import exists
 def tr(*td_text):
     return f'<tr>{"".join(map(td,td_text))}</tr>'
 
+def thr(*th_text):
+    return f'<tr>{"".join(map(th,th_text))}</tr>'
+
 def td(text):
     return f'<td>{text}</td>'
+    
+def th(text):
+    return f'<th style="position: sticky; top: 0; background: white;">{text}</th>'
 
 def blank_link(href, text=None):
     if href is None or len(href) == 0:
@@ -21,7 +27,7 @@ def checkFrom(lowest_section, highest_section):
     rawdata = listdir('V:/rawdata/rc3')
     volume = listdir('W:/volumes/rc3/tem')
 
-    output = f'<table>{tr("sec#", "in volume", "in rawdata", "in temxcopy", "mosaicreport")}'
+    output = f'<!DOCTYPE html><div style="max-height: 100vh; overflow: auto;"><table border="1" style="position: relative; text-align: left;">{thr("sec#", "in volume", "in rawdata", "in temxcopy", "mosaicreport")}'
 
     for section in range(lowest_section, highest_section+1):
         section = str(section).rjust(4, '0')
@@ -38,10 +44,12 @@ def checkFrom(lowest_section, highest_section):
                 in_rawdata,
                 in_temxcopy,
                 blank_link(f'/file/{mosaic_report}', mosaic_report),
+                blank_link(f'/rc3build/{section}', 'build'),
+                blank_link(f'/rc3rebuild/{section}', 'rebuild'),
                 blank_link(f'/rc3fixmosaic/{section}', 'fix mosaic'),
                 blank_link(f'/rc3merge/{section}', 'Merge'))
 
-    output += '</table>'
+    output += '</table></div>'
     return output
 
 def find_mosaic_report(section_str:str):

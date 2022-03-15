@@ -44,10 +44,18 @@ SwitchToHighMagSteps:list[Step] = [
     TellOperatorTEM("Insert the second aperture."),
     DependingOnScope(TellOperatorTEM("Spread the beam by several turns (by turning the 'brightness' knob clockwise.)"), DoNothing),
     DoAutomatically(ScreenDown),
-    TellOperatorTEM("Use the aperture X/Y dials to center the aperture.")
+    TellOperatorTEM("Use the X/Y dials on the upper left side of the microscope column to center the aperture.")
 ]
 
-FocusStep:Step = TellOperatorTEM("Tighten the beam, center it, and use image wobble and the focus knob to adjust focus. Make sure the beam is spread around 100 Current Density.")
+FastFocusStep:Step = TellOperatorTEM("Tighten the beam, center it, and use image wobble and the focus knob to adjust focus. Make sure the beam is spread around 100 Current Density.")
+
+DetailedFocusSteps:list[Step] = [
+    TellOperatorTEM("Turn the brightness knob counter-clockwise to tighten the beam, then center it with the X/Y knobs on the control panel."),
+    DependingOnScope(TellOperatorTEM("Turn on Image Wobble X and Image Wobble Y using the control panel."), TellOperatorTEM("Turn on Image Wobble using the control panel.")),
+    TellOperatorTEM("Put the mirror in using the lever to the right of the microscope column."),
+    TellOperatorTEM("Look through the binoculars and use the focus knob to make the 2 shaking images line up and stay still."),
+    TellOperatorTEM("Turn the brightness knob clockwise to spread the beam until Current Density is close to 100.")
+]
 
 ChooseMontageMacro:Step = DependingOnYesNo("Are there any holes in the section or formvar?", TellOperatorSEM(AcquireAtItemsMessage.replace("*", "CalibrateAndRecapturePy")), TellOperatorSEM(AcquireAtItemsMessage.replace("*", "HighMagCookPy")))
 UseRecaptureMacro:Step = TellOperatorSEM(AcquireAtItemsMessage.replace("*", "CalibrateAndRecapturePy"))

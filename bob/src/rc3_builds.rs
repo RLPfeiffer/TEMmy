@@ -91,10 +91,7 @@ pub fn rc3_build_chain(section: String, is_rebuild: bool) -> Option<CommandChain
                     format!("{} copied to RawData", section)));
             }
 
-            commands.push(rito(format!("{0} built automatically. Run `Merge: {0}` or send `merge {0}` preceded by @TEMBot if it looks good. Full MosaicReport: {1} ", section_number, mosaic_report_dest)));
-            commands.push(rito_get(format!("@TEMBot merge {0}", section_number)));
-            commands.push(rito(format!("Merging {} via Slack command", section_number)));
-            commands.append(&mut merge_commands(section_number.to_string()));
+            commands.push(rito(format!("{0} built automatically. Run `Merge: {0}` or click Merge on the web control panel if it looks good. Full MosaicReport: {1} ", section_number, mosaic_report_dest)));
 
             Some(CommandChain {
                 commands: commands,

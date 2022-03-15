@@ -65,6 +65,14 @@ def tell_bob(command):
     with open('Y:/DROPBOX/Notification/BobUI/message.txt', 'a') as f:
         f.write(f'\n{command}\n')
 
+def build(section):
+    tell_bob(f'Build: Jones_RC3_{section}')
+    return f'building {section}. monitor the #tem-bot slack channel for results. you can close this window'
+
+def rebuild(section):
+    tell_bob(f'Rebuild: Jones_RC3_{section}')
+    return f'rebuilding {section}. monitor the #tem-bot slack channel for results. you can close this window'
+
 def fixmosaic(section):
     tell_bob(f'RC3FixMosaic: {section}')
     return f'fixing mosaic for {section}. monitor the #tem-bot slack channel for results. you can close this window'

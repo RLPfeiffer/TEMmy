@@ -22,6 +22,12 @@ def blank_link(href, text=None):
         text = href
     return f'<a target="_blank" href="{href}">{text}</a>'
 
+def checkMark(status):
+    return "✔" if status else ""
+
+def conditional(text, cond):
+    return text if cond is not None and cond == True or len(cond) > 0 else ""
+
 def checkFrom(lowest_section, highest_section):
     temxcopy = listdir('Y:/DROPBOX/temxcopy')
     rawdata = listdir('V:/rawdata/rc3')
@@ -31,9 +37,9 @@ def checkFrom(lowest_section, highest_section):
 
     for section in range(lowest_section, highest_section+1):
         section = str(section).rjust(4, '0')
-        in_volume = section in volume
-        in_rawdata = section in rawdata
-        in_temxcopy = section in temxcopy or f'Jones_RC3_{section}' in temxcopy
+        in_volume = checkMark(section in volume)
+        in_rawdata = checkMark(section in rawdata)
+        in_temxcopy = checkMark(section in temxcopy or f'Jones_RC3_{section}' in temxcopy)
         if in_volume and in_rawdata:
             pass
         else:
@@ -44,10 +50,10 @@ def checkFrom(lowest_section, highest_section):
                 in_rawdata,
                 in_temxcopy,
                 blank_link(f'/file/{mosaic_report}', mosaic_report),
-                blank_link(f'/rc3build/{section}', 'build'),
-                blank_link(f'/rc3rebuild/{section}', 'rebuild'),
-                blank_link(f'/rc3fixmosaic/{section}', 'fix mosaic'),
-                blank_link(f'/rc3merge/{section}', 'Merge'))
+                blank_link(f'/rc3build/{section}', conditional('build', in_temxcopy)),
+                blank_link(f'/rc3rebuild/{section}', conditional('rebuild', in_rawdata)),
+                blank_link(f'/rc3fixmosaic/{section}', conditional('fix mosaic', mosaic_report)),
+                blank_link(f'/rc3merge/{section}', conditional('Merge', mosaic_report)))
 
     output += '</table></div>'
     return output

@@ -21,12 +21,15 @@ pub fn rc3_build_chain(section: String, is_rebuild: bool) -> Option<CommandChain
             let source = if is_rebuild {
                 format!(r#"{}\RC3\{}"#, config.raw_data_dir, section_number)
             } else {
-                // Rename the folder to just the section number so RC3Import knows it contains only 1 section:
-                commands.push(vec![
-                    "rename".to_string(),
-                    format!(r#"{}\TEMXCopy\{}"#, config.dropbox_dir, section),
-                    section_number.to_string(),
-                ]);
+                // If necessary, rename the folder to just the section number so RC3Import knows it contains only 1 section:
+                let full_section_dir = format!(r#"{}\TEMXCopy\{}"#, config.dropbox_dir, section);
+                if Path::new(&full_section_dir).exists() {
+                    commands.push(vec![
+                        "rename".to_string(),
+                        full_section_dir.to_string(),
+                        section_number.to_string(),
+                    ]);
+                }
                 format!(r#"{}\TEMXCopy\{}"#, config.dropbox_dir, section_number)
             };
             let source_size = get_size(Path::new(&source));

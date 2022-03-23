@@ -14,14 +14,10 @@ def MainCoreSteps(detailed:bool) ->list[Step]:
         TellOperatorSEM("With the polygon selected, check the Navigator checkboxes for 'Aquire', 'New File At Item', 'Montaged Images', 'Fit Montage to Polygon'. Make sure 'Go from center out and anchor at 2000x' is NOT active and click ok. Then select the generated idoc file. Choose to overwrite it."),
         DoAutomatically(lambda: MoveToNavItem(PolygonIndex)),
         DoAutomatically(ScreenDown)
-    ] + FocusSteps + [
-        DoAutomatically(Autofocus),
-        DoAutomatically(Record),
-        TellOperatorSEM("If the focus looks good, click 'Next Step'. If not, redo the focus, click 'Autofocus', then 'Record.' Keep doing this until it looks good."),
-    ]
+    ] + FocusSteps + FinalSteps(detailed)
 
-Steps["Core"] = NewSpecimenSteps + LowMagCookSteps + MainCoreSteps(True) + [ ChooseMontageMacro ] + AfterMontageSteps
-Steps["Core Recapture"] = NewSpecimenSteps + MainCoreSteps(True) + [ UseRecaptureMacro ] + AfterMontageSteps
+Steps["Core"] = NewSpecimenSteps + LowMagCookSteps + MainCoreSteps(True)
+Steps["Core Recapture"] = NewSpecimenSteps + MainCoreSteps(True)
 
-Steps["Core Fast"] = NewSpecimenSteps + LowMagCookSteps + MainCoreSteps(False) + [ ChooseMontageMacro ] + AfterMontageSteps
-Steps["Core RecapFast"] = NewSpecimenSteps + MainCoreSteps(False) + [ UseRecaptureMacro ] + AfterMontageSteps
+Steps["Core Fast"] = NewSpecimenSteps + LowMagCookSteps + MainCoreSteps(False)
+Steps["Core RecapFast"] = NewSpecimenSteps + MainCoreSteps(False)

@@ -59,3 +59,13 @@ DetailedFocusSteps:list[Step] = [
 
 ChooseMontageMacro:Step = DependingOnYesNo("Are there any holes in the section or formvar?", TellOperatorSEM(AcquireAtItemsMessage.replace("*", "CalibrateAndRecapturePy")), TellOperatorSEM(AcquireAtItemsMessage.replace("*", "HighMagCookPy")))
 UseRecaptureMacro:Step = TellOperatorSEM(AcquireAtItemsMessage.replace("*", "CalibrateAndRecapturePy"))
+
+def FinalSteps(detailed:bool) -> list[Step]:
+    return [
+        DoAutomatically(Autofocus),
+        DoAutomatically(Record),
+    ] + ([
+        TellOperatorSEM("If the focus looks good, click 'Next Step'. If not, redo the focus, click 'Autofocus', then 'Record.' Keep doing this until it looks good."),
+        TellOperatorSEM("If the green number representing the circle's center has shifted from where you put it, use 'Move item' to fix it, then click 'Stop Moving.'"),
+        ChooseMontageMacro,
+    ] + AfterMontageSteps if detailed else [])

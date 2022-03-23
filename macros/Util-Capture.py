@@ -119,6 +119,8 @@ def Capture(CookFirst:bool) -> None:
 
     try:
         sem.Montage()
+        # Neutralize the stage before a rod change
+        MoveStageTo(0, 0)
     except:
         Message = f"Montage failed with error {sys.exc_info()[0]} on {ScopeName}"
         try:

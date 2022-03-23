@@ -55,8 +55,8 @@ def Autofocus() -> None:
 def SetMagIndex(i:int) -> None:
     sem.SetMagIndex(i)
 
-def MoveToNavItem(i:Optional[int]) -> None:
-    if i != None:
+def MoveToNavItem(i:Optional[int] = None) -> None:
+    if i is not None:
         sem.MoveToNavItem(i)
     else:
         sem.MoveToNavItem()

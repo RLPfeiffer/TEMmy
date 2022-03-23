@@ -24,7 +24,7 @@ pub fn config_from_yaml() -> Config {
     };
     match serde_yaml::from_str(&yaml_str) {
         Ok(yaml) => yaml,
-        Err(err) => panic!("bob-config.yml failed to parse: {}", err)
+        Err(err) => panic!("bob-config.yaml failed to parse: {}", err)
     }
     // TODO have a list of volumes in the yaml file and let them define
     // import/build/merge/align script chains

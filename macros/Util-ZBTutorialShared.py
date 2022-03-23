@@ -6,6 +6,8 @@ RodChangeSteps:list[Step] = [
     TellOperatorTEM("One more time, pull the rod handle straight out until it stops, then twist it counter-clockwise until it stops. Then flip the PUMP switch to AIR."),
     TellOperator("After flipping the PUMP switch to AIR, V16 and V18 in TEM Center will turn green. Wait for them to turn back to gray."),
     TellOperatorTEM("Pull the rod all the way out, and go put the next grid in it."),
+    # Neutralize the stage before putting a new rod in it, so the range of stage movement doesn't get clipped on the new specimen
+    DoAutomatically(lambda: MoveStageTo(0, 0)),
     TellOperatorTEM("Line up the knob on the rod with the opening in the specimen chamber. Push the rod in until it stops."),
     TellOperatorTEM("Keep your hand on the rod, and flip the switch from AIR to PUMP."),
     TellOperator("A yellow light should be on. Wait for the specimen chamber to pump down and turn Green in TEM Center."),

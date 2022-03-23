@@ -60,3 +60,9 @@ def MoveToNavItem(i:Optional[int] = None) -> None:
         sem.MoveToNavItem(i)
     else:
         sem.MoveToNavItem()
+
+def MoveStageTo(x:float, y:float, z:Optional[float] = None) -> None:
+    if z is None:
+        sem.MoveStageTo(x, y)
+    else:
+        sem.MoveStageTo(x, y, z)

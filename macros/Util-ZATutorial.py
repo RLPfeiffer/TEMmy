@@ -17,11 +17,11 @@ def TellOperator(message:str) -> Step:
 
 # Display an instruction that must be carried out manually on the TEM controls:
 def TellOperatorTEM(message:str) -> Step:
-    return TellOperator(f"Do the following using the TEM controls, then click Yes when it's done. If you need to pause and make a manual correction first, click No: {message}")
+    return TellOperator(f"Do the following using the TEM controls, then click Yes when it's done. If you need to pause and make a manual correction first, click No: {newline}{newline} {message}")
 
 # Display an instruction that the operator must do in SerialEM, then click "Next Step"
 def TellOperatorSEM(message:str) -> Step:    
-    return lambda: OkBox(f"Click OK, do this in SerialEM, then click Next Step: {message}")
+    return lambda: OkBox(f"Click OK, do this in SerialEM, then click Next Step: {newline}{newline} {message}")
 
 # Do something through SerialEM Scripting and keep going when it's finished:
 def DoAutomatically(func:Callable[[], None]) -> Step:

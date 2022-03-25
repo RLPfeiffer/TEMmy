@@ -38,22 +38,30 @@ AfterMontageSteps:list[Step] = [
 
 AcquireAtItemsMessage = "In the menubar, click Navigator -> AcquireAtItems. Choose '*'. Leave FilamentManager selected, and click OK. Then move the mirror out of the way."
 
-SwitchToHighMagSteps:list[Step] = [
-    DoAutomatically(lambda: SetBeamBlank(True)),
-    DoAutomatically(lambda: SetMagIndex(HighMag2000)),
-    TellOperatorTEM("Insert the second aperture."),
-    DependingOnScope(TellOperatorTEM("Spread the beam by several turns (by turning the 'brightness' knob clockwise.)"), DoNothing),
-    DoAutomatically(ScreenDown),
-    TellOperatorTEM("Use the X/Y dials on the upper left side of the microscope column to center the aperture.")
-]
+def SwitchToHighMagSteps(Mag:int, MagIndex:int, ChangeAperture:bool, CenterPoint:bool, FocusSteps:list[Step]) -> list[Step]:
+    return [
+        DoAutomatically(lambda: SetBeamBlank(True)),
+        DoAutomatically(lambda: SetMagIndex(MagIndex))
+    ] + ([
+        TellOperatorTEM("Insert the second aperture."),
+        DependingOnScope(TellOperatorTEM("Spread the beam by several turns (by turning the 'brightness' knob clockwise.)"), DoNothing),
+        DoAutomatically(ScreenDown),
+        TellOperatorTEM("Use the X/Y dials on the upper left side of the microscope column to center the aperture.")
+    ] if ChangeAperture else []) + FocusSteps + [
+        DoAutomatically(Record)
+    ] + ([
+        OpenLastRC3Snapshot(Mag),
+        TellOperatorSEM(f"Find the center point at {Mag}x, and click it. Then delete the last navigator item."),
+        DoAutomatically(lambda: TakeSnapshotWithNotes("", False)),
+    ] if CenterPoint else [])
 
-FastFocusStep:Step = TellOperatorTEM("Tighten the beam, center it, and use image wobble and the focus knob to adjust focus. Make sure the beam is spread around 100 Current Density.")
+FastFocusStep:Step = TellOperatorTEM("Tighten the beam, center it, and use image wobble and the focus knob to adjust focus. Turn off wobble. Make sure the beam is spread around 100 Current Density.")
 
 DetailedFocusSteps:list[Step] = [
     TellOperatorTEM("Turn the brightness knob counter-clockwise to tighten the beam, then center it with the X/Y knobs on the control panel."),
     DependingOnScope(TellOperatorTEM("Turn on Image Wobble X and Image Wobble Y using the control panel."), TellOperatorTEM("Turn on Image Wobble using the control panel.")),
     TellOperatorTEM("Put the mirror in using the lever to the right of the microscope column."),
-    TellOperatorTEM("Look through the binoculars and use the focus knob to make the 2 shaking images line up and stay still."),
+    TellOperatorTEM(f"Look through the binoculars and use the focus knob to make the 2 shaking images line up and stay still. {newline} Turn off wobble."),
     TellOperatorTEM("Turn the brightness knob clockwise to spread the beam until Current Density is close to 100.")
 ]
 

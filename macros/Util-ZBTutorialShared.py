@@ -21,6 +21,7 @@ NewSpecimenSteps:list[Step] = [
     DoAutomatically(lambda: SetMagIndex(LowMag150)),
     TellOperatorTEM("Remove the aperture by turning the dial to the red dot."),
     DoAutomatically(TurnOnFilament),
+    DoAutomatically(lambda: SetSpotSize(2)),
     DoAutomatically(ScreenDown),
     TellOperatorSEM("Scroll the stage to find a region of formvar, and click 'Add Stage Pos' in the navigator window."),
 ]

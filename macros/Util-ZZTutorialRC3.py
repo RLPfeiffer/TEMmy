@@ -10,7 +10,7 @@ def OpenLastRC3Snapshot(mag:int) -> Step:
     return step
 
 def MainRC3Steps(detailed:bool) -> list[Step]:
-    FocusSteps = DetailedFocusSteps if detailed else [FastFocusStep]
+    FocusSteps = DetailedFocusSteps if detailed else FastFocusSteps
     
     return [
         OpenLastRC3Snapshot(150),
@@ -18,7 +18,13 @@ def MainRC3Steps(detailed:bool) -> list[Step]:
         DoAutomatically(lambda: MoveToNavItem(PolygonIndex)),
         DoAutomatically(Record),
         DoAutomatically(lambda: TakeSnapshotWithNotes("", False))
-    ] + SwitchToHighMagSteps(600, HighMag600, True, True, []) + SwitchToHighMagSteps(2000, HighMag2000, False, True, FocusSteps) + [
+    ] + [
+        # Spot size 1 is too bright to record at 600x
+        DoAutomatically(lambda: SetSpotSize(2)),
+    ] + SwitchToHighMagSteps(600, HighMag600, True, True, []) + [
+        # Spot size 1 allows for a smoother beam and eliminates some tile artifacts in montaging:
+        DoAutomatically(lambda: SetSpotSize(1)),
+    ] + SwitchToHighMagSteps(2000, HighMag2000, False, True, FocusSteps) + [
         TellOperatorSEM("In the menubar, click Navigator -> Montaging and Grids -> Add Circle Polygon. Type 125"),
         TellOperatorSEM("In the navigator window, delete every item EXCEPT FOR the formvar reference point and the circle Polygon."),
         DoAutomatically(lambda: SetMagIndex(HighMag5000)),

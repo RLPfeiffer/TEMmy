@@ -62,6 +62,10 @@ if __name__ == "__main__":
         macro_package_tem2.write("MaxMacros\t40\n")
         tem1_all_python_file.write("import serialem as sem # type: ignore\n")
         tem2_all_python_file.write("import serialem as sem # type: ignore\n")
+        tem1_all_python_file.write("from typing import List as list\n")
+        tem2_all_python_file.write("from typing import List as list\n")
+        tem1_all_python_file.write("from typing import Dict as dict\n")
+        tem2_all_python_file.write("from typing import Dict as dict\n")
         for macro in macros:
             if macro.endswith(".txt") or macro.endswith(".py"):
                 with open(f'macros/{macro}', "r") as macro_file: 

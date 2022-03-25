@@ -47,7 +47,7 @@ SwitchToHighMagSteps:list[Step] = [
     TellOperatorTEM("Use the X/Y dials on the upper left side of the microscope column to center the aperture.")
 ]
 
-FastFocusStep:Step = TellOperatorTEM("Tighten the beam, center it, and use image wobble and the focus knob to adjust focus. Make sure the beam is spread around 100 Current Density.")
+FastFocusStep:Step = TellOperatorTEM("Tighten the beam, center it, and use image wobble and the focus knob to adjust focus. Turn off wobble. Make sure the beam is spread around 100 Current Density.")
 
 DetailedFocusSteps:list[Step] = [
     TellOperatorTEM("Turn the brightness knob counter-clockwise to tighten the beam, then center it with the X/Y knobs on the control panel."),

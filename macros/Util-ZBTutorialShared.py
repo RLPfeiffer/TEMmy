@@ -53,7 +53,7 @@ DetailedFocusSteps:list[Step] = [
     TellOperatorTEM("Turn the brightness knob counter-clockwise to tighten the beam, then center it with the X/Y knobs on the control panel."),
     DependingOnScope(TellOperatorTEM("Turn on Image Wobble X and Image Wobble Y using the control panel."), TellOperatorTEM("Turn on Image Wobble using the control panel.")),
     TellOperatorTEM("Put the mirror in using the lever to the right of the microscope column."),
-    TellOperatorTEM("Look through the binoculars and use the focus knob to make the 2 shaking images line up and stay still."),
+    TellOperatorTEM(f"Look through the binoculars and use the focus knob to make the 2 shaking images line up and stay still. {newline} Turn off wobble."),
     TellOperatorTEM("Turn the brightness knob clockwise to spread the beam until Current Density is close to 100.")
 ]
 

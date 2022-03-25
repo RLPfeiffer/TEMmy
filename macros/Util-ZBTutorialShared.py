@@ -38,14 +38,22 @@ AfterMontageSteps:list[Step] = [
 
 AcquireAtItemsMessage = "In the menubar, click Navigator -> AcquireAtItems. Choose '*'. Leave FilamentManager selected, and click OK. Then move the mirror out of the way."
 
-SwitchToHighMagSteps:list[Step] = [
-    DoAutomatically(lambda: SetBeamBlank(True)),
-    DoAutomatically(lambda: SetMagIndex(HighMag2000)),
-    TellOperatorTEM("Insert the second aperture."),
-    DependingOnScope(TellOperatorTEM("Spread the beam by several turns (by turning the 'brightness' knob clockwise.)"), DoNothing),
-    DoAutomatically(ScreenDown),
-    TellOperatorTEM("Use the X/Y dials on the upper left side of the microscope column to center the aperture.")
-]
+def SwitchToHighMagSteps(Mag:int, MagIndex:int, ChangeAperture:bool, CenterPoint:bool, FocusSteps:list[Step]) -> list[Step]:
+    return [
+        DoAutomatically(lambda: SetBeamBlank(True)),
+        DoAutomatically(lambda: SetMagIndex(MagIndex))
+    ] + ([
+        TellOperatorTEM("Insert the second aperture."),
+        DependingOnScope(TellOperatorTEM("Spread the beam by several turns (by turning the 'brightness' knob clockwise.)"), DoNothing),
+        DoAutomatically(ScreenDown),
+        TellOperatorTEM("Use the X/Y dials on the upper left side of the microscope column to center the aperture.")
+    ] if ChangeAperture else []) + FocusSteps + [
+        DoAutomatically(Record)
+    ] + ([
+        OpenLastRC3Snapshot(Mag),
+        TellOperatorSEM(f"Find the center point at {Mag}x, and click it. Then delete the last navigator item."),
+        DoAutomatically(lambda: TakeSnapshotWithNotes("", False)),
+    ] if CenterPoint else [])
 
 FastFocusStep:Step = TellOperatorTEM("Tighten the beam, center it, and use image wobble and the focus knob to adjust focus. Turn off wobble. Make sure the beam is spread around 100 Current Density.")
 

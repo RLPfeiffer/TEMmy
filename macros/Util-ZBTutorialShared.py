@@ -51,7 +51,7 @@ def SwitchToHighMagSteps(Mag:int, MagIndex:int, ChangeAperture:bool, CenterPoint
         DoAutomatically(Record)
     ] + ([
         OpenLastRC3Snapshot(Mag),
-        TellOperatorSEM(f"Find the center point at {Mag}x, and click it. Then delete the last navigator item."),
+        TellOperatorSEM(f"Find the center point at {Mag}x, and click it. Then click 'Add Marker'. If another navigator item is visible, delete it."),
         DoAutomatically(lambda: TakeSnapshotWithNotes("", False)),
     ] if CenterPoint else [])
 

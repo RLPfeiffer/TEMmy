@@ -20,6 +20,7 @@ def MainRC3Steps(detailed:bool) -> list[Step]:
         DoAutomatically(lambda: TakeSnapshotWithNotes("", False))
     ] + SwitchToHighMagSteps(600, HighMag600, True, True, []) + SwitchToHighMagSteps(2000, HighMag2000, False, True, FocusSteps) + [
         TellOperatorSEM("In the menubar, click Navigator -> Montaging and Grids -> Add Circle Polygon. Type 125"),
+        TellOperatorSEM("In the navigator window, delete every item EXCEPT FOR the formvar reference point and the circle Polygon."),
         DoAutomatically(lambda: SetMagIndex(HighMag5000)),
         TellOperatorSEM("With the circle polygon selected, check the Navigator checkboxes for 'Aquire', 'New File At Item', 'Montaged Images', 'Fit Montage to Polygon'. Make sure 'Go from center out and anchor at 2000x' is active and click ok. Then select the generated idoc file. Choose to overwrite it."),
         DoAutomatically(lambda: MoveToNavItem(PolygonIndex)),

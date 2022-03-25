@@ -6,7 +6,7 @@
 # The times, on normal workdays, when the main TEM operator clocks in and out of the scope room:
 from datetime import time, datetime, date, timedelta
 from time import sleep
-ClockInTime:time = time(hour=10) # 10 AM
+ClockInTime:time = time(hour=8) # 8 AM
 ClockOutTime:time = time(hour=18) # 6 PM
 # The maximum number of hours to leave the filament on
 MaxUnattendedHours:float = 2

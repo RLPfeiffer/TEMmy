@@ -1,7 +1,7 @@
 # This file is named with a Z so it comes after every other Python function in Util files is defined
 
 def MainCoreSteps(detailed:bool) ->list[Step]:
-    FocusSteps = DetailedFocusSteps if detailed else [FastFocusStep]
+    FocusSteps = DetailedFocusSteps if detailed else FastFocusSteps
     return [
         TellOperatorSEM("Locate the Region of Interest at 150x (you may need to move the stage). Click 'Add Points' in the navigator window and click on the corners of the ROI. Then click 'Stop Adding Points'."),
         TellOperatorSEM("Select each of the corner points and type 'C' on the keyboard to mark them as corner points."),

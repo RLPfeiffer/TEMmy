@@ -55,9 +55,13 @@ def SwitchToHighMagSteps(Mag:int, MagIndex:int, ChangeAperture:bool, CenterPoint
         DoAutomatically(lambda: TakeSnapshotWithNotes("", False)),
     ] if CenterPoint else [])
 
-FastFocusStep:Step = TellOperatorTEM("Tighten the beam, center it, and use image wobble and the focus knob to adjust focus. Turn off wobble. Make sure the beam is spread around 100 Current Density.")
+FastFocusSteps:list[Step] = [
+    DoAutomatically(ScreenDown),
+    TellOperatorTEM("Tighten the beam, center it, and use image wobble and the focus knob to adjust focus. Turn off wobble. Make sure the beam is spread around 100 Current Density.")
+]
 
 DetailedFocusSteps:list[Step] = [
+    DoAutomatically(ScreenDown),
     TellOperatorTEM("Turn the brightness knob counter-clockwise to tighten the beam, then center it with the X/Y knobs on the control panel."),
     DependingOnScope(TellOperatorTEM("Turn on Image Wobble X and Image Wobble Y using the control panel."), TellOperatorTEM("Turn on Image Wobble using the control panel.")),
     TellOperatorTEM("Put the mirror in using the lever to the right of the microscope column."),

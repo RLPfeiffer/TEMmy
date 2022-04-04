@@ -15,6 +15,9 @@ use std::time::SystemTime;
 use humantime::format_rfc3339;
 use crate::errors::*;
 use crate::run::ShouldPrint::*;
+use lazy_static::lazy_static;
+use std::sync::Mutex;
+use std::collections::HashSet;
 
 pub type Command = Vec<String>;
 
@@ -151,12 +154,51 @@ fn report_error(err: BobError, command: Vec<String>) -> BobResult<()> {
 
 pub struct CommandChain {
     pub label: String,
+    pub folders_to_lock: Vec<String>,
     pub commands: Vec<Command>,
 }
 
-pub fn run_chain_and_save_output(chain: CommandChain) -> BobResult<()> {
-    let commands = chain.commands;
-    let label_with_info = format!("{} on {} via {}", chain.label, devicename(), realname());
+lazy_static!{
+    static ref FOLDER_LOCKS: Mutex<HashSet<String>> = Mutex::new(HashSet::new());
+}
+
+fn acquire_locks(folders: &Vec<String>) -> bool {
+    if let Ok(ref mut locks) = FOLDER_LOCKS.lock() {
+        for chain_folder in folders {
+            if locks.contains(chain_folder) {
+                return false;
+            }
+        }
+        // Make a separate for loop so locks aren't inserted if not all can be acquired
+        for chain_folder in folders {
+            locks.insert(chain_folder.to_string());
+        }
+        return true;
+    } else {
+        run_warn(rito("Error acquiring folder locks!".to_string()), Print);
+        return false;
+    }
+}
+
+fn release_locks(folders: &Vec<String>) {
+    if let Ok(ref mut locks) = FOLDER_LOCKS.lock() {
+        for chain_folder in folders {
+            if locks.contains(chain_folder) {
+                locks.remove(chain_folder);
+            }
+        }
+    } else {
+        run_warn(rito("Error releasing folder locks!".to_string()), Print);
+    }
+}
+
+pub fn run_chain_and_save_output(chain: &CommandChain) -> BobResult<bool> {
+    if !acquire_locks(&chain.folders_to_lock) {
+        return Ok(false);
+    }
+
+    let commands = &chain.commands;
+
     run(rito(format!("Starting command chain: {}", label_with_info)), Print)?;
     for command in commands {
         if let Err(err) = run(command.clone(), Silent) {
@@ -164,7 +206,9 @@ pub fn run_chain_and_save_output(chain: CommandChain) -> BobResult<()> {
             return Err(err);
         }
     }
-    run(rito(format!("Command chain finished: {}", label_with_info)), Print)
+    release_locks(&chain.folders_to_lock);
+    run(rito(format!("Command chain finished: {}", label_with_info)), Print)?;
+    Ok(true)
 }
 
 pub fn run_on_interval_and_filter_output<F>(command: Vec<String>, process_line: F, seconds: u64) -> Result<(), BobError>

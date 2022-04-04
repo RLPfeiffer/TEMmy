@@ -98,6 +98,7 @@ pub fn rc3_build_chain(section: String, is_rebuild: bool) -> Option<CommandChain
 
             Some(CommandChain {
                 commands: commands,
+                folders_to_lock: vec![temp_volume_dir.clone()],
                 label: if is_rebuild {
                     format!("automatic rebuild for RC3 {}", section_number)
                 } else {
@@ -113,7 +114,6 @@ pub fn rc3_build_chain(section: String, is_rebuild: bool) -> Option<CommandChain
 }
 
 pub fn rc3_fixmosaic(section:String) -> CommandChain {
-    let config = config_from_yaml();
 
     let temp_volume_dir = find_temp_volume(section.clone());
 
@@ -135,6 +135,7 @@ pub fn rc3_fixmosaic(section:String) -> CommandChain {
                     temp_volume_dir.clone()
                 ],
             ],
+        folders_to_lock: vec![temp_volume_dir.clone()],
         label:
             format!("automatic fixmosaic for RC3 {}", section)
     }
@@ -153,8 +154,6 @@ fn find_temp_volume(section:String) -> String {
 }
 
 fn merge_commands(section:String) -> Vec<Vec<String>> {
-    let config = config_from_yaml();
-
     let temp_volume_dir = find_temp_volume(section.clone());
 
     vec![
@@ -193,6 +192,7 @@ fn merge_commands(section:String) -> Vec<Vec<String>> {
 pub fn rc3_merge_chain(section: String) -> CommandChain {
     CommandChain {
         commands: merge_commands(section.clone()),
+        folders_to_lock: vec![r#"W:\Volumes\RC3"#.to_string(), find_temp_volume(section.clone())],
         label: format!("automatic merge for {} into RC3", section)
     }
 }

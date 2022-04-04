@@ -69,6 +69,7 @@ pub fn command_map() -> CommandMap {
         Some(
             Immediate(
                 CommandChain {
+                    folders_to_lock: vec![],
                     commands: vec![
                         rito_image(snapshot_path)
                     ],
@@ -86,6 +87,7 @@ pub fn command_map() -> CommandMap {
                         let queue: Vec<Vec<String>> = queue.iter().map(|line| line.split("~").map(|token| token.trim().to_string()).collect()).collect();
                         Some(Queue(CommandChain {
                             commands: queue, 
+                            folders_to_lock: vec![],
                             label: format!("bob queue file {}", queue_file)
                         }))
                     },
@@ -114,6 +116,7 @@ pub fn command_map() -> CommandMap {
             [command_string] => {
                 let command:Vec<String> = command_string.split("~").map(|arg| arg.trim().to_string()).collect();
                 Some(Queue(CommandChain {
+                    folders_to_lock: vec![],
                     commands: vec![
                         command,
                     ],
@@ -167,6 +170,7 @@ fn robocopy_command(typ:RobocopyType, args:Vec<String>) -> Option<CommandBehavio
                     [point_a, point_b] => {
                         Some(Queue(CommandChain {
                             label: format!("bob robocopy {:?} {} -> {}", typ, point_a, point_b),
+                            folders_to_lock: vec![point_a.clone(), point_b.clone()], 
                             commands: vec![robocopy(typ, point_a.clone(), point_b.clone())], 
                         }))
                     },

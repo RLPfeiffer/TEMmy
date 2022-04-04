@@ -8,6 +8,10 @@ use std::fs;
 use crate::run::ShouldPrint::*;
 
 pub fn core_build_chain(section: String, is_rebuild: bool) -> Option<CommandChain> {
+    run_warn(rito(format!("Automatic core builds need to be redesigned and are currently disabled. {0} was not built automatically", section)), Print);
+    None
+
+    /*
     let config = config_from_yaml();
 
     let section_dir = format!(r#"{}\TEMXCopy\{}"#, config.dropbox_dir, section);
@@ -68,7 +72,7 @@ pub fn core_build_chain(section: String, is_rebuild: bool) -> Option<CommandChai
             run_warn(rito(format!("{0} should be named with pattern core_[volume]_[section] and was not built automatically", section)), Print);
             None
         },
-    }
+    }*/
     
 }
 
@@ -111,6 +115,7 @@ pub fn core_fixmosaic_stage(volume:String, sections: Vec<String>) -> BobResult<C
 
     Ok(CommandChain {
         commands: commands,
+        folders_to_lock: vec![build_target.clone()],
         label: format!("automatic fixmosaic_stage for {} {:?}", volume, sections)
     })
 }
@@ -138,6 +143,7 @@ pub fn core_deploy_chain(volume: String) -> CommandChain {
             ],
             rito(format!(r#"{0} might be ready! Check http://storage1.connectomes.utah.edu/{0}/Mosaic.VikingXML in Viking"#, volume))
         ],
+        folders_to_lock: vec![volume_dir.clone(), deploy_dir.clone()],
         label: format!("automatic core volume deployment for {0} to http://storage1.connectomes.utah.edu/{0}/Mosaic.VikingXML", volume)
     }
 }

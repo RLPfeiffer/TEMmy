@@ -112,9 +112,14 @@ fn threadpool_step(receiver: &Receiver<CommandChain>, pool:&ThreadPool) -> BobRe
     let next_chain = receiver.recv()?;
     pool.execute(move || {
         let label = next_chain.label.clone();
-        if run_chain_and_save_output(next_chain).is_err() {
+        let res = run_chain_and_save_output(&next_chain);
+        if res.is_err() {
             println!("error from {} -- should have been reported via slack also", label);
         };
+        if let Ok(false) = res {
+            // TODO send things back to the sender if locks are blocking them
+            run_warn(rito("Blocking commandChain because of folder locks".to_string()), Print)
+        }
     });
     Ok(())
 }
@@ -153,7 +158,10 @@ fn command_thread_step(commands: &CommandMap, receiver: &Receiver<String>, sende
         match command_behavior(command_args) {
             // TODO won't be matching Some, will be matching Ok()
             Some(Immediate(chain)) => {
-                run_chain_and_save_output(chain)?;
+                let can_run = run_chain_and_save_output(&chain)?;
+                if !can_run {
+                    sender.send(chain)?;
+                }
             },
             Some(Queue(chain)) => {
                 sender.send(chain)?;

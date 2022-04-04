@@ -44,12 +44,13 @@ def checkFrom(lowest_section, highest_section):
             pass
         else:
             mosaic_report = find_mosaic_report(section)
+            mosaic_report_link = f'file:///{mosaic_report}' if 'D:/' in mosaic_report else f'/file/{mosaic_report}'
             output += tr(
                 section,
                 in_volume,
                 in_rawdata,
                 in_temxcopy,
-                blank_link(f'/file/{mosaic_report}', mosaic_report),
+                blank_link(mosaic_report_link, mosaic_report),
                 blank_link(f'/rc3build/{section}', conditional('build', in_temxcopy)),
                 blank_link(f'/rc3rebuild/{section}', conditional('rebuild', in_rawdata)),
                 blank_link(f'/rc3fixmosaic/{section}', conditional('fix mosaic', mosaic_report)),

@@ -36,6 +36,9 @@ pub enum BobError {
 
     #[error(transparent)]
     ReadlineError(#[from] rustyline::error::ReadlineError),
+
+    #[error(transparent)]
+    SystemTimeError(#[from] std::time::SystemTimeError),
 }
 
 pub type BobResult<T> = Result<T, BobError>;

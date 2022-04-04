@@ -198,6 +198,7 @@ pub fn run_chain_and_save_output(chain: &CommandChain) -> BobResult<bool> {
     }
 
     let commands = &chain.commands;
+    let label_with_info = format!("{} on {} via {}", chain.label, devicename(), realname());
 
     run(rito(format!("Starting command chain: {}", label_with_info)), Print)?;
     for command in commands {
@@ -211,7 +212,7 @@ pub fn run_chain_and_save_output(chain: &CommandChain) -> BobResult<bool> {
     Ok(true)
 }
 
-pub fn run_on_interval_and_filter_output<F>(command: Vec<String>, process_line: F, seconds: u64) -> Result<(), BobError>
+pub fn run_on_interval_and_filter_output<F>(command: Vec<String>, process_line: F, seconds: u64) -> BobResult<()>
     where F: Fn(String) -> BobResult<()> {
     
     loop {

@@ -6,6 +6,9 @@ use std::convert::TryInto;
 use threadpool::ThreadPool;
 use std::io::prelude::*;
 use std::io::BufReader;
+use lazy_static::lazy_static;
+use std::sync::Mutex;
+use std::time::{Duration, SystemTime};
 
 use duct::cmd;
 
@@ -108,6 +111,10 @@ fn spawn_cli_thread(sender: Sender<String>) -> JoinHandle<()> {
 
 }
 
+lazy_static!{
+    pub static ref BLOCKED_COMMAND_CHAINS: Mutex<Vec<CommandChain>> = Mutex::new(vec![]);
+}
+
 fn threadpool_step(receiver: &Receiver<CommandChain>, pool:&ThreadPool) -> BobResult<()> {
     let next_chain = receiver.recv()?;
     pool.execute(move || {
@@ -117,8 +124,12 @@ fn threadpool_step(receiver: &Receiver<CommandChain>, pool:&ThreadPool) -> BobRe
             println!("error from {} -- should have been reported via slack also", label);
         };
         if let Ok(false) = res {
-            // TODO send things back to the sender if locks are blocking them
-            run_warn(rito("Blocking commandChain because of folder locks".to_string()), Print)
+            // Store chains that were blocked where the command thread can access them to send them again
+            if let Ok(ref mut blocked_chains) = BLOCKED_COMMAND_CHAINS.lock() {
+                blocked_chains.push(next_chain);
+            } else {
+                run_warn(rito(format!("Error saving a blocked command chain")), Print);
+            }
         }
     });
     Ok(())
@@ -143,7 +154,22 @@ fn spawn_worker_threadpool(receiver: Receiver<CommandChain>) -> JoinHandle<()> {
     })
 }
 
-fn command_thread_step(commands: &CommandMap, receiver: &Receiver<String>, sender: &Sender<CommandChain>) -> BobResult<()> {
+fn command_thread_step(commands: &CommandMap, receiver: &Receiver<String>, sender: &Sender<CommandChain>, last_blocked_check_time:&mut SystemTime) -> BobResult<()> {
+    // Check if blocked command chains are free to run yet
+    let now = SystemTime::now();
+    let dur = now.duration_since(*last_blocked_check_time)?;
+    let blocked_check_mins = 15;
+    if dur.as_secs() > blocked_check_mins * 60 {
+        *last_blocked_check_time = now;
+        
+        if let Ok(mut blocked_chains) = BLOCKED_COMMAND_CHAINS.lock() {
+            while let Some(chain) = blocked_chains.pop() {
+                sender.send(chain)?;
+            }
+        }
+    } 
+
+    // Listen for new commands
     let next_command_full = receiver.recv()?;
     println!("saving the Message output: {}", next_command_full);
     let mut command_parts = next_command_full.split(": ");
@@ -179,9 +205,11 @@ fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>
  
     let commands = command_map();
 
+    let mut last_blocked_check_time = SystemTime::now();
+
     thread::spawn(move || {
         loop {
-            if let Err(err) = command_thread_step(&commands, &receiver, &sender) {
+            if let Err(err) = command_thread_step(&commands, &receiver, &sender, &mut last_blocked_check_time) {
                 run_warn(rito(format!("bob command thread error: {}", err)), Print);
             }
         }

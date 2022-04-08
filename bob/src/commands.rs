@@ -5,10 +5,10 @@ use crate::ShouldPrint::*;
 use crate::rito::*;
 use crate::run::*;
 use crate::config::*;
-use crate::rc3_builds::*;
 use crate::core_builds::*;
 use crate::robocopy::RobocopyType::*;
 use crate::robocopy::*;
+use crate::volume::*;
 
 use std::collections::HashMap;
 pub enum CommandBehavior {
@@ -21,9 +21,11 @@ pub type CommandMap = HashMap<String, fn(Vec<String>) -> Option<CommandBehavior>
 
 pub fn command_map() -> CommandMap {
     let mut commands:CommandMap = HashMap::new();
-    commands.insert("Copied".to_string(), |args| build_command(true, false, args));
-    commands.insert("Build".to_string(), |args| build_command(false, false, args));
-    commands.insert("Rebuild".to_string(), |args| build_command(false, true, args));
+    
+    commands.insert("Copied".to_string(), |args| build_command(true, args));
+    commands.insert("Build".to_string(), |args| build_command(false, args));
+    commands.insert("Rebuild".to_string(), |args| build_command(false, args));
+
     commands.insert("CoreFixMosaicStage".to_string(), |args| {
         if args.len() < 2 {
             None
@@ -46,6 +48,7 @@ pub fn command_map() -> CommandMap {
             _ => None
         }
     });
+    /*
     commands.insert("RC3FixMosaic".to_string(), |args| {
         match args.as_slice() {
             [section] => Some(Queue(rc3_fixmosaic(section.clone()))),
@@ -60,6 +63,7 @@ pub fn command_map() -> CommandMap {
             _ => None
         }
     });
+    */
     // Send snapshots to #tem-bot as images
     commands.insert("Snapshot".to_string(), |args| {
         // The snapshot command accepts a filename that can include spaces, so the args vec actually needs to be rejoined:
@@ -129,32 +133,29 @@ pub fn command_map() -> CommandMap {
     commands
 }
 
-fn build_chain(section:&str, is_rebuild: bool) -> Option<CommandChain> {
-    if section.starts_with("core") {
-        core_build_chain(section.to_string(), is_rebuild)
-    }
-    else {
-        rc3_build_chain(section.to_string(), is_rebuild)
-    }
-}
-
-
-fn build_command(is_automatic: bool, is_rebuild: bool, args:Vec<String>) -> Option<CommandBehavior> {
+fn build_command(is_automatic: bool, args:Vec<String>) -> Option<CommandBehavior> {
     // Copied: can have multiple plaintext words after the section name/number
-    if args.len() >= 1 {
-        let capture_dir = &args[0];
+    if args.len() >= 2 {
+        let volume = &args[0];
+        let section = &args[1];
         
         let config = config_from_yaml();
 
-        if config.automatic_builds || !is_automatic {
-            if let Some(chain) = build_chain(capture_dir, is_rebuild) {
-                Some(Queue(chain))
+        for volume_config in config.volumes {
+            if config.automatic_builds || !is_automatic {
+                if volume_config.name == volume.clone() {
+                    return if let Ok(chain) = volume_config.build_chain(section.to_string()) {
+                        Some(Queue(chain))
+                    } else {
+                        None
+                    }
+                }
             } else {
-                None
+                return Some(NoOp)
             }
-        } else {
-            Some(NoOp)
         }
+
+        None
     } else {
         None
     }

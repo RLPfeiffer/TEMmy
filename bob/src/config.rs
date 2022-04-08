@@ -1,5 +1,6 @@
 use serde::{Serialize, Deserialize};
 use std::fs;
+use crate::volume::*;
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct Config {
@@ -15,6 +16,7 @@ pub struct Config {
     pub automatic_builds: bool,
     pub junk_outputs: Vec<String>,
     pub fatal_errors: Vec<String>,
+    pub volumes: Vec<Volume>,
 }
 
 pub fn config_from_yaml() -> Config {

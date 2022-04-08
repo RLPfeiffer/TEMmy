@@ -23,10 +23,10 @@ mod robocopy;
 mod errors;
 use errors::*;
 mod core_builds;
-mod rc3_builds;
 mod commands;
 use commands::*;
 use commands::CommandBehavior::*;
+mod volume;
 
 // Source: https://stackoverflow.com/a/35820003
 use std::{
@@ -267,7 +267,7 @@ fn debug_main() {
                     } {
                         println!("{}:", chain.label);
                         for command in chain.commands {
-                            println!("    ");
+                            print!("\n    ");
                             for token in command {
                                 print!("{} ", token);
                             }

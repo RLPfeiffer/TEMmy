@@ -1,15 +1,4 @@
-use std::path::Path;
-use fs2::free_space;
-extern crate fs_extra;
-use fs_extra::dir::get_size;
-
-use crate::robocopy::*;
-use crate::rito::*;
-use crate::config::*;
-use crate::CommandChain;
-use crate::run::*;
-use crate::run::ShouldPrint::*;
-
+/*
 pub fn rc3_build_chain(section: String, is_rebuild: bool) -> Option<CommandChain> {
     let config = config_from_yaml();
 
@@ -196,3 +185,4 @@ pub fn rc3_merge_chain(section: String) -> CommandChain {
         label: format!("automatic merge for {} into RC3", section)
     }
 }
+*/

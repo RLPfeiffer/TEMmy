@@ -39,6 +39,9 @@ pub enum BobError {
 
     #[error(transparent)]
     SystemTimeError(#[from] std::time::SystemTimeError),
+
+    #[error(transparent)]
+    FSExtraError(#[from] fs_extra::error::Error),
 }
 
 pub type BobResult<T> = Result<T, BobError>;

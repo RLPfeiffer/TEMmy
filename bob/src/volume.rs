@@ -9,7 +9,6 @@ use crate::rito::*;
 use crate::config::*;
 use crate::CommandChain;
 use crate::run::*;
-use crate::run::ShouldPrint::*;
 use crate::errors::*;
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
@@ -40,16 +39,14 @@ impl Volume {
             path_in_temxcopy
         };
 
-        let source_size = get_size(Path::new(&data_dir));
+        let source_size = get_size(Path::new(&data_dir))?;
+        println!("{}", source_size);
         let temp_volume_dir = format!(r#"{}\{}_temp\{}"#, config.build_target, self.name, section);
         let overflow_volume_dir = format!(r#"{}\{}_temp\{}"#, config.overflow_build_target, self.name, section);
         let available_space = free_space(Path::new(&temp_volume_dir));
         let enough_space = if let Ok(available) = available_space {
-            if let Ok(size) = source_size {
-                if available > size { true } else { false }
-            } else {
-                false
-            }
+            println!("{}", available);
+            if available > source_size { true } else { false }
         } else { false };
             
         let temp_volume_dir = if enough_space { temp_volume_dir } else { overflow_volume_dir };
@@ -122,5 +119,63 @@ impl Volume {
             folders_to_lock: vec![temp_volume_dir.clone()],
             label: format!("automatic build for {} {}", self.name, section)
         })
+    }
+
+    pub fn merge_chain(&self, section:String) -> BobResult<CommandChain> {
+        let temp_volume_dir = find_temp_volume(self.name.clone(), section.clone());
+        
+        let mut commands = Vec::<Command>::new();
+        
+        commands.push(vec![
+            "copy-section-links".to_string(),
+            format!(r#"{}\TEM\VolumeData.xml"#, self.path.clone()),
+            format!(r#"{}\TEM\VolumeData.xml"#, temp_volume_dir),
+            "bob-output".to_string()
+        ]);
+
+        commands.push(robocopy_move(
+            format!(r#"{}\TEM"#, temp_volume_dir),
+            format!(r#"{}\TEM\"#, self.path.clone())));
+        
+        commands.push(vec![
+            "nornir-build".to_string(),
+            self.path.clone(), 
+            "CreateVikingXML".to_string(),
+            "-OutputFile".to_string(),
+            "Mosaic".to_string()
+        ]);
+        
+        // Delete the temp volume
+        commands.push(vec![
+            "rmdir".to_string(),
+            "/S".to_string(),
+            "/Q".to_string(),
+            temp_volume_dir.clone(),
+        ]);
+        commands.push(vec![
+            self.optimize_tiles_script.clone(),
+            self.path.clone(),
+            section.clone()
+        ]);
+        
+        // TODO If an align script is given, use it
+        
+        Ok(CommandChain {
+            commands: commands,
+            folders_to_lock: vec![self.path.clone(), temp_volume_dir.clone()],
+            label: format!("Automatic merge {} into {}", section, self.name.clone())
+        })
+    }
+}
+
+fn find_temp_volume(volume: String, section: String) -> String {
+    let config = config_from_yaml();
+
+    let temp_volume_dir = format!(r#"{}\{}_temp\{}"#, config.build_target, volume.clone(), section.clone());
+    let overflow_volume_dir = format!(r#"{}\{}_temp\{}"#, config.overflow_build_target, volume, section);
+    if Path::new(&temp_volume_dir).exists() {
+        temp_volume_dir
+    } else {
+        overflow_volume_dir
     }
 }

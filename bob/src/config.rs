@@ -1,6 +1,6 @@
 use serde::{Serialize, Deserialize};
 use std::fs;
-use crate::volume::*;
+use crate::volume::Volume;
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct Config {

@@ -5,10 +5,8 @@ use crate::ShouldPrint::*;
 use crate::rito::*;
 use crate::run::*;
 use crate::config::*;
-use crate::core_builds::*;
 use crate::robocopy::RobocopyType::*;
 use crate::robocopy::*;
-use crate::volume::*;
 
 use std::collections::HashMap;
 pub enum CommandBehavior {
@@ -26,6 +24,10 @@ pub fn command_map() -> CommandMap {
     commands.insert("Build".to_string(), |args| build_command(false, args));
     commands.insert("Rebuild".to_string(), |args| build_command(false, args));
 
+    // Merge automatically-built sections with a full volume
+    commands.insert("Merge".to_string(), merge_command);
+
+    /*
     commands.insert("CoreFixMosaicStage".to_string(), |args| {
         if args.len() < 2 {
             None
@@ -48,21 +50,13 @@ pub fn command_map() -> CommandMap {
             _ => None
         }
     });
-    /*
     commands.insert("RC3FixMosaic".to_string(), |args| {
         match args.as_slice() {
             [section] => Some(Queue(rc3_fixmosaic(section.clone()))),
             _ => None
         }
     });
-    // Merge automatically-built RC3 sections with the full volume
-    // TODO not all merges will be RC3 forever
-    commands.insert("Merge".to_string(), |args| {
-        match args.as_slice() {
-            [section] => Some(Queue(rc3_merge_chain(section.clone()))),
-            _ => None
-        }
-    });
+    
     */
     // Send snapshots to #tem-bot as images
     commands.insert("Snapshot".to_string(), |args| {
@@ -160,6 +154,32 @@ fn build_command(is_automatic: bool, args:Vec<String>) -> Option<CommandBehavior
         None
     }
 }
+
+fn merge_command(args:Vec<String>) -> Option<CommandBehavior> {
+    // Merge: <Volume name> <section>
+    if args.len() == 2 {
+        let volume = &args[0];
+        let section = &args[1];
+        
+        let config = config_from_yaml();
+
+        for volume_config in config.volumes {
+            if volume_config.name == volume.clone() {
+                return if let Ok(chain) = volume_config.merge_chain(section.to_string()) {
+                    Some(Queue(chain))
+                } else {
+                    None
+                }
+            }
+        }
+
+        None
+    } else {
+        None
+    }
+}
+
+
 
 fn robocopy_command(typ:RobocopyType, args:Vec<String>) -> Option<CommandBehavior> {
     match args.as_slice() {

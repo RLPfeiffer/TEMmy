@@ -8,7 +8,7 @@ use std::io::prelude::*;
 use std::io::BufReader;
 use lazy_static::lazy_static;
 use std::sync::Mutex;
-use std::time::{Duration, SystemTime};
+use std::time::SystemTime;
 
 use duct::cmd;
 
@@ -243,8 +243,6 @@ fn main() {
 }
 
 fn debug_main() {
-    let config = config_from_yaml();
-
     let commands = command_map();
 
     let mut rl = Editor::<()>::new();

@@ -4,10 +4,10 @@ use crate::config::*;
 use crate::CommandChain;
 use crate::run::*;
 use crate::errors::*;
-use std::fs;
 use crate::run::ShouldPrint::*;
 
-pub fn core_build_chain(section: String, is_rebuild: bool) -> Option<CommandChain> {
+
+pub fn core_build_chain(section: String, _is_rebuild: bool) -> Option<CommandChain> {
     run_warn(rito(format!("Automatic core builds need to be redesigned and are currently disabled. {0} was not built automatically", section)), Print);
     None
 

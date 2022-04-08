@@ -29,3 +29,13 @@ volumes:
     build_script: "RC3Build"
     optimize_tiles_script: "RC3OptimizeTiles"
     align_script: "RC3Align"
+  - name: RPC3AllCandidates
+    path: "X:/Volumes/RPC3AllCandidates"
+    save_raw_data: true
+    build_script: "TEMCoreBuildFast"
+    optimize_tiles_script: "TEMCoreBuildOptimizeTiles"
+  - name: JeanneAllSections
+    path: "X:/Volumes/JeanneAllSections"
+    save_raw_data: false
+    build_script: "TEMCoreBuildFast"
+    optimize_tiles_script: "TEMCoreBuildOptimizeTiles"

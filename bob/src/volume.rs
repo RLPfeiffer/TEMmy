@@ -158,7 +158,13 @@ impl Volume {
             section.clone()
         ]);
         
-        // TODO If an align script is given, use it
+        // If an align script is given, use it
+        if let Some(align_script) = &self.align_script {
+            commands.push(vec![
+                align_script.clone(),
+                self.path.clone(),
+            ])
+        }
         
         Ok(CommandChain {
             commands: commands,

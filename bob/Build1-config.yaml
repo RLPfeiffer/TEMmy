@@ -5,7 +5,7 @@ overflow_build_target: 'W:\Volumes'
 raw_data_dir: '\\OpR-Marc-Syn3\Data\RawData'
 notification_dir: 'Y:\DROPBOX\Notification'
 core_deployment_dir: 'X:\Volumes'
-worker_threads: 2
+worker_threads: 6
 process_tem_output: true
 automatic_builds: true
 junk_outputs:
@@ -16,9 +16,16 @@ junk_outputs:
 fatal_errors:
   - need at most 63 handles
   - No output from ir-refine-grid
-  - FileNotFoundError
   - is not recognized as an internal or external command, operable program or batch file
   - No tiles found in IDoc
   - After removing missing file names there were no tiles remaining
   - expected one argument
-  - Multiprocess call not successful
+  - OSError.*requested and 0 written
+volumes:
+  - name: RC3
+    path: "W:/Volumes/RC3"
+    save_raw_data: true
+    import_script: "RC3Import"
+    build_script: "RC3Build"
+    optimize_tiles_script: "RC3OptimizeTiles"
+    align_script: "RC3Align"

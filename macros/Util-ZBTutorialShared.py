@@ -39,10 +39,16 @@ AfterMontageSteps:list[Step] = [
 
 AcquireAtItemsMessage = "In the menubar, click Navigator -> AcquireAtItems. Choose '*'. Leave FilamentManager selected, and click OK. Then move the mirror out of the way."
 
-def SwitchToHighMagSteps(Mag:int, MagIndex:int, ChangeAperture:bool, CenterPoint:bool, FocusSteps:list[Step]) -> list[Step]:
+# Pass these as arguments to SwitchToHighMagSteps for readability
+SpotSize1:int = 1
+SpotSize2:int = 2
+SpotSize3:int = 3
+
+def SwitchToHighMagSteps(Mag:int, MagIndex:int, SpotSize:int, ChangeAperture:bool, CenterPoint:bool, FocusSteps:list[Step]) -> list[Step]:
     return [
         DoAutomatically(lambda: SetBeamBlank(True)),
-        DoAutomatically(lambda: SetMagIndex(MagIndex))
+        DoAutomatically(lambda: SetMagIndex(MagIndex)),
+        DoAutomatically(lambda: SetSpotSize(SpotSize))
     ] + ([
         TellOperatorTEM("Insert the second aperture."),
         DependingOnScope(TellOperatorTEM("Spread the beam by several turns (by turning the 'brightness' knob clockwise.)"), DoNothing),

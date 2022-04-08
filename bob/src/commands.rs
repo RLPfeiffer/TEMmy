@@ -7,6 +7,7 @@ use crate::run::*;
 use crate::config::*;
 use crate::robocopy::RobocopyType::*;
 use crate::robocopy::*;
+use crate::volume::Volume;
 
 use std::collections::HashMap;
 pub enum CommandBehavior {
@@ -27,32 +28,14 @@ pub fn command_map() -> CommandMap {
     // Merge automatically-built sections with a full volume
     commands.insert("Merge".to_string(), merge_command);
 
+    commands.insert("FixMosaic".to_string(), |args| fixmosaic_command(true, args));
+    commands.insert("FixMosaicStage".to_string(), |args| fixmosaic_command(false, args));
+
     /*
-    commands.insert("CoreFixMosaicStage".to_string(), |args| {
-        if args.len() < 2 {
-            None
-        } else {
-            let volume = args[0].clone();
-            let sections = &args[1..];
-            match core_fixmosaic_stage(volume.clone(), sections.to_vec()) {
-                Ok(chain) => Some(Queue(chain)),
-                Err(err) => {
-                    run_warn(rito(format!("failure parsing section# from {}: {:?}", volume, err)), Print);
-                    None
-                }
-            }
-        }
-    });
     // Deploy a core capture volume
     commands.insert("Deploy".to_string(), |args| {
         match args.as_slice() {
             [volume] => Some(Queue(core_deploy_chain(volume.clone()))),
-            _ => None
-        }
-    });
-    commands.insert("RC3FixMosaic".to_string(), |args| {
-        match args.as_slice() {
-            [section] => Some(Queue(rc3_fixmosaic(section.clone()))),
             _ => None
         }
     });
@@ -127,6 +110,15 @@ pub fn command_map() -> CommandMap {
     commands
 }
 
+fn volume_for<'a>(name:String, config:&'a Config) -> Option<&'a Volume> {
+    for volume_config in &config.volumes {
+        if volume_config.name == name.clone() {
+            return Some(&volume_config);
+        }
+    }
+    None
+}
+
 fn build_command(is_automatic: bool, args:Vec<String>) -> Option<CommandBehavior> {
     // Copied: can have multiple plaintext words after the section name/number
     if args.len() >= 2 {
@@ -134,22 +126,18 @@ fn build_command(is_automatic: bool, args:Vec<String>) -> Option<CommandBehavior
         let section = &args[1];
         
         let config = config_from_yaml();
-
-        for volume_config in config.volumes {
-            if config.automatic_builds || !is_automatic {
-                if volume_config.name == volume.clone() {
-                    return if let Ok(chain) = volume_config.build_chain(section.to_string()) {
-                        Some(Queue(chain))
-                    } else {
-                        None
-                    }
+        if config.automatic_builds || !is_automatic {
+            if let Some(volume_config) = volume_for(volume.clone(), &config) {
+                return if let Ok(chain) = volume_config.build_chain(section.to_string()) {
+                    Some(Queue(chain))
+                } else {
+                    None
                 }
-            } else {
-                return Some(NoOp)
             }
+            return None
+        } else {
+            return Some(NoOp)
         }
-
-        None
     } else {
         None
     }
@@ -162,24 +150,40 @@ fn merge_command(args:Vec<String>) -> Option<CommandBehavior> {
         let section = &args[1];
         
         let config = config_from_yaml();
-
-        for volume_config in config.volumes {
-            if volume_config.name == volume.clone() {
-                return if let Ok(chain) = volume_config.merge_chain(section.to_string()) {
-                    Some(Queue(chain))
-                } else {
-                    None
-                }
+        if let Some(volume_config) = volume_for(volume.clone(), &config) {
+            return if let Ok(chain) = volume_config.merge_chain(section.to_string()) {
+                Some(Queue(chain))
+            } else {
+                None
             }
+        } else {
+            None
         }
-
-        None
     } else {
         None
     }
 }
 
-
+fn fixmosaic_command(stage:bool, args:Vec<String>) -> Option<CommandBehavior> {
+    // <FixMosaic or FixMosaicStage> : <Volume name> <section>
+    if args.len() == 2 {
+        let volume = &args[0];
+        let section = &args[1];
+        
+        let config = config_from_yaml();
+        if let Some(volume_config) = volume_for(volume.clone(), &config) {
+            return if let Ok(chain) = volume_config.fixmosaic_chain(section.to_string(), stage) {
+                Some(Queue(chain))
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    } else {
+        None
+    }
+}
 
 fn robocopy_command(typ:RobocopyType, args:Vec<String>) -> Option<CommandBehavior> {
     match args.as_slice() {

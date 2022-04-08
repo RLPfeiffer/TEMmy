@@ -22,6 +22,9 @@ pub struct Volume {
     pub build_script: String,
     pub optimize_tiles_script:String,
     pub align_script: Option<String>,
+    pub fixmosaic_script: String,
+    pub fixmosaic_stage_script: String,
+    pub mosaic_file: String,
 }
 
 impl Volume {
@@ -40,12 +43,10 @@ impl Volume {
         };
 
         let source_size = get_size(Path::new(&data_dir))?;
-        println!("{}", source_size);
         let temp_volume_dir = format!(r#"{}\{}_temp\{}"#, config.build_target, self.name, section);
         let overflow_volume_dir = format!(r#"{}\{}_temp\{}"#, config.overflow_build_target, self.name, section);
         let available_space = free_space(Path::new(&temp_volume_dir));
         let enough_space = if let Ok(available) = available_space {
-            println!("{}", available);
             if available > source_size { true } else { false }
         } else { false };
             
@@ -170,6 +171,36 @@ impl Volume {
             commands: commands,
             folders_to_lock: vec![self.path.clone(), temp_volume_dir.clone()],
             label: format!("Automatic merge {} into {}", section, self.name.clone())
+        })
+    }
+
+    pub fn fixmosaic_chain(&self, section:String, stage:bool) -> BobResult<CommandChain> {
+        let temp_volume_dir = find_temp_volume(self.name.clone(), section.clone());
+
+        Ok(CommandChain {
+            commands: vec![
+                // Delete the bad mosaic file:
+                vec![
+                    "del".to_string(),
+                    format!(r#"{}\TEM\{}\TEM\{}"#, temp_volume_dir.clone(), section.clone(), self.mosaic_file.clone())
+                ],
+                vec![
+                    if stage {
+                        self.fixmosaic_stage_script.clone()
+                    } else {
+                        self.fixmosaic_script.clone()
+                    },
+                    temp_volume_dir.clone(),
+                    section.clone(),
+                ],
+                rito(format!("Automatic FixMosaic finished for {} {}", self.name.clone(), section.clone())),
+                vec![
+                    "send-first-mosaic-overview".to_string(),
+                    temp_volume_dir.clone()
+                ],
+            ],
+            folders_to_lock: vec![temp_volume_dir.clone()],
+            label: format!("automatic fixmosaic for {} {}", self.name.clone(), section.clone())
         })
     }
 }

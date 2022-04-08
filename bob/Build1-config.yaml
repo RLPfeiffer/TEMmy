@@ -29,13 +29,22 @@ volumes:
     build_script: "RC3Build"
     optimize_tiles_script: "RC3OptimizeTiles"
     align_script: "RC3Align"
+    fixmosaic_script: "RC3FixMosaic"
+    fixmosaic_stage_script: "RC3FixMosaic_Stage"
+    mosaic_file: "Translated_Prune_Max0.5.mosaic"
   - name: RPC3AllCandidates
     path: "X:/Volumes/RPC3AllCandidates"
     save_raw_data: true
     build_script: "TEMCoreBuildFast"
     optimize_tiles_script: "TEMCoreBuildOptimizeTiles"
+    fixmosaic_script: "TEMCoreBuildFixMosaic"
+    fixmosaic_stage_script: "TEMCoreBuildFixMosaic_Stage"
+    mosaic_file: "Grid_Cel128_Mes8_Mes8_Thr0.25_it10_sp4.mosaic"
   - name: JeanneAllSections
     path: "X:/Volumes/JeanneAllSections"
     save_raw_data: false
     build_script: "TEMCoreBuildFast"
     optimize_tiles_script: "TEMCoreBuildOptimizeTiles"
+    fixmosaic_script: "TEMCoreBuildFixMosaic"
+    fixmosaic_stage_script: "TEMCoreBuildFixMosaic_Stage"
+    mosaic_file: "Grid_Cel128_Mes8_Mes8_Thr0.25_it10_sp4.mosaic"

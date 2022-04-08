@@ -218,6 +218,9 @@ fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>
 fn main() {
     let args:Vec<String> = env::args().collect();
     match args.as_slice() {
+        [_, arg] if arg.as_str() == "debug" => {
+            debug_main();
+        },
         [_, arg] if arg.as_str() == "run_unsafe" => {
             unsafe_main();
         },
@@ -235,6 +238,45 @@ fn main() {
         }
         _ => {
             println!("bad args for bob");
+        }
+    }
+}
+
+fn debug_main() {
+    let config = config_from_yaml();
+
+    let commands = command_map();
+
+    let mut rl = Editor::<()>::new();
+
+    loop {
+
+        let readline = rl.readline(">> ");
+        match readline {
+            Ok(line) => {
+                let mut command_parts = line.split(": ");
+                let command_name = command_parts.next().ok_or(BobError::CommandNoneError("Command name", line.clone())).unwrap();
+                let command_args = command_parts.next().ok_or(BobError::CommandNoneError("Command args", line.clone())).unwrap().split(" ").map(|s| s.to_string()).collect::<Vec<String>>();
+ 
+                if let Some(behavior) = commands.get(command_name) {
+                    if let Some(chain) = match behavior(command_args) {
+                        // TODO won't be matching Some, will be matching Ok()
+                        Some(Immediate(chain)) => Some(chain),
+                        Some(Queue(chain)) => Some(chain),
+                        _ => None
+                    } {
+                        println!("{}:", chain.label);
+                        for command in chain.commands {
+                            println!("    ");
+                            for token in command {
+                                print!("{} ", token);
+                            }
+                        }
+                    }
+                }
+ 
+            },
+            _ => break,
         }
     }
 }

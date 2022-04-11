@@ -110,7 +110,7 @@ impl Volume {
             // Notify the TEMs that they can clear the original data files:
             commands.push(rito_text_file(
                 format!(r#"{}\TEMXCopy\rawdata.txt"#, config.dropbox_dir),
-                format!("{}_{} copied to RawData", self.name, section)));
+                format!("{}/{} copied to RawData", self.name, section)));
         }
         
         commands.push(rito(format!("{0} {1} built automatically. Run `Merge: {0} {1}` or click Merge on the web control panel if it looks good. Full MosaicReport: {2} ", self.name, section, mosaic_report_dest)));

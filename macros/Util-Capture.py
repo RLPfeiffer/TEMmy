@@ -1,5 +1,6 @@
 import sys
-from os.path import join, basename
+from os.path import join, basename, dirname
+import os
 
 FormvarIndex = 1
 PolygonIndex = 2
@@ -134,16 +135,9 @@ def Capture(CookFirst:bool) -> None:
     TakeSnapshot(True, OverviewFilename, Overview=True)
 
     # Copy the capture to DROPBOX
-    # Try python CopyFunctions first:
-    try:
-        if CopyDir(DataPath, CopyPath, basename(CaptureDir)):
-            SendStop(basename(CaptureDir))
-        else:
-            SendMessage(f"Failed to copy {CaptureDir} to DROPBOX")
-    except:
-        sem.CallFunction("Notifications::SendMessage", f"Python CopyDir failed with error {sys.exc_info()[0]}. Trying again with old version")
-        sem.SetVariable("CopyTarget", CopyPath)
-        sem.SetVariable("TargetDirName", basename(CaptureDir))
-        sem.SetVariable("CopySource", DataPath)
-        sem.CallFunction("CopyFunctions::CopyDir")
-        sem.CallFunction("Notifications::SendStop")
+    ExperimentDir = dirname(CaptureDir)
+    SectionDir = basename(CaptureDir)
+    if CopyDir(join(DataPath, ExperimentDir), join(CopyPath, ExperimentDir), SectionDir):
+        SendStop(ExperimentDir, SectionDir)
+    else:
+        SendMessage(f"Failed to copy {CaptureDir} to DROPBOX")

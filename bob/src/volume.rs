@@ -127,6 +127,8 @@ impl Volume {
         
         let mut commands = Vec::<Command>::new();
         
+        // Uncomment for testing a failed command/manual unlock:
+        // commands.push(vec!["exit".to_string(), "/b".to_string(), "1".to_string()]);
         commands.push(vec![
             "copy-section-links".to_string(),
             format!(r#"{}\TEM\VolumeData.xml"#, self.path.clone()),

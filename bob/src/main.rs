@@ -157,7 +157,7 @@ fn command_thread_step(commands: &CommandMap, receiver: &Receiver<String>, sende
     // Check if blocked command chains are free to run yet
     let now = SystemTime::now();
     let dur = now.duration_since(*last_blocked_check_time)?;
-    let blocked_check_mins = 15;
+    let blocked_check_mins = 1;
     if dur.as_secs() > blocked_check_mins * 60 {
         *last_blocked_check_time = now;
         
@@ -169,33 +169,34 @@ fn command_thread_step(commands: &CommandMap, receiver: &Receiver<String>, sende
     } 
 
     // Listen for new commands
-    let next_command_full = receiver.recv()?;
-    println!("saving the Message output: {}", next_command_full);
-    let mut command_parts = next_command_full.split(": ");
-    let tem_name = command_parts.next().ok_or(BobError::CommandNoneError("TEM Name", next_command_full.clone()))?;
-    let command_name = command_parts.next().ok_or(BobError::CommandNoneError("Command name", next_command_full.clone()))?;
-    println!("{}", command_name);
-    let command_args = command_parts.next().ok_or(BobError::CommandNoneError("Command args", next_command_full.clone()))?.split(" ").map(|s| s.to_string()).collect::<Vec<String>>();
-    let config = config_from_yaml();
-    run_warn(vec![format!(r#"@echo {} >> {}\{}\processedMessage.txt"#, next_command_full, config.notification_dir, tem_name)], Print);
+    if let Ok(next_command_full) = receiver.try_recv() {
+        println!("saving the Message output: {}", next_command_full);
+        let mut command_parts = next_command_full.split(": ");
+        let tem_name = command_parts.next().ok_or(BobError::CommandNoneError("TEM Name", next_command_full.clone()))?;
+        let command_name = command_parts.next().ok_or(BobError::CommandNoneError("Command name", next_command_full.clone()))?;
+        println!("{}", command_name);
+        let command_args = command_parts.next().ok_or(BobError::CommandNoneError("Command args", next_command_full.clone()))?.split(" ").map(|s| s.to_string()).collect::<Vec<String>>();
+        let config = config_from_yaml();
+        run_warn(vec![format!(r#"@echo {} >> {}\{}\processedMessage.txt"#, next_command_full, config.notification_dir, tem_name)], Print);
 
-    if let Some(command_behavior) = commands.get(command_name) {
-        match command_behavior(command_args) {
-            // TODO won't be matching Some, will be matching Ok()
-            Some(Immediate(chain)) => {
-                let can_run = run_chain_and_save_output(&chain)?;
-                if !can_run {
+        if let Some(command_behavior) = commands.get(command_name) {
+            match command_behavior(command_args) {
+                // TODO won't be matching Some, will be matching Ok()
+                Some(Immediate(chain)) => {
+                    let can_run = run_chain_and_save_output(&chain)?;
+                    if !can_run {
+                        sender.send(chain)?;
+                    }
+                },
+                Some(Queue(chain)) => {
                     sender.send(chain)?;
-                }
-            },
-            Some(Queue(chain)) => {
-                sender.send(chain)?;
-            },
-            Some(NoOp) => {},
-            None => { run_warn(rito(format!("bad bob command (command_behavior returned None): {}", next_command_full)), Print); }
-        };
-    } else {
-        run_warn(rito(format!("bad bob command: {}", next_command_full)), Print);
+                },
+                Some(NoOp) => {},
+                None => { run_warn(rito(format!("bad bob command (command_behavior returned None): {}", next_command_full)), Print); }
+            };
+        } else {
+            run_warn(rito(format!("bad bob command: {}", next_command_full)), Print);
+        }
     }
     Ok(())
 }

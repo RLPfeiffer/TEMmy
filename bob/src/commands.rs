@@ -31,6 +31,17 @@ pub fn command_map() -> CommandMap {
     commands.insert("FixMosaic".to_string(), |args| fixmosaic_command(true, args));
     commands.insert("FixMosaicStage".to_string(), |args| fixmosaic_command(false, args));
 
+    // Manually unlock a folder whose lock is held by a failed build chain.
+    // Only use this command if you are sure further jobs requiring this folder will not also fail
+    commands.insert("Unlock".to_string(), |args| {
+        release_locks(&args);
+        Some(Immediate(CommandChain {
+            label: "Unlock folder".to_string(),
+            commands: vec![],
+            folders_to_lock: vec![]
+        }))
+    });
+
     /*
     // Deploy a core capture volume
     commands.insert("Deploy".to_string(), |args| {

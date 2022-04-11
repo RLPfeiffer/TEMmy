@@ -180,7 +180,7 @@ fn acquire_locks(folders: &Vec<String>) -> bool {
     }
 }
 
-fn release_locks(folders: &Vec<String>) {
+pub fn release_locks(folders: &Vec<String>) {
     if let Ok(ref mut locks) = FOLDER_LOCKS.lock() {
         for chain_folder in folders {
             if locks.contains(chain_folder) {
@@ -204,6 +204,9 @@ pub fn run_chain_and_save_output(chain: &CommandChain) -> BobResult<bool> {
     for command in commands {
         if let Err(err) = run(command.clone(), Silent) {
             run_warn(rito(format!("Command chain failed: {}", label_with_info)), Print);
+            
+            run_warn(rito(format!("The following folders will remain locked by Bob until you restart bob.exe or use the Unlock: <folder> command from the command line: {:?}", chain.folders_to_lock)), Print);
+
             return Err(err);
         }
     }

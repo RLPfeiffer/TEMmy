@@ -45,7 +45,7 @@ Microscope = ScopeName
 NumRods = 4
 MainInvestigator = "Jones"
 MainExperiment = "RC3"
-MainOperator = "Nat Nelson"
+MainOperator = "Matt B"
 
 def PromptForSampleInfo() -> None:
     Blocks = []

@@ -135,7 +135,7 @@ def Capture(CookFirst:bool) -> None:
     TakeSnapshot(True, OverviewFilename, Overview=True)
 
     # Copy the capture to DROPBOX
-    ExperimentDir = dirname(CaptureDir)
+    ExperimentDir = basename(dirname(CaptureDir))
     SectionDir = basename(CaptureDir)
     if CopyDir(join(DataPath, ExperimentDir), join(CopyPath, ExperimentDir), SectionDir):
         SendStop(ExperimentDir, SectionDir)

@@ -38,12 +38,11 @@ def volume_info(volume_name):
 
 def checkFrom(volume_name, lowest_section, highest_section):
     temxcopy = listdir(f'Y:/DROPBOX/temxcopy/{volume_name}')
-    rawdata = listdir('V:/rawdata/{volume_name}')
+    rawdata = listdir(f'V:/rawdata/{volume_name}')
     volume_path = volume_info(volume_name)['path']
     volume = listdir(f'{volume_path}/tem')
 
     output = f'<!DOCTYPE html><div style="max-height: 100vh; overflow: auto;"><table border="1" style="position: relative; text-align: left;">{thr("sec#", "in volume", "in rawdata", "in temxcopy", "mosaicreport")}'
-
     for section in range(lowest_section, highest_section+1):
         section = str(section).rjust(4, '0')
         in_volume = checkMark(section in volume)

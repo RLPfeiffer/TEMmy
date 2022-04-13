@@ -5,7 +5,7 @@ from os.path import normpath
 app = Flask(__name__)
 
 # TODO make a checkAll function and route
-@app.route('/<str:volume_name>/<int:start>/<int:end>')
+@app.route('/<volume_name>/<int:start>/<int:end>')
 def volume_manager(volume_name, start, end):
     return volume.checkFrom(volume_name, start, end)
 

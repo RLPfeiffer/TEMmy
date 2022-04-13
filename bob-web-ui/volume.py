@@ -28,7 +28,13 @@ def conditional(text, cond):
     return text if cond is not None and cond == True or len(cond) > 0 else ""
 
 def volume_info(volume_name):
-    with open('bob-config.yaml', 'r') as f:
+    # When temmy is cloned in C:/Python37/Scripts, bob-web-ui is launched by
+    # ```
+    # cd \Python37\Scripts\temmy\bob-web-ui
+    # launch
+    # ```
+    # So the bob-config.yaml file is 2 directories up the chain:
+    with open('../../bob-config.yaml', 'r') as f:
         config_yaml = yaml.safe_load(f.read())
         volumes = config_yaml['volumes']
         for volume in volumes:

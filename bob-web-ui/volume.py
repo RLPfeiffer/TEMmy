@@ -43,9 +43,13 @@ def volume_info(volume_name):
     return None
 
 def checkFrom(volume_name, lowest_section, highest_section):
+    info = volume_info(volume_name)
     temxcopy = listdir(f'Y:/DROPBOX/temxcopy/{volume_name}')
-    rawdata = listdir(f'V:/rawdata/{volume_name}')
-    volume_path = volume_info(volume_name)['path']
+    
+    save_raw_data = 'save_raw_data' in info and info['save_raw_data']
+
+    rawdata = listdir(f'V:/rawdata/{volume_name}') if save_raw_data else []
+    volume_path = info['path']
     volume = listdir(f'{volume_path}/tem')
 
     output = f'<!DOCTYPE html><div style="max-height: 100vh; overflow: auto;"><table border="1" style="position: relative; text-align: left;">{thr("sec#", "in volume", "in rawdata", "in temxcopy", "mosaicreport")}'
@@ -54,7 +58,7 @@ def checkFrom(volume_name, lowest_section, highest_section):
         in_volume = checkMark(section in volume)
         in_rawdata = checkMark(section in rawdata)
         in_temxcopy = checkMark(section in temxcopy)
-        if in_volume and in_rawdata:
+        if in_volume and (in_rawdata or not save_raw_data):
             pass
         else:
             mosaic_report = find_mosaic_report(volume_name, section)

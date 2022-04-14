@@ -52,7 +52,7 @@ impl Volume {
             
         let temp_volume_dir = if enough_space { temp_volume_dir } else { overflow_volume_dir };
         
-        let mosaic_report_folder = format!(r#"{}\MosaicReports\{}\{}\MosaicReport"#, config.dropbox_link_dir, self.name, section);
+        let mosaic_report_folder = format!(r#"{}\MosaicReports\{}\{}"#, config.dropbox_link_dir, self.name, section);
         let mosaic_report_dest = format!(r#"{}\MosaicReports\{}\{}\MosaicReport.html"#, config.dropbox_link_dir, self.name, section);
 
         // Volumes with 2-step import/build
@@ -88,7 +88,7 @@ impl Volume {
         // a secondary indicator of build failure
         commands.push(robocopy_copy(
             format!(r#"{}\MosaicReport"#, temp_volume_dir.clone()),
-            mosaic_report_folder.clone()));
+            format!(r#"{}\MosaicReport"#, mosaic_report_folder.clone())));
         commands.push(vec![
             "copy".to_string(),
             format!(r#"{}\MosaicReport.html"#, temp_volume_dir),

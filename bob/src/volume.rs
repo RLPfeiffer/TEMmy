@@ -52,7 +52,7 @@ impl Volume {
             
         let temp_volume_dir = if enough_space { temp_volume_dir } else { overflow_volume_dir };
         
-        let mosaic_report_folder = format!(r#"{}\MosaicReports\{}\{}"#, config.dropbox_link_dir, self.name, section);
+        let mosaic_report_folder = format!(r#"{}\MosaicReports\{}\{}\MosaicReport"#, config.dropbox_link_dir, self.name, section);
         let mosaic_report_dest = format!(r#"{}\MosaicReports\{}\{}\MosaicReport.html"#, config.dropbox_link_dir, self.name, section);
 
         // Volumes with 2-step import/build

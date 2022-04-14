@@ -24,6 +24,7 @@ EXTERNAL showImage(file)
 * How do I change the SerialEM Python scripts and package them onto DROPBOX? -> package_temmy
 * How do I define a new SerialEM protocol tutorial? -> new_tutorial
 * How do I add endpoints to the Bob control panel? -> control_panel_endpoints
+* How does rito, the program managing the TEMBot slack messages, work? -> rito
 
 == wiz_tree
 
@@ -71,6 +72,11 @@ TODO
 -> DONE
 
 == new_filament
+
+TODO
+->DONE
+
+== rito
 
 TODO
 ->DONE

@@ -16,6 +16,7 @@ EXTERNAL showImage(file)
 * How do I manage builds through the control panel? -> builds_panel
 * How do I run the builds manually to do something the control panel doesn't allow? -> builds_manual_fix
 * When and how do I run gain reference? -> gain_ref
+* What were the MOST up-to-date/useful protocols for changing a filament and running beam calibration at the time Nat left -> new_filament
 
 == code_questions
 
@@ -68,6 +69,11 @@ TODO
 
 TODO
 -> DONE
+
+== new_filament
+
+TODO
+->DONE
 
 == extra_questions
 

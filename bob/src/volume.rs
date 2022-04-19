@@ -226,8 +226,8 @@ fn commands_from_cmd_file(file: String, args:Vec<String>) -> BobResult<Vec<Comma
     Ok(lines.map(
         |line| line.split(" ").map(
             |arg| if arg.starts_with("%") {
-                args[&arg[1..].parse::<usize>().unwrap() - 1].clone()
+                args[&arg[1..].trim().parse::<usize>().unwrap() - 1].clone()
             } else {
-                arg.to_string()
+                arg.trim().to_string()
             }).collect::<Vec<String>>()).collect::<Vec<Command>>())
 }

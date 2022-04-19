@@ -53,6 +53,8 @@ TODO
 
 == compile_bob
 
+The latest instructions for installing Rust are here: https:\/\/www.rust-lang.org/tools/install
+
 TODO
 -> DONE
 

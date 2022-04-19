@@ -37,6 +37,18 @@
 						// Generate next paragraph of story text
 						// Get ink to generate the next paragraph
 						var paragraphText = story.Continue();
+
+						// Generate links from URLs:
+						var matches = paragraphText.match(/\bhttps?:\/\/\S+/gi);
+						
+						console.log(matches);
+						if (matches !== null && matches.length > 0) {
+							matches.forEach(function (match) {
+								console.log(match);
+								paragraphText = paragraphText.replace(match, '<a href="' + match + '">' + match + '</a>');
+								console.log(paragraphText);
+							});
+						}
 				
 						// Create paragraph element
 						var paragraphElement = document.createElement('p');
@@ -75,7 +87,6 @@
 												var c = existingChoices[i];
 												c.parentNode.removeChild(c);
 										}
-
 										// Tell the story where to go next
 										story.ChooseChoiceIndex(choice.index);
 

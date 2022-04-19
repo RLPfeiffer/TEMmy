@@ -92,6 +92,8 @@ fn run_and_filter_output<F>(command: Vec<String>, mut process_line: F) -> BobRes
     let mut last_junk_pattern = "".to_string();
     let is_robocopy = command[0] == "robocopy";
 
+    let mut fatal_error_lines = Vec::<String>::new();
+
     for line in lines {
         match line {
             Ok(line) => {
@@ -115,8 +117,13 @@ fn run_and_filter_output<F>(command: Vec<String>, mut process_line: F) -> BobRes
                 // check if the line matches a set of known error patterns, i.e. 64-thread python error
                 for fatal_error_regex in &fatal_error_regexes {
                     if fatal_error_regex.is_match(&line) {
+                        // Old behavior: kill the process immediately. This had a side effect of leaving Python grandchild processes alive because nornir never gets to clean up.
+                        /*
                         reader.kill()?;
                         return report_error(BobError::FatalRegex(line), command);
+                        */
+                        // New behavior: Wait until the process is done before reporting failure of the command chain as a whole
+                        fatal_error_lines.push(line.clone());
                     }
                 }
  
@@ -142,7 +149,11 @@ fn run_and_filter_output<F>(command: Vec<String>, mut process_line: F) -> BobRes
             },
         }
     }
-    Ok(())
+    return if fatal_error_lines.len() > 0 {
+        report_error(BobError::FatalRegex(fatal_error_lines.join("\n")), command)
+    } else {
+        Ok(())
+    }
 }
 
 fn report_error(err: BobError, command: Vec<String>) -> BobResult<()> {

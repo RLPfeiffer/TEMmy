@@ -4,6 +4,9 @@ use crate::CommandChain;
 
 #[derive(Error, Debug)]
 pub enum BobError {
+    #[error("Bob error {0}")]
+    Bob(String),
+
     #[error("Exit code {0}")]
     BadExitCode(i32),
 

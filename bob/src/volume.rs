@@ -223,11 +223,26 @@ fn commands_from_cmd_file(file: String, args:Vec<String>) -> BobResult<Vec<Comma
     let cmd_str = fs::read_to_string(&file)?;
     let lines = cmd_str.split("\n");
 
-    Ok(lines.map(
+    let mut bad_arg_expression = "".to_string();
+
+    let commands = lines.map(
         |line| line.split(" ").map(
             |arg| if arg.starts_with("%") {
-                args[&arg[1..].trim().parse::<usize>().unwrap() - 1].clone()
+                let num = &arg[1..].trim();
+                if let Ok(num) = num.parse::<usize>() {
+                    args[num - 1].clone()
+                } else {
+                    bad_arg_expression = format!("Script file {} contains a % arg expression that bob cannot parse: {}", file, arg);
+                    "".to_string()
+                }
             } else {
                 arg.trim().to_string()
-            }).collect::<Vec<String>>()).collect::<Vec<Command>>())
+            }).collect::<Vec<String>>()).collect::<Vec<Command>>();
+
+    if bad_arg_expression.len() > 0 {
+        run(rito(bad_arg_expression.clone()), crate::ShouldPrint::Print)?;
+        Err(BobError::Bob(bad_arg_expression))
+    } else {
+        Ok(commands)
+    }
 }

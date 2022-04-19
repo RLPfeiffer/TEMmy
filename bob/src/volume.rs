@@ -155,6 +155,7 @@ impl Volume {
         
         // Old behavior: If an align script is given, use it
         // This was disabled because aligns can take so long.
+        // If it ever needs to be re-enabled it should use commands.extend(commands_from_cmd_file)
         /*if let Some(align_script) = &self.align_script {
             commands.push(vec![
                 align_script.clone(),

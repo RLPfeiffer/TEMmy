@@ -44,6 +44,8 @@ SpotSize1:int = 1
 SpotSize2:int = 2
 SpotSize3:int = 3
 
+ManuallyCheckCenterPoint:Step = DependingOnYesNo("Does this snapshot show the center point correctly and visibly?", DoAutomatically(lambda: print("")), TellOperatorSEM("Manually correct and re-take the center point image. When you click 'Next step', it will be saved."))
+
 def SwitchToHighMagSteps(Mag:int, MagIndex:int, SpotSize:int, ChangeAperture:bool, CenterPoint:bool, FocusSteps:list[Step]) -> list[Step]:
     return [
         DoAutomatically(lambda: SetBeamBlank(True)),
@@ -59,6 +61,9 @@ def SwitchToHighMagSteps(Mag:int, MagIndex:int, SpotSize:int, ChangeAperture:boo
     ] + ([
         OpenLastRC3Snapshot(Mag),
         TellOperatorSEM(f"Find the center point at {Mag}x, and click it. Then click 'Add Marker'. If another navigator item is visible, delete it."),
+        DoAutomatically(lambda: MoveToNavItem()),
+        DoAutomatically(Record),
+        ManuallyCheckCenterPoint,
         DoAutomatically(lambda: TakeSnapshotWithNotes("", False)),
     ] if CenterPoint else [])
 

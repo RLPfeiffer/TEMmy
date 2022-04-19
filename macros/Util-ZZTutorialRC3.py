@@ -17,6 +17,7 @@ def MainRC3Steps(detailed:bool) -> list[Step]:
         TellOperatorSEM("Locate the center point at 150x, click it, and click 'Add Marker' in the navigator window."),
         DoAutomatically(lambda: MoveToNavItem(PolygonIndex)),
         DoAutomatically(Record),
+        ManuallyCheckCenterPoint,
         DoAutomatically(lambda: TakeSnapshotWithNotes("", False))
     ] + SwitchToHighMagSteps(600, HighMag600, SpotSize2, True, True, []) + SwitchToHighMagSteps(2000, HighMag2000, SpotSize1, False, True, FocusSteps) + [
         TellOperatorSEM("In the menubar, click Navigator -> Montaging and Grids -> Add Circle Polygon. Type 125"),

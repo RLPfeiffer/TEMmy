@@ -3,6 +3,7 @@ use std::path::Path;
 use fs2::free_space;
 extern crate fs_extra;
 use fs_extra::dir::get_size;
+use std::fs;
 
 use crate::robocopy::*;
 use crate::rito::*;
@@ -58,28 +59,20 @@ impl Volume {
         // Volumes with 2-step import/build
         if let Some(import_script) = &self.import_script {
             // Example: RC3Import D:\Volumes\RC3_temp\0001 Y:\DROPBOX\TEMXCopy\RC3\0001
-            commands.push(vec![
-                import_script.clone(),
-                temp_volume_dir.clone(),
-                data_dir.clone(),
-            ]);
+            commands.extend(commands_from_cmd_file(import_script.clone(), vec![temp_volume_dir.clone(), data_dir.clone()])?);
 
             // Example: RC3Build D:\Volumes\RC3_temp\0001
-            commands.push(vec![
-                self.build_script.clone(),
-                temp_volume_dir.clone(),
-            ]);
+            commands.extend(commands_from_cmd_file(self.build_script.clone(), vec![temp_volume_dir.clone()])?);
         }
         // Volumes with a 1-step BuildFast script:
         else {
             // Example: TEMCoreBuildFast D:\Volumes\JeanneAllSections_temp\110001 Y:\DROPBOX\TEMXCopy\JeanneAllSections 110001
-            commands.push(vec![
-                self.build_script.clone(),
+            commands.extend(commands_from_cmd_file(self.build_script.clone(), vec![
                 temp_volume_dir.clone(),
                 Path::new(&data_dir).parent().unwrap().to_string_lossy().to_string(),
-                section.clone(),
-            ])
-        }
+                section.clone()
+            ])?);
+       }
 
         // Automatic build finished with code 0 and no fatal error messages. 
 
@@ -155,13 +148,13 @@ impl Volume {
             "/Q".to_string(),
             temp_volume_dir.clone(),
         ]);
-        commands.push(vec![
-            self.optimize_tiles_script.clone(),
+        commands.extend(commands_from_cmd_file(self.optimize_tiles_script.clone(), vec![
             self.path.clone(),
             section.clone()
-        ]);
+        ])?);
         
-        // If an align script is given, use it
+        // Old behavior: If an align script is given, use it
+        // This was disabled because aligns can take so long.
         /*if let Some(align_script) = &self.align_script {
             commands.push(vec![
                 align_script.clone(),
@@ -179,28 +172,33 @@ impl Volume {
     pub fn fixmosaic_chain(&self, section:String, stage:bool) -> BobResult<CommandChain> {
         let temp_volume_dir = find_temp_volume(self.name.clone(), section.clone());
 
-        Ok(CommandChain {
-            commands: vec![
-                // Delete the bad mosaic file:
-                vec![
-                    "del".to_string(),
-                    format!(r#"{}\TEM\{}\TEM\{}"#, temp_volume_dir.clone(), section.clone(), self.mosaic_file.clone())
-                ],
-                vec![
-                    if stage {
-                        self.fixmosaic_stage_script.clone()
-                    } else {
-                        self.fixmosaic_script.clone()
-                    },
+        let mut commands = vec![
+            // Delete the bad mosaic file:
+            vec![
+                "del".to_string(),
+                format!(r#"{}\TEM\{}\TEM\{}"#, temp_volume_dir.clone(), section.clone(), self.mosaic_file.clone())
+            ],
+        ];
+
+        commands.extend(
+            commands_from_cmd_file(
+                if stage {
+                    self.fixmosaic_stage_script.clone()
+                } else {
+                    self.fixmosaic_script.clone()
+                }, vec![
                     temp_volume_dir.clone(),
                     section.clone(),
-                ],
-                rito(format!("Automatic FixMosaic finished for {} {}", self.name.clone(), section.clone())),
-                vec![
-                    "send-first-mosaic-overview".to_string(),
-                    temp_volume_dir.clone()
-                ],
-            ],
+                ])?);
+
+        commands.push(rito(format!("Automatic FixMosaic finished for {} {}", self.name.clone(), section.clone())));
+        commands.push(vec![
+            "send-first-mosaic-overview".to_string(),
+            temp_volume_dir.clone()
+        ]);
+
+        Ok(CommandChain {
+            commands: commands,
             folders_to_lock: vec![temp_volume_dir.clone()],
             label: format!("automatic fixmosaic for {} {}", self.name.clone(), section.clone())
         })
@@ -217,4 +215,18 @@ fn find_temp_volume(volume: String, section: String) -> String {
     } else {
         overflow_volume_dir
     }
+}
+
+fn commands_from_cmd_file(file: String, args:Vec<String>) -> BobResult<Vec<Command>> {
+    let file = if file.ends_with(".cmd") { file } else { format!("{}.cmd", file)};
+    let cmd_str = fs::read_to_string(&file)?;
+    let lines = cmd_str.split("\n");
+
+    Ok(lines.map(
+        |line| line.split(" ").map(
+            |arg| if arg.starts_with("%") {
+                args[&arg[1..].parse::<usize>().unwrap() - 1].clone()
+            } else {
+                arg.to_string()
+            }).collect::<Vec<String>>()).collect::<Vec<Command>>())
 }

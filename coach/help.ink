@@ -55,7 +55,18 @@ TODO
 
 The latest instructions for installing Rust are here: https:\/\/www.rust-lang.org/tools/install
 
-TODO
+After installing Rust, clone the temmy repository: https:\/\/github.com/connectomes/temmy
+
+Then in a windows terminal:
+
+```
+cd temmy/bob
+
+deploy
+```
+
+(deploy.cmd is a script in the bob directory. It calls `cargo build` and if the compilation is successful, it copies the binary to our DROPBOX drive where Build1 can find it.)
+
 -> DONE
 
 == package_temmy

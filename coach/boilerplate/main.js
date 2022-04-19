@@ -37,19 +37,40 @@
 						// Generate next paragraph of story text
 						// Get ink to generate the next paragraph
 						var paragraphText = story.Continue();
+						if (paragraphText == "```\n") {
+							do {
+								var more = story.Continue();
+								paragraphText += more;
+							} while (more !== "```\n");
+						}
 
 						// Generate links from URLs:
 						var matches = paragraphText.match(/\bhttps?:\/\/\S+/gi);
 						
-						console.log(matches);
 						if (matches !== null && matches.length > 0) {
 							matches.forEach(function (match) {
-								console.log(match);
 								paragraphText = paragraphText.replace(match, '<a href="' + match + '">' + match + '</a>');
-								console.log(paragraphText);
 							});
 						}
 				
+						// Generate <code> tags around `text` and ``` blocks.
+						function applyCodeDelimiter(d) {
+							while (paragraphText.indexOf(d) !== -1) {
+								var startIdx = paragraphText.indexOf(d);
+								var endIdx = paragraphText.indexOf(d, startIdx+d.length);
+
+								var parts = [paragraphText.substring(0, startIdx), paragraphText.substring(startIdx + d.length, endIdx), paragraphText.substring(endIdx + d.length)]
+								console.log(parts);
+
+								paragraphText = parts[0] + "<code>" + parts[1] + "</code>" + parts[2];
+							}
+						}
+
+						applyCodeDelimiter("```\n");
+						applyCodeDelimiter("`");
+			
+						paragraphText = paragraphText.replace("\n", "<br />");
+			
 						// Create paragraph element
 						var paragraphElement = document.createElement('p');
 						paragraphElement.innerHTML = paragraphText;

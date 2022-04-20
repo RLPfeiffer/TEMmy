@@ -8,7 +8,6 @@ pub struct Config {
     pub dropbox_link_dir: String,
     pub build_target: String,
     pub overflow_build_target: String,
-    pub raw_data_dir: String,
     pub notification_dir: String,
     pub core_deployment_dir: String,
     pub worker_threads: i64,

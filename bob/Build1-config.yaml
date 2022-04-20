@@ -2,7 +2,6 @@ dropbox_dir: 'Y:\DROPBOX'
 dropbox_link_dir: '\\OpR-Marc-RC2\Data\DROPBOX'
 build_target: 'D:\Volumes'
 overflow_build_target: 'W:\Volumes'
-raw_data_dir: '\\OpR-Marc-Syn3\Data\RawData'
 notification_dir: 'Y:\DROPBOX\Notification'
 core_deployment_dir: 'X:\Volumes'
 worker_threads: 6
@@ -24,7 +23,7 @@ fatal_errors:
 volumes:
   - name: RC3
     path: "W:/Volumes/RC3"
-    save_raw_data: true
+    raw_data_dir: '\\OpR-Marc-Syn3\Data\RawData'
     import_script: "RC3Import"
     build_script: "RC3Build"
     optimize_tiles_script: "RC3OptimizeTiles"
@@ -34,7 +33,7 @@ volumes:
     mosaic_file: "Translated_Prune_Max0.5.mosaic"
   - name: RPC3AllCandidates
     path: "X:/Volumes/RPC3AllCandidates"
-    save_raw_data: true
+    raw_data_dir: '\\OpR-Marc-Syn3\Data\RawData'
     build_script: "TEMCoreBuildFast"
     optimize_tiles_script: "TEMCoreBuildOptimizeTiles"
     fixmosaic_script: "TEMCoreBuildFixMosaic"
@@ -42,7 +41,6 @@ volumes:
     mosaic_file: "Grid_Cel128_Mes8_Mes8_Thr0.25_it10_sp4.mosaic"
   - name: JeanneAllSections
     path: "X:/Volumes/JeanneAllSections"
-    save_raw_data: false
     build_script: "TEMCoreBuildFast"
     optimize_tiles_script: "TEMCoreBuildOptimizeTiles"
     fixmosaic_script: "TEMCoreBuildFixMosaic"

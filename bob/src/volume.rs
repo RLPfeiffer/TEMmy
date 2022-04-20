@@ -17,7 +17,7 @@ pub struct Volume {
     pub name: String,
     pub path: String,
 
-    pub save_raw_data: bool,
+    pub raw_data_dir: Option<String>,
 
     pub import_script: Option<String>,
     pub build_script: String,
@@ -36,9 +36,15 @@ impl Volume {
 
         // Find if the data is in rawdata or TEMXCopy
         let path_in_temxcopy = format!(r#"{}\TEMXCopy\{}\{}"#, config.dropbox_dir, self.name, section);
-        let path_in_raw_data = format!(r#"{}\{}\{}"#, config.raw_data_dir, self.name, section);
-        let data_dir = if self.save_raw_data && Path::new(&path_in_raw_data).exists() {
-            path_in_raw_data.clone()
+        let mut path_in_raw_data: Option<String> = None;
+        let data_dir = if let Some(raw_data_dir) = &self.raw_data_dir {
+            let _path_in_raw_data = format!(r#"{}\{}\{}"#, raw_data_dir, self.name, section);
+            if Path::new(&_path_in_raw_data).exists() {
+                path_in_raw_data = Some(_path_in_raw_data.clone());
+                _path_in_raw_data.clone()
+            } else {
+                path_in_temxcopy
+            }
         } else {
             path_in_temxcopy
         };
@@ -96,14 +102,16 @@ impl Volume {
         commands.push(rito_image(format!(r"{}\Histogram.png", data_dir)));
 
         // Move the data to Rawdata if it isn't already there
-        if self.save_raw_data && data_dir != path_in_raw_data {
-            commands.push(robocopy_move(
-                        data_dir,
-                        path_in_raw_data));
-            // Notify the TEMs that they can clear the original data files:
-            commands.push(rito_text_file(
-                format!(r#"{}\TEMXCopy\rawdata.txt"#, config.dropbox_dir),
-                format!("{}/{} copied to RawData", self.name, section)));
+        if let Some(path_in_raw_data) = path_in_raw_data {
+            if data_dir != path_in_raw_data {
+                commands.push(robocopy_move(
+                            data_dir,
+                            path_in_raw_data));
+                // Notify the TEMs that they can clear the original data files:
+                commands.push(rito_text_file(
+                    format!(r#"{}\TEMXCopy\rawdata.txt"#, config.dropbox_dir),
+                    format!("{}/{} copied to RawData", self.name, section)));
+            }
         }
         
         commands.push(rito(format!("{0} {1} built automatically. Run `Merge: {0} {1}` or click Merge on the web control panel if it looks good. Full MosaicReport: {2} ", self.name, section, mosaic_report_dest)));

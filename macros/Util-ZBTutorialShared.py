@@ -46,7 +46,16 @@ SpotSize3:int = 3
 
 ManuallyCheckCenterPoint:Step = DependingOnYesNo("Does this snapshot show the center point correctly and visibly?", DoAutomatically(lambda: print("")), TellOperatorSEM("Manually correct and re-take the center point image. When you click 'Next step', it will be saved."))
 
-def SwitchToHighMagSteps(Mag:int, MagIndex:int, SpotSize:int, ChangeAperture:bool, CenterPoint:bool, FocusSteps:list[Step]) -> list[Step]:
+def OpenLastSnapshot(investigator:str, volume:str, mag:int) -> Step:
+    def step() -> None:
+        try:
+            startfile(glob(join(DropboxPath, "TEMSnapshots", f"{investigator} {volume} * x{mag} *.jpg"))[-1])
+            RunNextStep()
+        except:
+            TellOperator(f"Open DROPBOX/TEMSnapshots and open the latest {investigator} {volume} snapshot at x{mag}")
+    return step
+
+def SwitchToHighMagSteps(investigator:str, volume:str, Mag:int, MagIndex:int, SpotSize:int, ChangeAperture:bool, CenterPoint:bool, FocusSteps:list[Step]) -> list[Step]:
     return [
         DoAutomatically(lambda: SetBeamBlank(True)),
         DoAutomatically(lambda: SetMagIndex(MagIndex)),
@@ -59,7 +68,7 @@ def SwitchToHighMagSteps(Mag:int, MagIndex:int, SpotSize:int, ChangeAperture:boo
     ] if ChangeAperture else []) + FocusSteps + [
         DoAutomatically(Record)
     ] + ([
-        OpenLastRC3Snapshot(Mag),
+        OpenLastSnapshot(investigator, volume, Mag),
         TellOperatorSEM(f"Find the center point at {Mag}x, and click it. Then click 'Add Marker'. If another navigator item is visible, delete it."),
         DoAutomatically(lambda: MoveToNavItem()),
         DoAutomatically(Record),

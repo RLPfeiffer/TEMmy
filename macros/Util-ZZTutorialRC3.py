@@ -1,25 +1,16 @@
 # This file is named with a Z so it comes after every other Python function in Util files is defined
 
-def OpenLastRC3Snapshot(mag:int) -> Step:
-    def step() -> None:
-        try:
-            startfile(glob(join(DropboxPath, "TEMSnapshots", f"Jones RC3 * x{mag} *.jpg"))[-1])
-            RunNextStep()
-        except:
-            TellOperator(f"Open DROPBOX/TEMSnapshots and open the latest RC3 snapshot at x{mag}")
-    return step
-
 def MainRC3Steps(detailed:bool) -> list[Step]:
     FocusSteps = DetailedFocusSteps if detailed else FastFocusSteps
     
     return [
-        OpenLastRC3Snapshot(150),
+        OpenLastSnapshot("Jones", "RC3", 150),
         TellOperatorSEM("Locate the center point at 150x, click it, and click 'Add Marker' in the navigator window."),
         DoAutomatically(lambda: MoveToNavItem(PolygonIndex)),
         DoAutomatically(Record),
         ManuallyCheckCenterPoint,
         DoAutomatically(lambda: TakeSnapshotWithNotes("", False))
-    ] + SwitchToHighMagSteps(600, HighMag600, SpotSize2, True, True, []) + SwitchToHighMagSteps(2000, HighMag2000, SpotSize1, False, True, FocusSteps) + [
+    ] + SwitchToHighMagSteps("Jones", "RC3", 600, HighMag600, SpotSize2, True, True, []) + SwitchToHighMagSteps("Jones", "RC3", 2000, HighMag2000, SpotSize1, False, True, FocusSteps) + [
         TellOperatorSEM("In the menubar, click Navigator -> Montaging and Grids -> Add Circle Polygon. Type 125"),
         TellOperatorSEM("In the navigator window, delete every item EXCEPT FOR the formvar reference point and the circle Polygon."),
         DoAutomatically(lambda: SetMagIndex(HighMag5000)),

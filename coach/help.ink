@@ -133,12 +133,13 @@ deploy
 
 -> DONE
 
-== package_temmy
+== new_tutorial
 
 TODO
--> DONE
 
-== new_tutorial
+-> package_temmy
+
+== package_temmy
 
 TODO
 -> DONE
@@ -150,7 +151,7 @@ TODO
 
 == new_filament
 
-TODO
+Becca is in charge of the filament change protocols. She can help.
 ->DONE
 
 == rito

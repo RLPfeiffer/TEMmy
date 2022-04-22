@@ -66,7 +66,19 @@ When SerialEM asks you for notes on the capture, note that TEM Center or the TEM
 
 == wiz_tree
 
-TODO
+When I need to clear space on one of the network hard drives, I use a program called WizTree.
+
+https:\/\/www.diskanalyzer.com/download
+
+Download the portable version of WizTree and extract the folder. Run WizTree64.exe and select the network drive that is full to run a scan on.
+
+* I have downloaded WizTree Portable and run the scan
+- WizTree will show you a tree view and a grid view of the places where the most file storage is being used. When you hover over the grid view, it will show you where the selected file is. I use this to spot folders of data that are safe to move or delete to other places.
+
+Never delete anything unless you know what it is and have double-checked with the lab if anyone needs or wants those files saved.
+
+~ showImage("wiztree.png")
+
 -> DONE
 
 == launch_bob

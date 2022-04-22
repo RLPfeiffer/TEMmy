@@ -18,6 +18,7 @@ VAR camera_shutdown = false
 * Bob (or the Bob control panel) isn't running. How do I restart it? -> launch_bob
 * How do I manage builds through the control panel? -> builds_panel
 * How do I run the builds manually to do something the control panel doesn't allow? -> builds_manual_fix
+* I see a weird spot on the camera images that won't go away. -> gain_ref
 * When and how do I run gain reference? -> gain_ref
 * What were the MOST up-to-date/useful protocols for changing a filament and running beam calibration at the time Nat left -> new_filament
 
@@ -85,7 +86,21 @@ TODO
 
 == gain_ref
 
-TODO
+Gain reference is an important calibration to remove dark spots from our camera images. Whenever you see a dark spot in SerialEM that doesn't move or go away when you move the stage, you will know you need to run Gain Reference.
+
+There is a new protocol for Gain Reference which Gatan wants us to use. Becca knows how to do it. If she's available, ask her to teach you.
+
+If Becca is not available, there is an old protocol for Gain Reference that still works, for now:
+
+1. Pull rod out to first position
+2. Put foil thingy into the slot to keep the vacuum on.
+3. Go to High Mag 5000X
+4. Center the Beam
+5. In Digital Micrograph, Click Help > User Mode > Power User
+6. Camera>Acquire Gain reference
+7. Follow the instructions in Digital Micrograph
+8.	Click Help > User Mode > Regular
+
 -> DONE
 
 == compile_bob

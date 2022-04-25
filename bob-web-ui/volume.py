@@ -77,7 +77,7 @@ def checkFrom(volume_name, lowest_section, highest_section):
                 blank_link(f'/build/{volume_name}/{section}', conditional('build', in_temxcopy)),
                 blank_link(f'/rebuild/{volume_name}/{section}', conditional('rebuild', in_rawdata)),
                 blank_link(f'/fixmosaic/{volume_name}/{section}', conditional('fix mosaic', mosaic_report)),
-                contrast_overrides_elements(section),
+                contrast_overrides_elements(volume_name, section),
                 blank_link(f'/merge/{volume_name}/{section}', conditional('Merge', mosaic_report)))
 
     output += '</table></div>'

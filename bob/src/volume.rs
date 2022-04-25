@@ -193,18 +193,22 @@ impl Volume {
         let mut path_in_raw_data = None;
         let data_dir = self.find_data_dir(section.clone(), &mut path_in_raw_data);
 
-        // Write the contrast override options to the ContrastOverrides file
-        let mut file = OpenOptions::new()
-            .write(true)
-            .append(true)
-            .open(format!("{}/ContrastOverrides.txt", data_dir))?;
-        writeln!(file, "{} {} {} 1.0", section.clone(), min, max)?;
+        let path = Path::new(&data_dir).join("ContrastOverrides.txt");
+        println!("{:?}", path);
+        let overrides_line = format!("{} {} {} 1.0", section.clone(), min, max);
 
         // Return a command chain that is basically just a build chain:
         let build_chain = self.build_chain(section.clone())?;
 
+        // With this done before it starts:
+        // Write the contrast override options to the ContrastOverrides file
+        let mut commands = build_chain.commands;
+
+        commands.insert(0, vec![format!("@echo {} >> {}", overrides_line, path.to_string_lossy().to_string())]);
+        commands.insert(0, vec![format!("@echo >> {}", path.to_string_lossy().to_string())]);
+
         Ok(CommandChain {
-            commands: build_chain.commands,
+            commands: commands,
             label: format!("Contrast overrides for {} {}", self.name.clone(), section.clone()),
             folders_to_lock: build_chain.folders_to_lock
         })

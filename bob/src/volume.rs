@@ -4,6 +4,8 @@ use fs2::free_space;
 extern crate fs_extra;
 use fs_extra::dir::get_size;
 use std::fs;
+use std::fs::OpenOptions;
+use std::io::prelude::*;
 
 use crate::robocopy::*;
 use crate::rito::*;
@@ -34,20 +36,8 @@ impl Volume {
         
         let mut commands = Vec::<Command>::new();
 
-        // Find if the data is in rawdata or TEMXCopy
-        let path_in_temxcopy = format!(r#"{}\TEMXCopy\{}\{}"#, config.dropbox_dir, self.name, section);
-        let mut path_in_raw_data: Option<String> = None;
-        let data_dir = if let Some(raw_data_dir) = &self.raw_data_dir {
-            let _path_in_raw_data = format!(r#"{}\{}\{}"#, raw_data_dir, self.name, section);
-            if Path::new(&_path_in_raw_data).exists() {
-                path_in_raw_data = Some(_path_in_raw_data.clone());
-                _path_in_raw_data.clone()
-            } else {
-                path_in_temxcopy
-            }
-        } else {
-            path_in_temxcopy
-        };
+        let mut path_in_raw_data = None;
+        let data_dir = self.find_data_dir(section.clone(), &mut path_in_raw_data);
 
         let source_size = get_size(Path::new(&data_dir))?;
         let temp_volume_dir = format!(r#"{}\{}_temp\{}"#, config.build_target, self.name, section);
@@ -197,6 +187,45 @@ impl Volume {
             folders_to_lock: vec![temp_volume_dir.clone()],
             label: format!("automatic fixmosaic for {} {}", self.name.clone(), section.clone())
         })
+    }
+
+    pub fn contrast_overrides_chain(&self, section:String, min:u64, max:u64) -> BobResult<CommandChain> {
+        let mut path_in_raw_data = None;
+        let data_dir = self.find_data_dir(section.clone(), &mut path_in_raw_data);
+
+        // Write the contrast override options to the ContrastOverrides file
+        let mut file = OpenOptions::new()
+            .write(true)
+            .append(true)
+            .open(format!("{}/ContrastOverrides.txt", data_dir))?;
+        writeln!(file, "{} {} {} 1.0", section.clone(), min, max)?;
+
+        // Return a command chain that is basically just a build chain:
+        let build_chain = self.build_chain(section.clone())?;
+
+        Ok(CommandChain {
+            commands: build_chain.commands,
+            label: format!("Contrast overrides for {} {}", self.name.clone(), section.clone()),
+            folders_to_lock: build_chain.folders_to_lock
+        })
+    }
+
+    // Find if the data for a section is in rawdata or TEMXCopy
+    fn find_data_dir(&self, section:String, path_in_raw_data: &mut Option<String>) -> String {
+        let config = config_from_yaml();
+        let path_in_temxcopy = format!(r#"{}\TEMXCopy\{}\{}"#, config.dropbox_dir, self.name, section);
+        let data_dir = if let Some(raw_data_dir) = &self.raw_data_dir {
+            let _path_in_raw_data = format!(r#"{}\{}\{}"#, raw_data_dir, self.name, section);
+            *path_in_raw_data = Some(_path_in_raw_data.clone());
+            if Path::new(&_path_in_raw_data).exists() {
+                _path_in_raw_data.clone()
+            } else {
+                path_in_temxcopy
+            }
+        } else {
+            path_in_temxcopy
+        };
+        data_dir
     }
 }
 

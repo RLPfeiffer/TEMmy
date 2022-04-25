@@ -31,6 +31,30 @@ pub fn command_map() -> CommandMap {
     commands.insert("FixMosaic".to_string(), |args| fixmosaic_command(true, args));
     commands.insert("FixMosaicStage".to_string(), |args| fixmosaic_command(false, args));
 
+    commands.insert("ContrastOverrides".to_string(), |args| match args.as_slice() {
+        [volume, section, min, max] => {
+            let config = config_from_yaml();
+            if let Some(volume_config) = volume_for(volume.clone(), &config) {
+                if let Ok(min) = min.parse::<u64>() {
+                    if let Ok(max) = max.parse::<u64>() {
+                        if let Ok(chain) = volume_config.contrast_overrides_chain(section.clone(), min, max) {
+                            Some(Queue(chain))
+                        } else {
+                            None
+                        }
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        },
+        _ => None
+    });
+
     // Manually unlock a folder whose lock is held by a failed build chain.
     // Only use this command if you are sure further jobs requiring this folder will not also fail
     commands.insert("Unlock".to_string(), |args| {

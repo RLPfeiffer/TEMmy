@@ -42,6 +42,11 @@ def volume_info(volume_name):
                 return volume
     return None
 
+def contrast_overrides_elements(volume, section):
+    return f'''min: <input type="text" id="min_{section}" value="" />
+                max: <input type="text" id="max_{section}" value="" />
+                <a onclick="javascript: window.open('/contrast/{volume}/{section}/' + document.getElementById('min_{section}').value + '/' + document.getElementById('max_{section}').value);" >Contrast Overrides</a>'''
+
 def checkFrom(volume_name, lowest_section, highest_section):
     info = volume_info(volume_name)
     temxcopy = listdir(f'Y:/DROPBOX/temxcopy/{volume_name}')
@@ -72,6 +77,7 @@ def checkFrom(volume_name, lowest_section, highest_section):
                 blank_link(f'/build/{volume_name}/{section}', conditional('build', in_temxcopy)),
                 blank_link(f'/rebuild/{volume_name}/{section}', conditional('rebuild', in_rawdata)),
                 blank_link(f'/fixmosaic/{volume_name}/{section}', conditional('fix mosaic', mosaic_report)),
+                contrast_overrides_elements(section),
                 blank_link(f'/merge/{volume_name}/{section}', conditional('Merge', mosaic_report)))
 
     output += '</table></div>'

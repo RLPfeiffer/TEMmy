@@ -45,7 +45,7 @@ def volume_info(volume_name):
 def contrast_overrides_elements(volume, section):
     return f'''min: <input type="text" id="min_{section}" value="" />
                 max: <input type="text" id="max_{section}" value="" />
-                <a onclick="javascript: window.open('/contrast/{volume}/{section}/' + document.getElementById('min_{section}').value + '/' + document.getElementById('max_{section}').value);" >Contrast Overrides</a>'''
+                <a href="#" onclick="javascript: window.open('/contrast/{volume}/{section}/' + document.getElementById('min_{section}').value + '/' + document.getElementById('max_{section}').value);" >Contrast Overrides</a>'''
 
 def checkFrom(volume_name, lowest_section, highest_section):
     info = volume_info(volume_name)
@@ -107,6 +107,10 @@ def rebuild(volume, section):
 def fixmosaic(volume, section):
     tell_bob(f'FixMosaic: {volume} {section}')
     return f'fixing mosaic for {volume} {section}. monitor the #tem-bot slack channel for results. you can close this window'
+
+def contrast(volume, section, min, max):
+    tell_bob(f'ContrastOverrides: {volume} {section} {min} {max}')
+    return f'running contrast overrides for {volume} {section}. monitor the #tem-bot slack channel for results. you can close this window'
 
 def merge(volume, section):
     tell_bob(f'Merge: {volume} {section}')

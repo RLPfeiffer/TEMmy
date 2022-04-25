@@ -21,6 +21,10 @@ def rebuild(volume_name,section):
 def fixmosaic(volume_name, section):
     return volume.fixmosaic(volume_name, section)
 
+@app.route('/contrast/<volume_name>/<section>/<min>/<max>')
+def contrast(volume_name, section, min, max):
+    return volume.contrast(volume_name, section, min, max)
+
 @app.route('/merge/<volume_name>/<section>')
 def merge(volume_name, section):
     return volume.merge(volume_name, section)

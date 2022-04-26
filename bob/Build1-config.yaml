@@ -22,7 +22,7 @@ fatal_errors:
   - OSError.*requested and 0 written
 volumes:
   - name: RC3
-    path: "W:/Volumes/RC3"
+    path: 'W:\Volumes\RC3'
     raw_data_dir: '\\OpR-Marc-Syn3\Data\RawData'
     import_script: "RC3Import"
     build_script: "RC3Build"
@@ -32,7 +32,7 @@ volumes:
     fixmosaic_stage_script: "RC3FixMosaic_Stage"
     mosaic_file: "Translated_Prune_Max0.5.mosaic"
   - name: RPC3AllCandidates
-    path: "X:/Volumes/RPC3AllCandidates"
+    path: 'X:\Volumes\RPC3AllCandidates'
     raw_data_dir: '\\OpR-Marc-Syn3\Data\RawData'
     build_script: "TEMCoreBuildFast"
     optimize_tiles_script: "TEMCoreBuildOptimizeTiles"
@@ -40,9 +40,16 @@ volumes:
     fixmosaic_stage_script: "TEMCoreBuildFixMosaic_Stage"
     mosaic_file: "Grid_Cel128_Mes8_Mes8_Thr0.25_it10_sp4.mosaic"
   - name: JeanneAllSections
-    path: "X:/Volumes/JeanneAllSections"
+    path: 'X:\Volumes\JeanneAllSections'
     build_script: "TEMCoreBuildFast"
     optimize_tiles_script: "TEMCoreBuildOptimizeTiles"
     fixmosaic_script: "TEMCoreBuildFixMosaic"
     fixmosaic_stage_script: "TEMCoreBuildFixMosaic_Stage"
     mosaic_file: "Grid_Cel128_Mes8_Mes8_Thr0.25_it10_sp4.mosaic"
+  - name: Redmond
+    path: 'X:\Volumes\Redmond'
+    build_script: "TEMCoreBuildFast"
+    optimize_tiles_script: "TEMCoreBuildOptimizeTiles"
+    fixmosaic_script: "TEMCoreBuildFixMosaic"
+    fixmosaic_stage_script: "TEMCoreBuildFixMosaic_Stage"
+    mosaic_file: "Grid_Cel128_Mes8_Mes8_Thr0.25_it10_sp4.mosaic"dropbox_dir: 'Y:\DROPBOX'

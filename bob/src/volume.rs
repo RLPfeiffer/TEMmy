@@ -59,11 +59,10 @@ impl Volume {
         }
         // Volumes with a 1-step BuildFast script:
         else {
-            // Example: TEMCoreBuildFast D:\Volumes\JeanneAllSections_temp\110001 Y:\DROPBOX\TEMXCopy\JeanneAllSections 110001
+            // Example: TEMCoreBuildFast D:\Volumes\JeanneAllSections_temp\110001 Y:\DROPBOX\TEMXCopy\JeanneAllSections\110001
             commands.extend(commands_from_cmd_file(self.build_script.clone(), vec![
                 temp_volume_dir.clone(),
-                Path::new(&data_dir).parent().unwrap().to_string_lossy().to_string(),
-                section.clone()
+                data_dir.clone(),
             ])?);
        }
 

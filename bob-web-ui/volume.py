@@ -55,7 +55,9 @@ def checkFrom(volume_name, lowest_section, highest_section):
 
     rawdata = listdir(f'V:/rawdata/{volume_name}') if save_raw_data else []
     volume_path = info['path']
-    volume = listdir(f'{volume_path}/tem')
+    volume = []
+    if exists(f'{volume_path}/tem'):
+        volume = listdir(f'{volume_path}/tem')
 
     output = f'<!DOCTYPE html><div style="max-height: 100vh; overflow: auto;"><table border="1" style="position: relative; text-align: left;">{thr("sec#", "in volume", "in rawdata", "in temxcopy", "mosaicreport")}'
     for section in range(lowest_section, highest_section+1):

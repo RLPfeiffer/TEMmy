@@ -1,5 +1,5 @@
 from os import listdir
-from os.path import exists
+from os.path import exists, join
 import yaml
 
 def tr(*td_text):
@@ -51,9 +51,9 @@ def checkFrom(volume_name, lowest_section, highest_section):
     info = volume_info(volume_name)
     temxcopy = listdir(f'Y:/DROPBOX/temxcopy/{volume_name}')
     
-    save_raw_data = 'save_raw_data' in info and info['save_raw_data']
+    raw_data_dir = info['raw_data_dir'] if 'raw_data_dir' in info else ''
 
-    rawdata = listdir(f'V:/rawdata/{volume_name}') if save_raw_data else []
+    rawdata = listdir(join(raw_data_dir, volume_name)) if len(raw_data_dir) > 0 else []
     volume_path = info['path']
     volume = []
     if exists(f'{volume_path}/tem'):

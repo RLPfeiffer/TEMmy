@@ -65,7 +65,7 @@ def checkFrom(volume_name, lowest_section, highest_section):
         in_volume = checkMark(section in volume)
         in_rawdata = checkMark(section in rawdata)
         in_temxcopy = checkMark(section in temxcopy)
-        if in_volume and (in_rawdata or not save_raw_data):
+        if in_volume and (in_rawdata or len(raw_data_dir) == 0):
             pass
         else:
             mosaic_report = find_mosaic_report(volume_name, section)

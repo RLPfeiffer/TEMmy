@@ -141,7 +141,7 @@ impl Volume {
         let temp_volume_dir = find_temp_volume(self.name.clone(), section.clone());
         
         // TODO if the volume doesn't exist yet, use this first section as the basis for the volume, and add the host info to Mosaic.VikingXML
-        let volume_path = Path::new(&self.path).join(self.name.clone());
+        let volume_path = Path::new(&self.path);
         if !volume_path.exists() {
             fs::create_dir_all(volume_path)?;
             return self.deploy_chain(section);

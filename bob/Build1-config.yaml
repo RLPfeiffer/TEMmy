@@ -44,8 +44,8 @@ volumes:
     fixmosaic_script: "TEMCoreBuildFixMosaic"
     fixmosaic_stage_script: "TEMCoreBuildFixMosaic_Stage"
     mosaic_file: "Grid_Cel128_Mes8_Mes8_Thr0.25_it10_sp4.mosaic"
-  - name: JeanneAllSections
-    path: 'X:\Volumes\JeanneAllSections'
+  - name: Jeanne
+    path: 'X:\Volumes\Jeanne'
     build_script: "TEMCoreBuildFast"
     optimize_tiles_script: "TEMCoreBuildOptimizeTiles"
     fixmosaic_script: "TEMCoreBuildFixMosaic"

@@ -7,6 +7,11 @@ core_deployment_dir: 'X:\Volumes'
 worker_threads: 6
 process_tem_output: true
 automatic_builds: true
+hosts:
+  - drive_letter: 'X'
+    url: http://storage1.connectomes.utah.edu/
+  - drive_letter: 'W'
+    url: http://storage2.connectomes.utah.edu/
 junk_outputs:
   - Jobs Queued
   - underflow encountered in multiply

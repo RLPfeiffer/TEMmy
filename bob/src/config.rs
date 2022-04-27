@@ -15,7 +15,14 @@ pub struct Config {
     pub automatic_builds: bool,
     pub junk_outputs: Vec<String>,
     pub fatal_errors: Vec<String>,
+    pub hosts: Vec<Host>,
     pub volumes: Vec<Volume>,
+}
+
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+pub struct Host {
+    pub drive_letter: String,
+    pub url: String,
 }
 
 pub fn config_from_yaml() -> Config {

@@ -98,13 +98,60 @@ impl Volume {
         })
     }
 
+    pub fn deploy_chain(&self, section:String) -> BobResult<CommandChain> {
+        let config = config_from_yaml();
+        let mut host_url = "".to_string();
+        for host in config.hosts {
+            if self.path.starts_with(&host.drive_letter) {
+                host_url = host.url.clone();
+            }
+        }
+        if host_url.len() == 0 {
+            return Err(BobError::Bob("Tried to deploy volume without a defined host for its drive letter".to_string()));
+        }
+
+        let temp_volume_dir = find_temp_volume(self.name.clone(), section.clone());
+        let mut commands = Vec::<Command>::new();
+        commands.push(robocopy_move(
+            temp_volume_dir.clone(),
+            format!(r#"{}\"#, self.path.clone())));
+
+        commands.push(
+            vec![
+                "add-volume-path".to_string(),
+                format!(r#"{}\Mosaic.VikingXML"#, self.path.clone()),
+                self.name.clone(),
+                host_url.clone(),
+                "bob-output".to_string() // backup dir for Mosaic.VikingXML files
+            ]);
+
+        commands.extend(commands_from_cmd_file(self.optimize_tiles_script.clone(), vec![
+            self.path.clone(),
+            section.clone()
+        ])?);
+ 
+        Ok(CommandChain {
+            commands: commands,
+            folders_to_lock: vec![self.path.clone(), temp_volume_dir.clone()],
+            label: format!("Automatic deploy {} as first section of volume {}", section, self.name.clone())
+        })
+    }
+
     pub fn merge_chain(&self, section:String) -> BobResult<CommandChain> {
         let temp_volume_dir = find_temp_volume(self.name.clone(), section.clone());
         
+        // TODO if the volume doesn't exist yet, use this first section as the basis for the volume, and add the host info to Mosaic.VikingXML
+        let volume_path = Path::new(&self.path).join(self.name.clone());
+        if !volume_path.exists() {
+            fs::create_dir_all(volume_path)?;
+            return self.deploy_chain(section);
+        }
+
         let mut commands = Vec::<Command>::new();
         
         // Uncomment for testing a failed command/manual unlock:
         // commands.push(vec!["exit".to_string(), "/b".to_string(), "1".to_string()]);
+
         commands.push(vec![
             "copy-section-links".to_string(),
             format!(r#"{}\TEM\VolumeData.xml"#, self.path.clone()),

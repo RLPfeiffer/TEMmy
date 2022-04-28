@@ -38,7 +38,7 @@ def volume_info(volume_name):
         config_yaml = yaml.safe_load(f.read())
         volumes = config_yaml['volumes']
         for volume in volumes:
-            if volume['name'] == volume_name:
+            if volume['name'].lower() == volume_name.lower():
                 return volume
     return None
 

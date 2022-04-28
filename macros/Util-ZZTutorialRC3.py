@@ -4,13 +4,13 @@ def MainRC3Steps(detailed:bool, recap:bool) -> list[Step]:
     FocusSteps = DetailedFocusSteps if detailed else FastFocusSteps
     
     return [
-        OpenLastSnapshot("Jones", "RC3", 150),
+        OpenLastSnapshot(recap, "Jones", "RC3", 150),
         TellOperatorSEM("Locate the center point at 150x, click it, and click 'Add Marker' in the navigator window."),
         DoAutomatically(lambda: MoveToNavItem(PolygonIndex)),
         DoAutomatically(Record),
         ManuallyCheckCenterPoint,
         DoAutomatically(lambda: TakeSnapshotWithNotes("", False))
-    ] + SwitchToHighMagSteps("Jones", "RC3", 600, HighMag600, SpotSize2, True, True, []) + SwitchToHighMagSteps("Jones", "RC3", 2000, HighMag2000, SpotSize1, False, True, FocusSteps) + [
+    ] + SwitchToHighMagSteps(recap, "Jones", "RC3", 600, HighMag600, SpotSize2, True, True, []) + SwitchToHighMagSteps(recap, "Jones", "RC3", 2000, HighMag2000, SpotSize1, False, True, FocusSteps) + [
         TellOperatorSEM("In the menubar, click Navigator -> Montaging and Grids -> Add Circle Polygon. Type 125"),
         TellOperatorSEM("In the navigator window, delete every item EXCEPT FOR the formvar reference point and the circle Polygon."),
         DoAutomatically(lambda: SetMagIndex(HighMag5000)),

@@ -92,6 +92,15 @@ fn cli_thread_step(rl: &mut Editor<()>, sender: &Sender<String>) -> BobResult<bo
     Ok(false)
 }
 
+fn spawn_ui_thread() -> JoinHandle<()> {
+    thread::spawn(move || {
+        let dir = env::current_dir().unwrap().join("temmy\\bob-web-ui");
+        let script = dir.join("launch.cmd");
+        println!("{:?}", dir);
+        cmd!(script).dir(dir).read().unwrap();
+    })
+}
+
 // TODO cli thread could allow serialization/suspension of chains to restart bob????
 fn spawn_cli_thread(sender: Sender<String>) -> JoinHandle<()> {
     thread::spawn(move || {
@@ -299,6 +308,8 @@ fn unsafe_main() {
     }
     // This thread monitors an input file that is managed by the Bob Web UI. It is not technicaly a tem message reader but the behavior is the same
     spawn_tem_message_reader_thread("BobUI", command_sender.clone());
+
+    spawn_ui_thread();
 
     // The CLI thread listens for manually entered CommandChains via queues or raw commands
     if spawn_cli_thread(command_sender.clone()).join().is_err() {

@@ -6,6 +6,8 @@ FormvarIndex = 1
 PolygonIndex = 2
 FocusPointIndex = 3
 
+VolumeExperiments = ['RC3', 'RPC3']
+
 def Capture(CookFirst:bool) -> None:
     CurrentNotes = CurrentSampleNotes()
     assert CurrentNotes is not None, "No sample notes have been entered!"
@@ -56,6 +58,7 @@ def Capture(CookFirst:bool) -> None:
 
     # TODO get Block from the label of the navigator point instead of disturbing CurrentSampleNotes, when multiple captures are implemented
     Block, Notes = CurrentNotes.popitem(last=False)
+    _, _, _, _, _, Investigator, Experiment, _, _, _, _, _, _, _ = Notes
     CurrentNotes[Block] = Notes
     CurrentNotes.move_to_end(Block, last=False)
     WriteSampleNotes(CurrentNotes)
@@ -136,8 +139,10 @@ def Capture(CookFirst:bool) -> None:
 
     # Copy the capture to DROPBOX
     ExperimentDir = basename(dirname(CaptureDir))
+    # This should copy core builds by investigator name instead of experiment name:
+    DestinationDir = ExperimentDir if Experiment in VolumeExperiments else Investigator
     SectionDir = basename(CaptureDir)
-    if CopyDir(join(DataPath, ExperimentDir), join(CopyPath, ExperimentDir), SectionDir):
+    if CopyDir(join(DataPath, ExperimentDir), join(CopyPath, DestinationDir), SectionDir):
         SendStop(ExperimentDir, SectionDir)
     else:
         SendMessage(f"Failed to copy {CaptureDir} to DROPBOX")

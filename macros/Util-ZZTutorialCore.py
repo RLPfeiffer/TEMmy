@@ -1,6 +1,6 @@
 # This file is named with a Z so it comes after every other Python function in Util files is defined
 
-def MainCoreSteps(detailed:bool) ->list[Step]:
+def MainCoreSteps(detailed:bool, recap:bool) ->list[Step]:
     FocusSteps = DetailedFocusSteps if detailed else FastFocusSteps
     return [
         TellOperatorSEM("Locate the Region of Interest at 150x (you may need to move the stage). Click 'Add Points' in the navigator window and click on the corners of the ROI. Then click 'Stop Adding Points'."),
@@ -14,10 +14,10 @@ def MainCoreSteps(detailed:bool) ->list[Step]:
         TellOperatorSEM("With the polygon selected, check the Navigator checkboxes for 'Aquire', 'New File At Item', 'Montaged Images', 'Fit Montage to Polygon'. Make sure 'Go from center out and anchor at 2000x' is NOT active and click ok. Then select the generated idoc file. Choose to overwrite it."),
         DoAutomatically(lambda: MoveToNavItem(PolygonIndex)),
         DoAutomatically(ScreenDown)
-    ] + FocusSteps + FinalSteps(detailed)
+    ] + FocusSteps + FinalSteps(detailed, True, recap)
 
-Steps["Core"] = NewSpecimenSteps + LowMagCookSteps + MainCoreSteps(True)
-Steps["Core Recapture"] = NewSpecimenSteps + MainCoreSteps(True)
+Steps["Core"] = NewSpecimenSteps + LowMagCookSteps + MainCoreSteps(True, False)
+Steps["Core Recapture"] = NewSpecimenSteps + MainCoreSteps(True, True)
 
-Steps["Core Fast"] = NewSpecimenSteps + LowMagCookSteps + MainCoreSteps(False)
-Steps["Core RecapFast"] = NewSpecimenSteps + MainCoreSteps(False)
+Steps["Core Fast"] = NewSpecimenSteps + LowMagCookSteps + MainCoreSteps(False, False)
+Steps["Core RecapFast"] = NewSpecimenSteps + MainCoreSteps(False, True)

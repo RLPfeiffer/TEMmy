@@ -49,13 +49,13 @@ ManuallyCheckCenterPoint:Step = DependingOnYesNo("Does this snapshot show the ce
 def OpenLastSnapshot(recap:bool, investigator:str, volume:str, mag:int) -> Step:
     def step() -> None:
         if recap:
-            TellOperator(f"Open DROPBOX/TEMSnapshots and open the closest {investigator} {volume} snapshot to your section at x{mag}")
+            TellOperator(f"Open DROPBOX/TEMSnapshots and open the closest {investigator} {volume} snapshot to your section at x{mag}")()
         else:
             try:
                 startfile(glob(join(DropboxPath, "TEMSnapshots", f"{investigator} {volume} * x{mag} *.jpg"))[-1])
                 RunNextStep()
             except:
-                TellOperator(f"Open DROPBOX/TEMSnapshots and open the latest {investigator} {volume} snapshot at x{mag}")
+                TellOperator(f"Open DROPBOX/TEMSnapshots and open the latest {investigator} {volume} snapshot at x{mag}")()
     return step
 
 def SwitchToHighMagSteps(recap:bool, investigator:str, volume:str, Mag:int, MagIndex:int, SpotSize:int, ChangeAperture:bool, CenterPoint:bool, FocusSteps:list[Step]) -> list[Step]:

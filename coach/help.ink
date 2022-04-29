@@ -223,7 +223,7 @@ Make sure the Scripts folder of your Python installation is in your PATH.
 You also have to add some Environment Variables.
 
 OPENCV_IO_MAX_IMAGE_PIXELS: 3361836000
-RITO_SLACK_TOKEN: xoxb-323357221621-1457545528979-VF32BjzX6tMd1of0jyG0f1d4
+RITO_SLACK_TOKEN: get this value from DROPBOX/nat/RITO_SLACK_TOKEN.txt
 
 ->DONE
 

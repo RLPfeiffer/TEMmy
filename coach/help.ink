@@ -16,8 +16,8 @@ VAR camera_shutdown = false
 * One of the hard drives is full. How do I free up space? -> wiz_tree
 * SerialEM had a random error while running a tutorial. What do I do now? -> serialem_error
 * Bob (or the Bob control panel) isn't running. How do I restart it? -> launch_bob
+* How do I connect to build1? -> connect_to_build1
 * How do I manage builds through the control panel? -> builds_panel
-* How do I run the builds manually to do something the control panel doesn't allow? -> builds_manual_fix
 * I see a weird spot on the camera images that won't go away. -> gain_ref
 * When and how do I run gain reference? -> gain_ref
 * What were the MOST up-to-date/useful protocols for changing a filament and running beam calibration at the time Nat left -> new_filament
@@ -27,7 +27,6 @@ VAR camera_shutdown = false
 * How do I install rust and compile Bob? -> compile_bob
 * How do I change the SerialEM Python scripts and package them onto DROPBOX? -> package_temmy
 * How do I define a new SerialEM protocol tutorial? -> new_tutorial
-* How do I add endpoints to the Bob control panel? -> control_panel_endpoints
 * How does rito, the program managing the TEMBot slack messages, work? -> rito
 
 == serialem_error
@@ -81,19 +80,62 @@ Never delete anything unless you know what it is and have double-checked with th
 
 -> DONE
 
+== connect_to_build1
+
+Press the windows key and type "Remote Desktop", then click on that application.
+
+Type `OpR-Marc-Build1` into the Computer field. Press ENTER and type in your password.
+
+If it doesn't work, Jamie may need to give your account permission to access Build1.
+
+-> DONE
+
 == launch_bob
 
-TODO
+<- connect_to_build1
+
+A folder called temmy needs to exist in C:/Python37/Scripts. (It should already.)
+
+If it doesn't, ask Becca or Jamie to clone the connectomes/temmy repository in that folder.
+
+Open a terminal on Build1.
+
+Type these lines, followed by ENTER:
+
+```
+cd \\Python37\\Scripts
+Y:\\Dropbox\\bob.exe
+```
+
+This also launches the Bob web UI.
+
 -> DONE
 
 == builds_panel
 
-TODO
--> DONE
 
-== builds_manual_fix
+To run builds with the Bob control panel, first make sure Bob is running.
 
-TODO
+* It is
+* It's not
+    First, launch Bob by following these instructions:
+    <- launch_bob
+
+-
+
+<- connect_to_build1
+Open Firefox.
+
+Type http:\/\/155.100.106.88:5000/ into the browser window followed by a volume name and the start and end number of sections to work on.
+
+For example: http:\/\/155.100.106.88:5000/rc3/1400/1450
+
+You should see a table of sections that require attention.
+
+* I can't see images when I click on MosaicReports.
+    Copy the `distribution` folder from `C:/Python37/Scripts/temmy/bob-web-ui` into `C:/Program Files/Mozilla Firefox`. Reopen firefox and try loading again.
+* It works
+-
 -> DONE
 
 == gain_ref
@@ -135,18 +177,32 @@ deploy
 
 == new_tutorial
 
-TODO
+Clone the `connectomes/temmy` repository and open either Util-ZZTutorialCore.py or Util-ZZTutorialVolume.py from the macros folder in a text editor.
+
+Define your new tutorial by adding a line like this one at the bottom of the file: 
+`Steps["RC3"] = NewSpecimenSteps + LowMagCookSteps + MainVolumeSteps("Jones", "RC3", 125, True, False)`
+
+After making a new tutorial, you need to package temmy, correct any errors, and load the new script package.
 
 -> package_temmy
 
 == package_temmy
 
-TODO
--> DONE
+Make sure you have a Y: network mapping for \\OpR-Marc-RC2\Data
 
-== control_panel_endpoints
+```
+cd temmy
+python package.py
+```
 
-TODO
+package.py will detect any type errors in your tutorial. These need to be fixed before your tutorial can be used.
+
+If package.py succeeds, tem1package and tem2package txt files will appear in DROPBOX/nat/script_packages/ with new timestamps.
+
+On each microscope, open SerialEM and Click Scripts > Load New Package, and choose the corresponding new package file.
+
+Test your tutorial as soon as possible.
+
 -> DONE
 
 == new_filament
@@ -156,7 +212,19 @@ Becca is in charge of the filament change protocols. She can help.
 
 == rito
 
-TODO
+rito is Nat's Python library for sending automated notifications. https:\/\/github.com/nqnstudios/rito
+
+Bob relies on rito to send slack notifications. To install rito:
+
+`pip install rito`
+
+Make sure the Scripts folder of your Python installation is in your PATH.
+
+You also have to add some Environment Variables.
+
+OPENCV_IO_MAX_IMAGE_PIXELS: 3361836000
+RITO_SLACK_TOKEN: xoxb-323357221621-1457545528979-VF32BjzX6tMd1of0jyG0f1d4
+
 ->DONE
 
 == extra_questions

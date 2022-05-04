@@ -24,4 +24,4 @@ def ClearDataDrive() -> None:
         new_lines.extend(sections_to_delete)
     
     with open(join(CopyPath, "rawdata.txt"), "w") as f:
-        f.write(linesep.join(new_lines))
+        f.write(linesep.join(new_lines) + linesep)

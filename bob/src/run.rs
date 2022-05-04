@@ -15,6 +15,9 @@ use std::time::SystemTime;
 use humantime::format_rfc3339;
 use crate::errors::*;
 use crate::run::ShouldPrint::*;
+use lazy_static::lazy_static;
+use std::sync::Mutex;
+use std::collections::HashSet;
 
 pub type Command = Vec<String>;
 
@@ -89,6 +92,8 @@ fn run_and_filter_output<F>(command: Vec<String>, mut process_line: F) -> BobRes
     let mut last_junk_pattern = "".to_string();
     let is_robocopy = command[0] == "robocopy";
 
+    let mut fatal_error_lines = Vec::<String>::new();
+
     for line in lines {
         match line {
             Ok(line) => {
@@ -112,8 +117,13 @@ fn run_and_filter_output<F>(command: Vec<String>, mut process_line: F) -> BobRes
                 // check if the line matches a set of known error patterns, i.e. 64-thread python error
                 for fatal_error_regex in &fatal_error_regexes {
                     if fatal_error_regex.is_match(&line) {
+                        // Old behavior: kill the process immediately. This had a side effect of leaving Python grandchild processes alive because nornir never gets to clean up.
+                        /*
                         reader.kill()?;
                         return report_error(BobError::FatalRegex(line), command);
+                        */
+                        // New behavior: Wait until the process is done before reporting failure of the command chain as a whole
+                        fatal_error_lines.push(line.clone());
                     }
                 }
  
@@ -139,7 +149,11 @@ fn run_and_filter_output<F>(command: Vec<String>, mut process_line: F) -> BobRes
             },
         }
     }
-    Ok(())
+    return if fatal_error_lines.len() > 0 {
+        report_error(BobError::FatalRegex(fatal_error_lines.join("\n")), command)
+    } else {
+        Ok(())
+    }
 }
 
 fn report_error(err: BobError, command: Vec<String>) -> BobResult<()> {
@@ -151,23 +165,68 @@ fn report_error(err: BobError, command: Vec<String>) -> BobResult<()> {
 
 pub struct CommandChain {
     pub label: String,
+    pub folders_to_lock: Vec<String>,
     pub commands: Vec<Command>,
 }
 
-pub fn run_chain_and_save_output(chain: CommandChain) -> BobResult<()> {
-    let commands = chain.commands;
+lazy_static!{
+    static ref FOLDER_LOCKS: Mutex<HashSet<String>> = Mutex::new(HashSet::new());
+}
+
+fn acquire_locks(folders: &Vec<String>) -> bool {
+    if let Ok(ref mut locks) = FOLDER_LOCKS.lock() {
+        for chain_folder in folders {
+            if locks.contains(chain_folder) {
+                return false;
+            }
+        }
+        // Make a separate for loop so locks aren't inserted if not all can be acquired
+        for chain_folder in folders {
+            locks.insert(chain_folder.to_string());
+        }
+        return true;
+    } else {
+        run_warn(rito("Error acquiring folder locks!".to_string()), Print);
+        return false;
+    }
+}
+
+pub fn release_locks(folders: &Vec<String>) {
+    if let Ok(ref mut locks) = FOLDER_LOCKS.lock() {
+        for chain_folder in folders {
+            if locks.contains(chain_folder) {
+                locks.remove(chain_folder);
+            }
+        }
+    } else {
+        run_warn(rito("Error releasing folder locks!".to_string()), Print);
+    }
+}
+
+pub fn run_chain_and_save_output(chain: &CommandChain) -> BobResult<bool> {
+    if !acquire_locks(&chain.folders_to_lock) {
+        return Ok(false);
+    }
+
+    let commands = &chain.commands;
     let label_with_info = format!("{} on {} via {}", chain.label, devicename(), realname());
+
     run(rito(format!("Starting command chain: {}", label_with_info)), Print)?;
     for command in commands {
         if let Err(err) = run(command.clone(), Silent) {
             run_warn(rito(format!("Command chain failed: {}", label_with_info)), Print);
+            
+            run_warn(rito(format!("The following folders will remain locked by Bob until you restart bob.exe or use the Unlock: <folder> command from the command line: {:?}", chain.folders_to_lock)), Print);
+
             return Err(err);
         }
     }
-    run(rito(format!("Command chain finished: {}", label_with_info)), Print)
+    release_locks(&chain.folders_to_lock);
+    run(rito(format!("Command chain finished: {}", label_with_info)), Print)?;
+    Ok(true)
 }
 
-pub fn run_on_interval_and_filter_output<F>(command: Vec<String>, process_line: F, seconds: u64) -> Result<(), BobError>
+pub fn run_on_interval_and_filter_output<F>(command: Vec<String>, process_line: F, seconds: u64) -> BobResult<()>
     where F: Fn(String) -> BobResult<()> {
     
     loop {

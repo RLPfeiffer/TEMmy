@@ -26,5 +26,5 @@ def SendStart() -> None:
 
       SendMessage(f"Started: Capturing {NumTiles} images on {ScopeName}. Estimating {EstimatedCaptureHours} hours to complete")
 
-def SendStop(CaptureDir:str) -> None:
-   SendMessage(f"Copied: {CaptureDir} copied from {ScopeName} to DROPBOX.")
+def SendStop(ExperimentDir:str, SectionDir:str) -> None:
+   SendMessage(f"Copied: {ExperimentDir} {SectionDir} copied from {ScopeName} to DROPBOX.")

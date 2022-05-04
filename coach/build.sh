@@ -1,23 +1,25 @@
+main_ink_file="help.ink"
+
 # Make sure there is no existing TEMmy build
 if [ -d temmy ]; then rm -rf temmy; fi
 
 # Compile the protocol Ink
 if [[ $(uname) == *"MINGW"* ]]; then
-    inklecate/inklecate.exe protocol.ink
+    inklecate/inklecate.exe ${main_ink_file}
 else
-    mono inklecate/inklecate.exe protocol.ink
+    mono inklecate/inklecate.exe ${main_ink_file}
 fi
 
 
 # Make the static site
 cp -r boilerplate temmy
-echo "var storyContent = $(cat protocol.ink.json);" > temmy/story.js
+echo "var storyContent = $(cat ${main_ink_file}.json);" > temmy/story.js
 cp "index.html" "temmy/"
 cp -r "images" "temmy/"
 cp "temmy.js" "temmy/"
 
 # Clean up
-rm protocol.ink.json
+rm ${main_ink_file}.json
 
 # Try to copy to internal.connectomes.utah.edu/temmy
 out_path=/y/Volumes/temmy

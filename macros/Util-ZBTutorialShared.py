@@ -14,7 +14,7 @@ RodChangeSteps:list[Step] = [
 
 NewSpecimenSteps:list[Step] = [
     DoAutomatically(ClearSampleNotes),
-    #DoAutomatically(ClearDataDrive),
+    DoAutomatically(ClearDataDrive),
     DependingOnYesNo("Is the sample already loaded in the scope?", SkipSteps(RodChangeSteps), RunNextStep)
 ] + RodChangeSteps + [
     DependingOnScope(DoNothing, TellOperator("Wait for the Penning Gauge to turn on (Green) and stabilize below 30.")),

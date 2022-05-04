@@ -15,7 +15,7 @@ if __name__ == "__main__":
 
     os.makedirs("script_packages", exist_ok=True)
 
-    # Package TEM SerialEM_Scripts
+    # Package TEM macros
     def write_macro(macro, content, file, all_python_file):
         num, name, *scope_name = macro.split('-')
         is_python = name.endswith(".py")
@@ -27,7 +27,7 @@ if __name__ == "__main__":
         name = name.replace('.py', '')
         name = name.replace('.txt', '')
         try:
-            # SerialEM_Scripts with number prefix will be put through this function first because of lexicographical ordering
+            # Macros with number prefix will be put through this function first because of lexicographical ordering
             num = int(macro.split("-")[0])
             file.write(f"Macro\t{num}\n")
             if not is_python:
@@ -46,11 +46,11 @@ if __name__ == "__main__":
             if name != "Util":
                 file.write("EndMacro\n")
         except:
-            # SerialEM_Scripts with the Util prefix will come through last
+            # Macros with the Util prefix will come through last
             file.write(f"############# {macro} #############\n\n{content}\n\n")
             all_python_file.write(f"{content}\n")
 
-    SerialEM_Scripts = sorted(os.listdir('SerialEM_Scripts'))
+    macros = sorted(os.listdir('macros'))
 
     tem1_package_name = f"script_packages/tem1package-{timestamp}.txt"
     tem2_package_name = f"script_packages/tem2package-{timestamp}.txt"
@@ -58,17 +58,17 @@ if __name__ == "__main__":
     tem2_all_python_filename = f"script_packages/tem2-python-{timestamp}.py"
     with open(tem1_package_name, "w") as macro_package_tem1, open(tem2_package_name, "w") as macro_package_tem2, open(tem1_all_python_filename, "w") as tem1_all_python_file, open(tem2_all_python_filename, "w") as tem2_all_python_file:
 
-        macro_package_tem1.write("MaxSerialEM_Scripts\t40\n")
-        macro_package_tem2.write("MaxSerialEM_Scripts\t40\n")
+        macro_package_tem1.write("MaxMacros\t40\n")
+        macro_package_tem2.write("MaxMacros\t40\n")
         tem1_all_python_file.write("import serialem as sem # type: ignore\n")
         tem2_all_python_file.write("import serialem as sem # type: ignore\n")
         tem1_all_python_file.write("from typing import List as list\n")
         tem2_all_python_file.write("from typing import List as list\n")
         tem1_all_python_file.write("from typing import Dict as dict\n")
         tem2_all_python_file.write("from typing import Dict as dict\n")
-        for macro in SerialEM_Scripts:
+        for macro in macros:
             if macro.endswith(".txt") or macro.endswith(".py"):
-                with open(f'SerialEM_Scripts/{macro}', "r") as macro_file: 
+                with open(f'macros/{macro}', "r") as macro_file: 
                     macro_content = macro_file.read()
                     if "tem1" in macro.lower():
                         write_macro(macro, macro_content, macro_package_tem1, tem1_all_python_file)
@@ -81,7 +81,7 @@ if __name__ == "__main__":
         macro_package_tem1.write("EndMacro\n")
         macro_package_tem2.write("EndMacro\n")
 
-    # Type-check python TEM SerialEM_Scripts
+    # Type-check python TEM macros
     subprocess.run(["mypy", "--config-file", "mypy.ini", tem1_all_python_filename])
     subprocess.run(["mypy", "--config-file", "mypy.ini", tem2_all_python_filename])
 

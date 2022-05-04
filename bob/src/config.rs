@@ -1,5 +1,6 @@
 use serde::{Serialize, Deserialize};
 use std::fs;
+use crate::volume::Volume;
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct Config {
@@ -7,7 +8,6 @@ pub struct Config {
     pub dropbox_link_dir: String,
     pub build_target: String,
     pub overflow_build_target: String,
-    pub raw_data_dir: String,
     pub notification_dir: String,
     pub core_deployment_dir: String,
     pub worker_threads: i64,
@@ -15,6 +15,14 @@ pub struct Config {
     pub automatic_builds: bool,
     pub junk_outputs: Vec<String>,
     pub fatal_errors: Vec<String>,
+    pub hosts: Vec<Host>,
+    pub volumes: Vec<Volume>,
+}
+
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+pub struct Host {
+    pub drive_letter: String,
+    pub url: String,
 }
 
 pub fn config_from_yaml() -> Config {

@@ -1,9 +1,12 @@
 import sys
-from os.path import join, basename
+from os.path import join, basename, dirname
+import os
 
 FormvarIndex = 1
 PolygonIndex = 2
 FocusPointIndex = 3
+
+VolumeExperiments = ['RC3', 'RPC3']
 
 def Capture(CookFirst:bool) -> None:
     CurrentNotes = CurrentSampleNotes()
@@ -55,6 +58,7 @@ def Capture(CookFirst:bool) -> None:
 
     # TODO get Block from the label of the navigator point instead of disturbing CurrentSampleNotes, when multiple captures are implemented
     Block, Notes = CurrentNotes.popitem(last=False)
+    _, _, _, _, _, Investigator, Experiment, _, _, _, _, _, _, _ = Notes
     CurrentNotes[Block] = Notes
     CurrentNotes.move_to_end(Block, last=False)
     WriteSampleNotes(CurrentNotes)
@@ -134,16 +138,11 @@ def Capture(CookFirst:bool) -> None:
     TakeSnapshot(True, OverviewFilename, Overview=True)
 
     # Copy the capture to DROPBOX
-    # Try python CopyFunctions first:
-    try:
-        if CopyDir(DataPath, CopyPath, basename(CaptureDir)):
-            SendStop(basename(CaptureDir))
-        else:
-            SendMessage(f"Failed to copy {CaptureDir} to DROPBOX")
-    except:
-        sem.CallFunction("Notifications::SendMessage", f"Python CopyDir failed with error {sys.exc_info()[0]}. Trying again with old version")
-        sem.SetVariable("CopyTarget", CopyPath)
-        sem.SetVariable("TargetDirName", basename(CaptureDir))
-        sem.SetVariable("CopySource", DataPath)
-        sem.CallFunction("CopyFunctions::CopyDir")
-        sem.CallFunction("Notifications::SendStop")
+    ExperimentDir = basename(dirname(CaptureDir))
+    # This should copy core builds by investigator name instead of experiment name:
+    DestinationDir = ExperimentDir if Experiment in VolumeExperiments else Investigator
+    SectionDir = basename(CaptureDir)
+    if CopyDir(join(DataPath, ExperimentDir), join(CopyPath, DestinationDir), SectionDir):
+        SendStop(ExperimentDir, SectionDir)
+    else:
+        SendMessage(f"Failed to copy {CaptureDir} to DROPBOX")

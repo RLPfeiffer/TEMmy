@@ -45,7 +45,7 @@ Microscope = ScopeName
 NumRods = 4
 MainInvestigator = "Jones"
 MainExperiment = "RC3"
-MainOperator = "Nat Nelson"
+MainOperator = "Matt B"
 
 def PromptForSampleInfo() -> None:
     Blocks = []
@@ -92,12 +92,9 @@ def GetCaptureDir(Block:str) -> str:
     CurrentNotes = CurrentSampleNotes()
     assert CurrentNotes is not None
     Notes = CurrentNotes[Block]
-    Investigator = Notes[SampleInfoKeys.index("Investigator")]
     Experiment = Notes[SampleInfoKeys.index("Experiment")]
     BlockPadded = Block.zfill(4)
-    Dir = f"{Investigator}_{Experiment}_{BlockPadded}"
-    if Investigator != MainInvestigator:
-        Dir = f"core_{Dir}"
+    Dir = f"{Experiment}/{BlockPadded}"
     return join(DataPath, Dir)
 
 def GetOverviewFilename(Block:str) -> str:

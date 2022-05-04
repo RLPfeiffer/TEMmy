@@ -23,6 +23,7 @@ dependencies = [
  "fs2",
  "fs_extra",
  "humantime",
+ "lazy_static",
  "regex",
  "rustyline",
  "serde",

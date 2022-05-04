@@ -5,6 +5,7 @@ from os import path
 
 # Check to make sure there is enough space, then copy the contents CopySource recursively to CopyTarget.
 def CopyDir(CopySource:str, CopyTarget:str, TargetDirName:str) -> bool:
+   os.makedirs(CopyTarget, exist_ok=True)
    if CheckSpaceForCopyDir(CopySource, CopyTarget, TargetDirName):
       return CopyDirWithoutCheckingSpace(CopySource, CopyTarget, TargetDirName)
    else:
@@ -34,14 +35,14 @@ def CheckSpaceForCopyDir(CopySource:str, CopyTarget:str, TargetDirName:str) -> b
 # INTERNAL helper function that copies a directory to CopyTarget without checking for space first.
 # (External-use functions all check before calling this one)
 def CopyDirWithoutCheckingSpace(CopySource:str, CopyTarget:str, TargetDirName:str) -> bool:
+   source = path.join(CopySource, TargetDirName)
+   destination = path.join(CopyTarget, TargetDirName)
+   print(f"Calling copytree from {source}->{destination}")
    try:
-      source = path.join(CopySource, TargetDirName)
-      destination = path.join(CopyTarget, TargetDirName)
-      print(f"Calling copytree from {source}->{destination}")
       shutil.copytree(source, destination)
       return True
    except:
-      SendMessage(f"Error {sys.exc_info()[0]} while attempting to copy {TargetDirName} from {ScopeName} to {CopyTarget}")
+      SendMessage(f"Error {sys.exc_info()[0]} while attempting to copy {TargetDirName} from {ScopeName} {source} to {destination}")
       return False
 
 # The argument values need to be updated to match the SerialEM computer's current network mappings and a folder in the data drive before testing

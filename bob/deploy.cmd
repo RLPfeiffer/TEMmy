@@ -1,0 +1,1 @@
+cargo build && copy target\debug\bob.exe \\OpR-Marc-RC2\Data\DROPBOX

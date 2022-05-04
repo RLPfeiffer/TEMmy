@@ -2,12 +2,16 @@ dropbox_dir: 'Y:\DROPBOX'
 dropbox_link_dir: '\\OpR-Marc-RC2\Data\DROPBOX'
 build_target: 'D:\Volumes'
 overflow_build_target: 'W:\Volumes'
-raw_data_dir: '\\OpR-Marc-Syn3\Data\RawData'
 notification_dir: 'Y:\DROPBOX\Notification'
 core_deployment_dir: 'X:\Volumes'
-worker_threads: 2
+worker_threads: 6
 process_tem_output: true
 automatic_builds: true
+hosts:
+  - drive_letter: 'X'
+    url: http://storage1.connectomes.utah.edu/
+  - drive_letter: 'W'
+    url: http://storage2.connectomes.utah.edu/
 junk_outputs:
   - Jobs Queued
   - underflow encountered in multiply
@@ -16,9 +20,41 @@ junk_outputs:
 fatal_errors:
   - need at most 63 handles
   - No output from ir-refine-grid
-  - FileNotFoundError
   - is not recognized as an internal or external command, operable program or batch file
   - No tiles found in IDoc
   - After removing missing file names there were no tiles remaining
   - expected one argument
-  - Multiprocess call not successful
+  - OSError.*requested and 0 written
+volumes:
+  - name: RC3
+    path: 'W:\Volumes\RC3'
+    raw_data_dir: '\\OpR-Marc-Syn3\Data\RawData'
+    import_script: "RC3Import"
+    build_script: "RC3Build"
+    optimize_tiles_script: "RC3OptimizeTiles"
+    align_script: "RC3Align"
+    fixmosaic_script: "RC3FixMosaic"
+    fixmosaic_stage_script: "RC3FixMosaic_Stage"
+    mosaic_file: "Translated_Prune_Max0.5.mosaic"
+  - name: RPC3AllCandidates
+    path: 'X:\Volumes\RPC3AllCandidates'
+    raw_data_dir: '\\OpR-Marc-Syn3\Data\RawData'
+    build_script: "TEMCoreBuildFast"
+    optimize_tiles_script: "TEMCoreBuildOptimizeTiles"
+    fixmosaic_script: "TEMCoreBuildFixMosaic"
+    fixmosaic_stage_script: "TEMCoreBuildFixMosaic_Stage"
+    mosaic_file: "Grid_Cel128_Mes8_Mes8_Thr0.25_it10_sp4.mosaic"
+  - name: Jeanne
+    path: 'X:\Volumes\Jeanne'
+    build_script: "TEMCoreBuildFast"
+    optimize_tiles_script: "TEMCoreBuildOptimizeTiles"
+    fixmosaic_script: "TEMCoreBuildFixMosaic"
+    fixmosaic_stage_script: "TEMCoreBuildFixMosaic_Stage"
+    mosaic_file: "Grid_Cel128_Mes8_Mes8_Thr0.25_it10_sp4.mosaic"
+  - name: Redmond
+    path: 'X:\Volumes\Redmond'
+    build_script: "TEMCoreBuildFast"
+    optimize_tiles_script: "TEMCoreBuildOptimizeTiles"
+    fixmosaic_script: "TEMCoreBuildFixMosaic"
+    fixmosaic_stage_script: "TEMCoreBuildFixMosaic_Stage"
+    mosaic_file: "Grid_Cel128_Mes8_Mes8_Thr0.25_it10_sp4.mosaic"dropbox_dir: 'Y:\DROPBOX'

@@ -6,6 +6,9 @@ use std::convert::TryInto;
 use threadpool::ThreadPool;
 use std::io::prelude::*;
 use std::io::BufReader;
+use lazy_static::lazy_static;
+use std::sync::Mutex;
+use std::time::SystemTime;
 
 use duct::cmd;
 
@@ -19,11 +22,10 @@ use rito::*;
 mod robocopy;
 mod errors;
 use errors::*;
-mod core_builds;
-mod rc3_builds;
 mod commands;
 use commands::*;
 use commands::CommandBehavior::*;
+mod volume;
 
 // Source: https://stackoverflow.com/a/35820003
 use std::{
@@ -90,6 +92,15 @@ fn cli_thread_step(rl: &mut Editor<()>, sender: &Sender<String>) -> BobResult<bo
     Ok(false)
 }
 
+fn spawn_ui_thread() -> JoinHandle<()> {
+    thread::spawn(move || {
+        let dir = env::current_dir().unwrap().join("temmy\\bob-web-ui");
+        let script = dir.join("launch.cmd");
+        println!("{:?}", dir);
+        cmd!(script).dir(dir).read().unwrap();
+    })
+}
+
 // TODO cli thread could allow serialization/suspension of chains to restart bob????
 fn spawn_cli_thread(sender: Sender<String>) -> JoinHandle<()> {
     thread::spawn(move || {
@@ -108,13 +119,26 @@ fn spawn_cli_thread(sender: Sender<String>) -> JoinHandle<()> {
 
 }
 
+lazy_static!{
+    pub static ref BLOCKED_COMMAND_CHAINS: Mutex<Vec<CommandChain>> = Mutex::new(vec![]);
+}
+
 fn threadpool_step(receiver: &Receiver<CommandChain>, pool:&ThreadPool) -> BobResult<()> {
     let next_chain = receiver.recv()?;
     pool.execute(move || {
         let label = next_chain.label.clone();
-        if run_chain_and_save_output(next_chain).is_err() {
+        let res = run_chain_and_save_output(&next_chain);
+        if res.is_err() {
             println!("error from {} -- should have been reported via slack also", label);
         };
+        if let Ok(false) = res {
+            // Store chains that were blocked where the command thread can access them to send them again
+            if let Ok(ref mut blocked_chains) = BLOCKED_COMMAND_CHAINS.lock() {
+                blocked_chains.push(next_chain);
+            } else {
+                run_warn(rito(format!("Error saving a blocked command chain")), Print);
+            }
+        }
     });
     Ok(())
 }
@@ -138,31 +162,50 @@ fn spawn_worker_threadpool(receiver: Receiver<CommandChain>) -> JoinHandle<()> {
     })
 }
 
-fn command_thread_step(commands: &CommandMap, receiver: &Receiver<String>, sender: &Sender<CommandChain>) -> BobResult<()> {
-    let next_command_full = receiver.recv()?;
-    println!("saving the Message output: {}", next_command_full);
-    let mut command_parts = next_command_full.split(": ");
-    let tem_name = command_parts.next().ok_or(BobError::CommandNoneError("TEM Name", next_command_full.clone()))?;
-    let command_name = command_parts.next().ok_or(BobError::CommandNoneError("Command name", next_command_full.clone()))?;
-    println!("{}", command_name);
-    let command_args = command_parts.next().ok_or(BobError::CommandNoneError("Command args", next_command_full.clone()))?.split(" ").map(|s| s.to_string()).collect::<Vec<String>>();
-    let config = config_from_yaml();
-    run_warn(vec![format!(r#"@echo {} >> {}\{}\processedMessage.txt"#, next_command_full, config.notification_dir, tem_name)], Print);
-
-    if let Some(command_behavior) = commands.get(command_name) {
-        match command_behavior(command_args) {
-            // TODO won't be matching Some, will be matching Ok()
-            Some(Immediate(chain)) => {
-                run_chain_and_save_output(chain)?;
-            },
-            Some(Queue(chain)) => {
+fn command_thread_step(commands: &CommandMap, receiver: &Receiver<String>, sender: &Sender<CommandChain>, last_blocked_check_time:&mut SystemTime) -> BobResult<()> {
+    // Check if blocked command chains are free to run yet
+    let now = SystemTime::now();
+    let dur = now.duration_since(*last_blocked_check_time)?;
+    let blocked_check_mins = 1;
+    if dur.as_secs() > blocked_check_mins * 60 {
+        *last_blocked_check_time = now;
+        
+        if let Ok(mut blocked_chains) = BLOCKED_COMMAND_CHAINS.lock() {
+            while let Some(chain) = blocked_chains.pop() {
                 sender.send(chain)?;
-            },
-            Some(NoOp) => {},
-            None => { run_warn(rito(format!("bad bob command (command_behavior returned None): {}", next_command_full)), Print); }
-        };
-    } else {
-        run_warn(rito(format!("bad bob command: {}", next_command_full)), Print);
+            }
+        }
+    } 
+
+    // Listen for new commands
+    if let Ok(next_command_full) = receiver.try_recv() {
+        println!("saving the Message output: {}", next_command_full);
+        let mut command_parts = next_command_full.split(": ");
+        let tem_name = command_parts.next().ok_or(BobError::CommandNoneError("TEM Name", next_command_full.clone()))?;
+        let command_name = command_parts.next().ok_or(BobError::CommandNoneError("Command name", next_command_full.clone()))?;
+        println!("{}", command_name);
+        let command_args = command_parts.next().ok_or(BobError::CommandNoneError("Command args", next_command_full.clone()))?.split(" ").map(|s| s.to_string()).collect::<Vec<String>>();
+        let config = config_from_yaml();
+        run_warn(vec![format!(r#"@echo {} >> {}\{}\processedMessage.txt"#, next_command_full, config.notification_dir, tem_name)], Print);
+
+        if let Some(command_behavior) = commands.get(command_name) {
+            match command_behavior(command_args) {
+                // TODO won't be matching Some, will be matching Ok()
+                Some(Immediate(chain)) => {
+                    let can_run = run_chain_and_save_output(&chain)?;
+                    if !can_run {
+                        sender.send(chain)?;
+                    }
+                },
+                Some(Queue(chain)) => {
+                    sender.send(chain)?;
+                },
+                Some(NoOp) => {},
+                None => { run_warn(rito(format!("bad bob command (command_behavior returned None): {}", next_command_full)), Print); }
+            };
+        } else {
+            run_warn(rito(format!("bad bob command: {}", next_command_full)), Print);
+        }
     }
     Ok(())
 }
@@ -171,9 +214,11 @@ fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>
  
     let commands = command_map();
 
+    let mut last_blocked_check_time = SystemTime::now();
+
     thread::spawn(move || {
         loop {
-            if let Err(err) = command_thread_step(&commands, &receiver, &sender) {
+            if let Err(err) = command_thread_step(&commands, &receiver, &sender, &mut last_blocked_check_time) {
                 run_warn(rito(format!("bob command thread error: {}", err)), Print);
             }
         }
@@ -182,6 +227,9 @@ fn spawn_command_thread(receiver: Receiver<String>, sender: Sender<CommandChain>
 fn main() {
     let args:Vec<String> = env::args().collect();
     match args.as_slice() {
+        [_, arg] if arg.as_str() == "debug" => {
+            debug_main();
+        },
         [_, arg] if arg.as_str() == "run_unsafe" => {
             unsafe_main();
         },
@@ -199,6 +247,43 @@ fn main() {
         }
         _ => {
             println!("bad args for bob");
+        }
+    }
+}
+
+fn debug_main() {
+    let commands = command_map();
+
+    let mut rl = Editor::<()>::new();
+
+    loop {
+
+        let readline = rl.readline(">> ");
+        match readline {
+            Ok(line) => {
+                let mut command_parts = line.split(": ");
+                let command_name = command_parts.next().ok_or(BobError::CommandNoneError("Command name", line.clone())).unwrap();
+                let command_args = command_parts.next().ok_or(BobError::CommandNoneError("Command args", line.clone())).unwrap().split(" ").map(|s| s.to_string()).collect::<Vec<String>>();
+ 
+                if let Some(behavior) = commands.get(command_name) {
+                    if let Some(chain) = match behavior(command_args) {
+                        // TODO won't be matching Some, will be matching Ok()
+                        Some(Immediate(chain)) => Some(chain),
+                        Some(Queue(chain)) => Some(chain),
+                        _ => None
+                    } {
+                        println!("{}:", chain.label);
+                        for command in chain.commands {
+                            print!("\n    ");
+                            for token in command {
+                                print!("{} ", token);
+                            }
+                        }
+                    }
+                }
+ 
+            },
+            _ => break,
         }
     }
 }
@@ -223,6 +308,8 @@ fn unsafe_main() {
     }
     // This thread monitors an input file that is managed by the Bob Web UI. It is not technicaly a tem message reader but the behavior is the same
     spawn_tem_message_reader_thread("BobUI", command_sender.clone());
+
+    spawn_ui_thread();
 
     // The CLI thread listens for manually entered CommandChains via queues or raw commands
     if spawn_cli_thread(command_sender.clone()).join().is_err() {

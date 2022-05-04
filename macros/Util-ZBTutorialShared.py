@@ -21,6 +21,7 @@ NewSpecimenSteps:list[Step] = [
     DoAutomatically(lambda: SetMagIndex(LowMag150)),
     TellOperatorTEM("Remove the aperture by turning the dial to the red dot."),
     DoAutomatically(TurnOnFilament),
+    DoAutomatically(lambda: SetSpotSize(2)),
     DoAutomatically(ScreenDown),
     TellOperatorSEM("Scroll the stage to find a region of formvar, and click 'Add Stage Pos' in the navigator window."),
 ]
@@ -38,10 +39,30 @@ AfterMontageSteps:list[Step] = [
 
 AcquireAtItemsMessage = "In the menubar, click Navigator -> AcquireAtItems. Choose '*'. Leave FilamentManager selected, and click OK. Then move the mirror out of the way."
 
-def SwitchToHighMagSteps(Mag:int, MagIndex:int, ChangeAperture:bool, CenterPoint:bool, FocusSteps:list[Step]) -> list[Step]:
+# Pass these as arguments to SwitchToHighMagSteps for readability
+SpotSize1:int = 1
+SpotSize2:int = 2
+SpotSize3:int = 3
+
+ManuallyCheckCenterPoint:Step = DependingOnYesNo("Does this snapshot show the center point correctly and visibly?", DoAutomatically(lambda: print("")), TellOperatorSEM("Manually correct and re-take the center point image. When you click 'Next step', it will be saved."))
+
+def OpenLastSnapshot(recap:bool, investigator:str, volume:str, mag:int) -> Step:
+    def step() -> None:
+        if recap:
+            TellOperator(f"Open DROPBOX/TEMSnapshots and open the closest {investigator} {volume} snapshot to your section at x{mag}")()
+        else:
+            try:
+                startfile(glob(join(DropboxPath, "TEMSnapshots", f"{investigator} {volume} * x{mag} *.jpg"))[-1])
+                RunNextStep()
+            except:
+                TellOperator(f"Open DROPBOX/TEMSnapshots and open the latest {investigator} {volume} snapshot at x{mag}")()
+    return step
+
+def SwitchToHighMagSteps(recap:bool, investigator:str, volume:str, Mag:int, MagIndex:int, SpotSize:int, ChangeAperture:bool, CenterPoint:bool, FocusSteps:list[Step]) -> list[Step]:
     return [
         DoAutomatically(lambda: SetBeamBlank(True)),
-        DoAutomatically(lambda: SetMagIndex(MagIndex))
+        DoAutomatically(lambda: SetMagIndex(MagIndex)),
+        DoAutomatically(lambda: SetSpotSize(SpotSize))
     ] + ([
         TellOperatorTEM("Insert the second aperture."),
         DependingOnScope(TellOperatorTEM("Spread the beam by several turns (by turning the 'brightness' knob clockwise.)"), DoNothing),
@@ -50,14 +71,21 @@ def SwitchToHighMagSteps(Mag:int, MagIndex:int, ChangeAperture:bool, CenterPoint
     ] if ChangeAperture else []) + FocusSteps + [
         DoAutomatically(Record)
     ] + ([
-        OpenLastRC3Snapshot(Mag),
-        TellOperatorSEM(f"Find the center point at {Mag}x, and click it. Then delete the last navigator item."),
+        OpenLastSnapshot(recap, investigator, volume, Mag),
+        TellOperatorSEM(f"Find the center point at {Mag}x, and click it. Then click 'Add Marker'. If another navigator item is visible, delete it."),
+        DoAutomatically(lambda: MoveToNavItem()),
+        DoAutomatically(Record),
+        ManuallyCheckCenterPoint,
         DoAutomatically(lambda: TakeSnapshotWithNotes("", False)),
     ] if CenterPoint else [])
 
-FastFocusStep:Step = TellOperatorTEM("Tighten the beam, center it, and use image wobble and the focus knob to adjust focus. Turn off wobble. Make sure the beam is spread around 100 Current Density.")
+FastFocusSteps:list[Step] = [
+    DoAutomatically(ScreenDown),
+    TellOperatorTEM("Tighten the beam, center it, and use image wobble and the focus knob to adjust focus. Turn off wobble. Make sure the beam is spread around 100 Current Density.")
+]
 
 DetailedFocusSteps:list[Step] = [
+    DoAutomatically(ScreenDown),
     TellOperatorTEM("Turn the brightness knob counter-clockwise to tighten the beam, then center it with the X/Y knobs on the control panel."),
     DependingOnScope(TellOperatorTEM("Turn on Image Wobble X and Image Wobble Y using the control panel."), TellOperatorTEM("Turn on Image Wobble using the control panel.")),
     TellOperatorTEM("Put the mirror in using the lever to the right of the microscope column."),
@@ -68,12 +96,20 @@ DetailedFocusSteps:list[Step] = [
 ChooseMontageMacro:Step = DependingOnYesNo("Are there any holes in the section or formvar?", TellOperatorSEM(AcquireAtItemsMessage.replace("*", "CalibrateAndRecapturePy")), TellOperatorSEM(AcquireAtItemsMessage.replace("*", "HighMagCookPy")))
 UseRecaptureMacro:Step = TellOperatorSEM(AcquireAtItemsMessage.replace("*", "CalibrateAndRecapturePy"))
 
-def FinalSteps(detailed:bool) -> list[Step]:
-    return [
+def FinalSteps(detailed:bool, core:bool, recap:bool) -> list[Step]:
+    MontageStep:Step = ChooseMontageMacro
+    if recap:
+        MontageStep = UseRecaptureMacro
+    
+    steps:list[Step] = [
         DoAutomatically(Autofocus),
         DoAutomatically(Record),
-    ] + ([
-        TellOperatorSEM("If the focus looks good, click 'Next Step'. If not, redo the focus, click 'Autofocus', then 'Record.' Keep doing this until it looks good."),
-        TellOperatorSEM("If the green number representing the circle's center has shifted from where you put it, use 'Move item' to fix it, then click 'Stop Moving.'"),
-        ChooseMontageMacro,
-    ] + AfterMontageSteps if detailed else [])
+    ]
+    if detailed:
+        steps.append(TellOperatorSEM("If the focus looks good, click 'Next Step'. If not, redo the focus, click 'Autofocus', then 'Record.' Keep doing this until it looks good."))
+        if not core:
+            steps.append(TellOperatorSEM("If the green number representing the circle's center has shifted from where you put it, use 'Move item' to fix it, then click 'Stop Moving.'"))
+        steps.append(MontageStep)
+        steps += AfterMontageSteps
+    
+    return steps

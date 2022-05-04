@@ -1,28 +1,33 @@
 from flask import Flask
-from . import rc3
+from . import volume
 from os.path import dirname
 from os.path import normpath
 app = Flask(__name__)
 
-@app.route('/rc3/<int:start>/<int:end>')
-def rc3_manager(start, end):
-    return rc3.checkFrom(start, end)
+# TODO make a checkAll function and route
+@app.route('/<volume_name>/<int:start>/<int:end>')
+def volume_manager(volume_name, start, end):
+    return volume.checkFrom(volume_name, start, end)
 
-@app.route('/rc3build/<section>')
-def rc3_build(section):
-    return rc3.build(section)
+@app.route('/build/<volume_name>/<section>')
+def build(volume_name, section):
+    return volume.build(volume_name, section)
 
-@app.route('/rc3rebuild/<section>')
-def rc3_rebuild(section):
-    return rc3.rebuild(section)
+@app.route('/rebuild/<volume_name>/<section>')
+def rebuild(volume_name,section):
+    return volume.rebuild(volume_name, section)
 
-@app.route('/rc3fixmosaic/<section>')
-def rc3_fixmosaic(section):
-    return rc3.fixmosaic(section)
+@app.route('/fixmosaic/<volume_name>/<section>')
+def fixmosaic(volume_name, section):
+    return volume.fixmosaic(volume_name, section)
 
-@app.route('/rc3merge/<section>')
-def rc3_merge(section):
-    return rc3.merge(section)
+@app.route('/contrast/<volume_name>/<section>/<min>/<max>')
+def contrast(volume_name, section, min, max):
+    return volume.contrast(volume_name, section, min, max)
+
+@app.route('/merge/<volume_name>/<section>')
+def merge(volume_name, section):
+    return volume.merge(volume_name, section)
 
 @app.route('/file/<path:p>')
 def file(p):

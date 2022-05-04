@@ -4,6 +4,9 @@ use crate::CommandChain;
 
 #[derive(Error, Debug)]
 pub enum BobError {
+    #[error("Bob error {0}")]
+    Bob(String),
+
     #[error("Exit code {0}")]
     BadExitCode(i32),
 
@@ -36,6 +39,12 @@ pub enum BobError {
 
     #[error(transparent)]
     ReadlineError(#[from] rustyline::error::ReadlineError),
+
+    #[error(transparent)]
+    SystemTimeError(#[from] std::time::SystemTimeError),
+
+    #[error(transparent)]
+    FSExtraError(#[from] fs_extra::error::Error),
 }
 
 pub type BobResult<T> = Result<T, BobError>;

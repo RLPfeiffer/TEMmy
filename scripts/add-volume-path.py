@@ -21,11 +21,13 @@ from code import interact
 import xml.etree.ElementTree as ET
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print("add-volume-path requires args [path to Mosaic.VikingXML] [backup directory]")
+    if len(sys.argv) != 5:
+        print("add-volume-path requires args [path to Mosaic.VikingXML] [name] [host] [backup directory]")
         exit(1)
     viking_xml_path = sys.argv[1]
-    backup_dir = sys.argv[2]
+    name = sys.argv[2]
+    host = sys.argv[3]
+    backup_dir = sys.argv[4]
 
     # Before automatically doing anything to a volume's files, make a backup
     timestamp = datetime.now().strftime("%d-%b-%Y-%H-%M-%S")
@@ -34,11 +36,10 @@ if __name__ == "__main__":
     # Get the Volume element from Mosaic.VikingXML
     viking_xml_tree = ET.parse(viking_xml_path)
     viking_xml_root = viking_xml_tree.getroot()
-    name = viking_xml_root.attrib['Name']
 
     # Set the Volume element's host and path attribute
-    host = "http://storage1.connectomes.utah.edu/"
     path = "{}{}".format(host, name)
+    viking_xml_root.attrib['Name'] = name
     viking_xml_root.attrib['host'] = host
     viking_xml_root.attrib['path'] = path
 

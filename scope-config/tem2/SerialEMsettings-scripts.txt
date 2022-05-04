@@ -1,4 +1,4 @@
-MaxMacros	40
+MaxSerialEM_Scripts	40
 Macro	0
 MacroName Timed Low Mag Cook With Wobble
 

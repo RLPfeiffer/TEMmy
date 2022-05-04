@@ -54,7 +54,7 @@ MacroName Messages
 
 ## Incorrect:
 # Call ScopeUtil
-## Won't work because other macros calling Messages::SendMessage will not run code outside of the SendMessage function
+## Won't work because other SerialEM_Scripts calling Messages::SendMessage will not run code outside of the SendMessage function
 
 Function SendMessage 0 1 Text
    # Correct:

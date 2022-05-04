@@ -282,7 +282,7 @@ MacroLimitTiltDown	0
 MacroLimitMontError	0
 MacroLimitIS	0
 MacroRunLimit	500
-MacroScaleMaxLimit	50
+SerialEM_ScriptscaleMaxLimit	50
 MacroTiltUpLimit	80.000000
 MacroTiltDownLimit	-80.000000
 MacroMontErrorLimit	1.000000

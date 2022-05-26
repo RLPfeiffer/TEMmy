@@ -14,7 +14,7 @@ def MainVolumeSteps(investigator:str, name:str, radius:int, detailed:bool, recap
         TellOperatorSEM(f"In the menubar, click Navigator -> Montaging and Grids -> Add Circle Polygon. Type {radius}"),
         TellOperatorSEM("In the navigator window, delete every item EXCEPT FOR the formvar reference point and the circle Polygon."),
         DoAutomatically(lambda: SetMagIndex(HighMag5000)),
-        TellOperatorSEM("With the circle polygon selected, check the Navigator checkboxes for 'Aquire', 'New File At Item', 'Montaged Images', 'Fit Montage to Polygon'. Make sure 'Go from center out and anchor at 2000x' is active and click ok. Then select the generated idoc file. Choose to overwrite it."),
+        TellOperatorSEM(f"With the circle polygon selected, check the Navigator checkboxes for 'Aquire', 'New File At Item', 'Montaged Images', 'Fit Montage to Polygon'. {newline} {newline} In setup window: {newline} Make sure overlap is set to 12% {newline} 'Go from center out and anchor at 2000x' is active {newline} click ok. Then select the generated idoc file. Choose to overwrite it."),
         DoAutomatically(lambda: MoveToNavItem(PolygonIndex)),
         DoAutomatically(ScreenDown)
     ] + FocusSteps + FinalSteps(detailed, False, recap)

@@ -21,7 +21,7 @@ NewSpecimenSteps:list[Step] = [
     DoAutomatically(lambda: SetMagIndex(LowMag150)),
     TellOperatorTEM("Remove the aperture by turning the dial to the red dot."),
     DoAutomatically(TurnOnFilament),
-    DoAutomatically(lambda: SetSpotSize(2)),
+    DependingOnScope(DoAutomatically(lambda: SetSpotSize(3)),DoAutomatically(lambda: SetSpotSize(2))),
     DoAutomatically(ScreenDown),
     TellOperatorSEM("Scroll the stage to find a region of formvar, and click 'Add Stage Pos' in the navigator window."),
 ]
@@ -72,7 +72,7 @@ def SwitchToHighMagSteps(recap:bool, investigator:str, volume:str, Mag:int, MagI
         DoAutomatically(Record)
     ] + ([
         OpenLastSnapshot(recap, investigator, volume, Mag),
-        TellOperatorSEM(f"Find the center point at {Mag}x, and click it. Then click 'Add Marker'. If another navigator item is visible, delete it."),
+        TellOperatorSEM(f"Find the center point at {Mag}x, and use 'Move Item' to relocate the centerpoint marker to the correct location."),
         DoAutomatically(lambda: MoveToNavItem()),
         DoAutomatically(Record),
         ManuallyCheckCenterPoint,

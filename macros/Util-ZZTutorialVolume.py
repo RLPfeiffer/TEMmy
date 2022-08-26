@@ -16,7 +16,7 @@ def MainVolumeSteps(investigator:str, name:str, radius:int, detailed:bool, recap
         DoAutomatically(lambda: SetMagIndex(HighMag5000)),
         TellOperatorSEM(f"With the circle polygon selected, check the Navigator checkboxes for 'Aquire', 'New File At Item', 'Montaged Images', 'Fit Montage to Polygon'. {newline} {newline} In setup window: {newline} Make sure overlap is set to 12% {newline} 'Go from center out and anchor at 2000x' is active {newline} click ok. Then select the generated idoc file. Choose to overwrite it."),
         DoAutomatically(lambda: MoveToNavItem(PolygonIndex)),
-        DoAutomatically(lambda: SetSpotSize(1)),
+        DoAutomatically(lambda: SetSpotSize(2)),
         DoAutomatically(ScreenDown)
     ] + FocusSteps + FinalSteps(detailed, False, recap)
 

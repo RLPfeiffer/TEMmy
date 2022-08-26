@@ -14,7 +14,7 @@ def MainCoreSteps(detailed:bool, recap:bool) ->list[Step]:
         TellOperatorSEM("In the menubar, click Navigator -> Montaging and Grids -> Polygon from Corners. Zoom out to make sure the generated polygon is your intended shape, then delete the corner points."),
         TellOperatorSEM(f"With the polygon selected, check the Navigator checkboxes for 'Aquire', 'New File At Item', 'Montaged Images', 'Fit Montage to Polygon'. {newline} {newline} In setup window: {newline} Make sure overlap is set to 15% {newline} 'Go from center out and anchor at 2000x' is NOT checked {newline} click ok. Then select the generated idoc file. Choose to overwrite it."),
         DoAutomatically(lambda: MoveToNavItem(PolygonIndex)),
-        DoAutomatically(lambda: SetSpotSize(1)),
+        DoAutomatically(lambda: SetSpotSize(2)),
         DoAutomatically(ScreenDown)
     ] + FocusSteps + FinalSteps(detailed, True, recap)
 

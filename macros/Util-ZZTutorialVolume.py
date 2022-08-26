@@ -5,17 +5,18 @@ def MainVolumeSteps(investigator:str, name:str, radius:int, detailed:bool, recap
     
     return [
         OpenLastSnapshot(recap, investigator, name, 150),
-        TellOperatorSEM("Locate the center point at 150x, click it, and click 'Add Marker' in the navigator window."),
+        TellOperatorSEM(f"Locate the center point at 150x, click it, and click 'Add Marker' in the navigator window.{newline} {newline} If no image appears or image is washed out, check current density and press 'Record' to have image for placing new centerpoint"),
         DoAutomatically(lambda: MoveToNavItem(PolygonIndex)),
         DoAutomatically(Record),
         ManuallyCheckCenterPoint,
         DoAutomatically(lambda: TakeSnapshotWithNotes("", False))
-    ] + SwitchToHighMagSteps(recap, investigator, name, 600, HighMag600, SpotSize2, True, True, []) + SwitchToHighMagSteps(recap, investigator, name, 2000, HighMag2000, SpotSize1, False, True, FocusSteps) + [
+    ] + SwitchToHighMagSteps(recap, investigator, name, 600, HighMag600, SpotSize3, True, True, []) + SwitchToHighMagSteps(recap, investigator, name, 2000, HighMag2000, SpotSize2, False, True, FocusSteps) + [
         TellOperatorSEM(f"In the menubar, click Navigator -> Montaging and Grids -> Add Circle Polygon. Type {radius}"),
         TellOperatorSEM("In the navigator window, delete every item EXCEPT FOR the formvar reference point and the circle Polygon."),
         DoAutomatically(lambda: SetMagIndex(HighMag5000)),
         TellOperatorSEM(f"With the circle polygon selected, check the Navigator checkboxes for 'Aquire', 'New File At Item', 'Montaged Images', 'Fit Montage to Polygon'. {newline} {newline} In setup window: {newline} Make sure overlap is set to 12% {newline} 'Go from center out and anchor at 2000x' is active {newline} click ok. Then select the generated idoc file. Choose to overwrite it."),
         DoAutomatically(lambda: MoveToNavItem(PolygonIndex)),
+        DoAutomatically(lambda: SetSpotSize(2)),
         DoAutomatically(ScreenDown)
     ] + FocusSteps + FinalSteps(detailed, False, recap)
 

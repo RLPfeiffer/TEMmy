@@ -10,7 +10,7 @@ def MainVolumeSteps(investigator:str, name:str, radius:int, detailed:bool, recap
         DoAutomatically(Record),
         ManuallyCheckCenterPoint,
         DoAutomatically(lambda: TakeSnapshotWithNotes("", False))
-    ] + SwitchToHighMagSteps(recap, investigator, name, 600, HighMag600, SpotSize3, True, True, []) + SwitchToHighMagSteps(recap, investigator, name, 2000, HighMag2000, SpotSize2, False, True, FocusSteps) + [
+    ] + SwitchToHighMagSteps(recap, investigator, name, 600, HighMag600, SpotSize=3, ChangeAperture=True, CenterPoint=True, FocusSteps=[]) + SwitchToHighMagSteps(recap, investigator, name, 2000, HighMag2000, SpotSize=2, ChangeAperture=True, CenterPoint=True, FocusSteps=FocusSteps) + [
         TellOperatorSEM(f"In the menubar, click Navigator -> Montaging and Grids -> Add Circle Polygon. Type {radius}"),
         TellOperatorSEM("In the navigator window, delete every item EXCEPT FOR the formvar reference point and the circle Polygon."),
         DoAutomatically(lambda: SetMagIndex(HighMag5000)),
@@ -26,4 +26,10 @@ Steps["RC3 Recapture"] = NewSpecimenSteps + MainVolumeSteps("Jones", "RC3", 125,
 
 Steps["RC3 Fast"] = NewSpecimenSteps + LowMagCookSteps + MainVolumeSteps("Jones", "RC3", 125, False, False)
 Steps["RC3 RecapFast"] = NewSpecimenSteps + MainVolumeSteps("Jones", "RC3", 125, False, True)
+
+Steps["RPC3"] = NewSpecimenSteps + LowMagCookSteps + MainVolumeSteps("Jones", "RPC3", 45, True, False)
+Steps["RPC3 Recapture"] = NewSpecimenSteps + MainVolumeSteps("Jones", "RPC3", 45, True, True)
+
+Steps["RPC3 Fast"] = NewSpecimenSteps + LowMagCookSteps + MainVolumeSteps("Jones", "RPC3", 45, False, False)
+Steps["RPC3 RecapFast"] = NewSpecimenSteps + MainVolumeSteps("Jones", "RPC3", 45, False, True)
 

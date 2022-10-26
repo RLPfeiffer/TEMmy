@@ -58,7 +58,7 @@ def OpenLastSnapshot(recap:bool, investigator:str, volume:str, mag:int) -> Step:
                 TellOperator(f"Open DROPBOX/TEMSnapshots and open the latest {investigator} {volume} snapshot at x{mag}")()
     return step
 
-def SwitchToHighMagSteps(recap:bool, investigator:str, volume:str, Mag:int, MagIndex:int, SpotSize:int, ChangeAperture:bool, CenterPoint:bool, FocusSteps:list[Step]) -> list[Step]:
+def SwitchToHighMagSteps(recap:bool, investigator:str, volume:str, Mag:int, MagIndex:int, SpotSize:int, ChangeAperture:bool, CenterAperture:bool, CenterPoint:bool, FocusSteps:list[Step]) -> list[Step]:
     return [
         DoAutomatically(lambda: SetBeamBlank(True)),
         DoAutomatically(lambda: SetMagIndex(MagIndex)),
@@ -68,7 +68,11 @@ def SwitchToHighMagSteps(recap:bool, investigator:str, volume:str, Mag:int, MagI
         DependingOnScope(TellOperatorTEM("Spread the beam by several turns (by turning the 'brightness' knob clockwise.)"), DoNothing),
         DoAutomatically(ScreenDown),
         TellOperatorTEM("Use the X/Y dials on the upper left side of the microscope column to center the aperture.")
-    ] if ChangeAperture else []) + FocusSteps + [
+    ] if ChangeAperture else []) + ([
+        TellOperatorTEM(f"Spread the beam by several turns (by turning the 'brightness' knob clockwise.)"), DoNothing,
+        DoAutomatically(ScreenDown),
+        TellOperatorTEM("Use the X/Y dials on the upper left side of the microscope column to center the aperture.")
+    ] if CenterAperture else[]) + FocusSteps + [
         DoAutomatically(Record)
     ] + ([
         OpenLastSnapshot(recap, investigator, volume, Mag),

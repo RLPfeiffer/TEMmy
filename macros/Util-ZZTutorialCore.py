@@ -7,7 +7,7 @@ def MainCoreSteps(detailed:bool, recap:bool) ->list[Step]:
         TellOperatorSEM("Locate the Region of Interest at 150x (you may need to move the stage). Click 'Add Points' in the navigator window and click on the corners of the ROI. Then click 'Stop Adding Points'."),
         TellOperatorSEM("Select each of the corner points and type 'C' on the keyboard to mark them as corner points."),
         DoAutomatically(lambda: TakeSnapshotWithNotes("corners", False))
-    ] + SwitchToHighMagSteps(recap, "", "", 2000, HighMag2000, 2, True, False, []) + [
+    ] + SwitchToHighMagSteps(recap, "", "", 2000, HighMag2000, 2, True, False, False, []) + [
         DoAutomatically(lambda: SetMagIndex(HighMag5000))
     ] + FocusSteps + [
         TellOperatorSEM("For each corner point, click 'Go to XY' and take a recording. If the point is not where you expect it to be, zoom out with the scrollbar to see its position relative to the other corners, then zoom back in and use 'Search' to find its real position. Then use 'Move item' to move the point."),

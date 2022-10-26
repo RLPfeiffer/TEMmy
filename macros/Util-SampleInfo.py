@@ -44,7 +44,7 @@ Version = 2
 Microscope = ScopeName
 NumRods = 4
 MainInvestigator = "Jones"
-MainExperiment = "RC3"
+MainExperiment = "RPC3"
 MainOperator = "Matt B"
 
 def PromptForSampleInfo() -> None:

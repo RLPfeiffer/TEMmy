@@ -10,7 +10,7 @@ def MainVolumeSteps(investigator:str, name:str, radius:int, detailed:bool, recap
         DoAutomatically(Record),
         ManuallyCheckCenterPoint,
         DoAutomatically(lambda: TakeSnapshotWithNotes("", False))
-    ] + SwitchToHighMagSteps(recap, investigator, name, 600, HighMag600, SpotSize=3, ChangeAperture=True, CenterPoint=True, FocusSteps=[]) + SwitchToHighMagSteps(recap, investigator, name, 2000, HighMag2000, SpotSize=2, ChangeAperture=True, CenterPoint=True, FocusSteps=FocusSteps) + [
+    ] + SwitchToHighMagSteps(recap, investigator, name, 600, HighMag600, SpotSize=3, ChangeAperture=True, CenterAperture=False, CenterPoint=True, FocusSteps=[]) + SwitchToHighMagSteps(recap, investigator, name, 2000, HighMag2000, SpotSize=2, ChangeAperture=False, CenterAperture=True, CenterPoint=True, FocusSteps=FocusSteps) + [
         TellOperatorSEM(f"In the menubar, click Navigator -> Montaging and Grids -> Add Circle Polygon. Type {radius}"),
         TellOperatorSEM("In the navigator window, delete every item EXCEPT FOR the formvar reference point and the circle Polygon."),
         DoAutomatically(lambda: SetMagIndex(HighMag5000)),

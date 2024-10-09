@@ -134,10 +134,10 @@ def WriteNotesFiles(Block:str, Notes:SampleNotes) -> None:
             txt.write(f"{key}: {Notes[idx]}{newline}")
 
     # Make an empty idoc file so the operator doesn't have to type the name
-    IdocPath = join(BlockFolder, f"{Block}.idoc")
-    if not os.path.exists(IdocPath):
-        with open(IdocPath, "w") as f:
-            pass
+    # IdocPath = join(BlockFolder, f"{Block}.idoc")
+    # if not os.path.exists(IdocPath):
+    #     with open(IdocPath, "w") as f:
+    #         pass
         
         # Set the working directory there, and use it in the next file prompt
         SetWorkingDir(BlockFolder)

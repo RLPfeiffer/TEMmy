@@ -1,6 +1,7 @@
 import sys
 from os.path import join, basename, dirname
 import os
+import stat
 
 FormvarIndex = 1
 PolygonIndex = 2
@@ -142,6 +143,7 @@ def Capture(CookFirst:bool) -> None:
     # This should copy core builds by investigator name instead of experiment name:
     DestinationDir = ExperimentDir if Experiment in VolumeExperiments else Investigator
     SectionDir = basename(CaptureDir)
+    #os.chmod(SectionDir, stat.S_IRUSR)
     if CopyDir(join(DataPath, ExperimentDir), join(CopyPath, DestinationDir), SectionDir):
         SendStop(ExperimentDir, SectionDir)
     else:

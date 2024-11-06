@@ -5,7 +5,7 @@ def MainVolumeSteps(investigator:str, name:str, radius:int, detailed:bool, recap
     
     return [
         OpenLastSnapshot(recap, investigator, name, 150),
-        TellOperatorSEM(f"Locate the center point at 150x, click it, and click 'Add Marker' in the navigator window.{newline} {newline} If no image appears or image is washed out, check current density and press 'Record' to have image for placing new centerpoint"),
+        TellOperatorSEM(f"Locate the center point at 150x, click it, and click 'Add Marker' in the navigator window.{newline} {newline} If no im age appears or image is washed out, check current density and press 'Record' to have image for placing new centerpoint"),
         DoAutomatically(lambda: MoveToNavItem(PolygonIndex)),
         DoAutomatically(Record),
         ManuallyCheckCenterPoint,

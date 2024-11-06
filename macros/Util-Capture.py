@@ -7,7 +7,7 @@ FormvarIndex = 1
 PolygonIndex = 2
 FocusPointIndex = 3
 
-VolumeExperiments = ['RC3', 'RPC3']
+VolumeExperiments = ['RC3', 'RPC3', 'RCx36KO1', 'MiniTest1']
 
 def Capture(CookFirst:bool) -> None:
     CurrentNotes = CurrentSampleNotes()

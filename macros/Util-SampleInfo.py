@@ -43,8 +43,8 @@ SampleInfoKeys:List[str] = [
 Version = 2
 Microscope = ScopeName
 NumRods = 4
-MainInvestigator = "Jones"
-MainExperiment = "RPC3"
+MainInvestigator = "Sigulinsky"
+MainExperiment = "miniRCx1"
 MainOperator = "Matt B"
 
 def PromptForSampleInfo() -> None:

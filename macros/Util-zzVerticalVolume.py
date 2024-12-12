@@ -22,10 +22,10 @@ def VerticalVolumeSteps(investigator:str, name:str, detailed:bool, recap:bool) -
     ] + FocusSteps + FinalSteps(detailed, False, recap)
 
 
-Steps["RCx36KO1"] = NewSpecimenSteps + LowMagCookSteps + VerticalVolumeSteps("Sigulinsky", "RCx36KO1", True, False)
-Steps["RCx36KO1 Recapture"] = NewSpecimenSteps + VerticalVolumeSteps("Sigulinsky", "RCx36KO1", True, True)
+Steps["miniRCx1"] = NewSpecimenSteps + LowMagCookSteps + VerticalVolumeSteps("Sigulinsky", "miniRCx1", True, False)
+Steps["miniRCx1 Recapture"] = NewSpecimenSteps + VerticalVolumeSteps("Sigulinsky", "miniRCx1", True, True)
 
-Steps["RCx36KO1 Fast"] = NewSpecimenSteps + LowMagCookSteps + VerticalVolumeSteps("Sigulinsky", "RCx36KO1", False, False)
-Steps["RCx36KO1 Recap Fast"] = NewSpecimenSteps + VerticalVolumeSteps("Sigulinsky", "RCx36KO1", False, True)
+Steps["miniRCx1 Fast"] = NewSpecimenSteps + LowMagCookSteps + VerticalVolumeSteps("Sigulinsky", "miniRCx1", False, False)
+Steps["miniRCx1 Recap Fast"] = NewSpecimenSteps + VerticalVolumeSteps("Sigulinsky", "miniRCx1", False, True)
 
  

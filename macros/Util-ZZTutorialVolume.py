@@ -20,8 +20,8 @@ def MainVolumeSteps(investigator:str, name:str, radius:int, detailed:bool, recap
         DoAutomatically(ScreenDown)
     ] + FocusSteps + FinalSteps(detailed, False, recap)
 
-
-Steps["RC3"] = NewSpecimenSteps + LowMagCookSteps + MainVolumeSteps("Jones", "RC3", 125, True, False)
+#Not callable because these aren't currently in use.  Repopulate for next mini Hz connectome (RPC3) or full Hz connectome
+"""Steps["RC3"] = NewSpecimenSteps + LowMagCookSteps + MainVolumeSteps("Jones", "RC3", 125, True, False)
 Steps["RC3 Recapture"] = NewSpecimenSteps + MainVolumeSteps("Jones", "RC3", 125, True, True)
 
 Steps["RC3 Fast"] = NewSpecimenSteps + LowMagCookSteps + MainVolumeSteps("Jones", "RC3", 125, False, False)
@@ -31,5 +31,5 @@ Steps["RPC3"] = NewSpecimenSteps + LowMagCookSteps + MainVolumeSteps("Jones", "R
 Steps["RPC3 Recapture"] = NewSpecimenSteps + MainVolumeSteps("Jones", "RPC3", 45, True, True)
 
 Steps["RPC3 Fast"] = NewSpecimenSteps + LowMagCookSteps + MainVolumeSteps("Jones", "RPC3", 45, False, False)
-Steps["RPC3 RecapFast"] = NewSpecimenSteps + MainVolumeSteps("Jones", "RPC3", 45, False, True)
+Steps["RPC3 RecapFast"] = NewSpecimenSteps + MainVolumeSteps("Jones", "RPC3", 45, False, True)"""
 
